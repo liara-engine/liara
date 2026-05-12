@@ -60,6 +60,7 @@ jobs:
 
   build:
     needs: detect
+    if: needs.detect.outputs.matrix != '[]'
 
     permissions:
       contents: read

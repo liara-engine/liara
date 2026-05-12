@@ -38,13 +38,20 @@ jobs:
         run: |
           FILES='${{ steps.changed.outputs.all_changed_files }}'
 
-          JSON=$(printf '%s\n' $FILES | jq -R . | jq -cs '
-            map({
-              dockerfile: .,
-              target: (split("/")[-2]),
-              image: ("liara-engine/liara/" + split("/")[-2])
-            })
-          ')
+          # Initialize an empty array for the matrix
+          MATRIX=()
+          # Loop through the changed files and extract target, image, and dockerfile path
+          for FILE in $FILES; do
+            if [[ $FILE == docker/*/Dockerfile ]]; then
+              TARGET=$(echo $FILE | cut -d'/' -f2)
+              IMAGE="liara-engine/${TARGET}"
+              DOCKERFILE_PATH=$FILE
+              MATRIX+=("{\"target\":\"$TARGET\", \"image\":\"$IMAGE\", \"dockerfile\":\"$DOCKERFILE_PATH\"}")
+            fi
+          done
+          
+          # Convert the array to a JSON string
+          JSON=$(printf '%s\n' "${MATRIX[@]}" | jq -cs '.')
 
           echo "matrix={\"include\":$JSON}" >> $GITHUB_OUTPUT
           

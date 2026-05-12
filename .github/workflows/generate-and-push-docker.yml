@@ -1,0 +1,59 @@
+name: Generate and Push Docker Images
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+    paths:
+      - 'docker/**/Dockerfile'
+      - '.github/workflows/generate-and-push-docker.yml'
+  workflow_dispatch:
+
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect Changed Dockerfiles
+        id: changed
+        uses: tj-actions/changed-files@v47
+        with:
+          files: |
+            docker/**/Dockerfile
+
+      - name: Generate Build Matrix
+        id: detect
+        run: |
+          FILES='${{ steps.changed.outputs.all_changed_files }}'
+
+          JSON=$(printf '%s\n' $FILES | jq -R . | jq -s '
+            map({
+              dockerfile: .,
+              target: (split("/")[-2]),
+              image: ("ghcr.io/my-org/" + split("/")[-2])
+            })
+          ')
+
+          echo "matrix={\"include\":$JSON}" >> $GITHUB_OUTPUT
+
+  build:
+    needs: detect
+
+    strategy:
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+
+    uses: liara-engine/.github/.github/workflows/reusable-generate-docker.yml@v0
+
+    with:
+      target: ${{ matrix.target }}
+      image-name: ${{ matrix.image }}
+      image-tag: ${{ github.ref_name }}
+      dockerfile-path: ${{ matrix.dockerfile }}

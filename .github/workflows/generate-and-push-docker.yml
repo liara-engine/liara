@@ -42,11 +42,14 @@ jobs:
             map({
               dockerfile: .,
               target: (split("/")[-2]),
-              image: ("ghcr.io/my-org/" + split("/")[-2])
+              image: ("liara-engine/liara/" + split("/")[-2])
             })
           ')
 
           echo "matrix={\"include\":$JSON}" >> $GITHUB_OUTPUT
+          
+          # Debug output
+          echo "Generated matrix: $JSON"
 
   build:
     needs: detect

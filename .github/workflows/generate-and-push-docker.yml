@@ -51,6 +51,10 @@ jobs:
   build:
     needs: detect
 
+    permissions:
+      contents: read
+      packages: write
+
     strategy:
       matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
 

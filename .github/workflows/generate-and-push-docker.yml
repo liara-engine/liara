@@ -38,7 +38,7 @@ jobs:
         run: |
           FILES='${{ steps.changed.outputs.all_changed_files }}'
 
-          JSON=$(printf '%s\n' $FILES | jq -R . | jq -s '
+          JSON=$(printf '%s\n' $FILES | jq -R . | jq -cs '
             map({
               dockerfile: .,
               target: (split("/")[-2]),

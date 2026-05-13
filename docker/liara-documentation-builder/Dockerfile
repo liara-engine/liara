@@ -262,9 +262,15 @@ fi
 
 if [ -f "${SRC_DIR}/Doxyfile" ]; then
     echo "==> Running Doxygen"
-    doxygen "${SRC_DIR}/Doxyfile"
-    cp -r "${DOXYGEN_GEN_DIR}/html" "${OUTPUT_DIR}/doxygen" \
-        || echo "WARNING: Doxygen output not found, skipping copy"
+
+    mkdir -p "${DOXYGEN_GEN_DIR}"
+    (cat "${SRC_DIR}/Doxyfile"; echo "OUTPUT_DIRECTORY = ${DOXYGEN_GEN_DIR}") | doxygen -
+
+    if [ -d "${DOXYGEN_GEN_DIR}/html" ]; then
+        cp -r "${DOXYGEN_GEN_DIR}/html" "${OUTPUT_DIR}/doxygen"
+    else
+        echo "WARNING: Doxygen HTML output not found in ${DOXYGEN_GEN_DIR}/html"
+    fi
 fi
 
 # ----------------------------------------------------------------------------

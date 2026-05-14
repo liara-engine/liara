@@ -109,6 +109,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     graphviz \
     findutils \
     coreutils \
+    nodejs \
+    npm \
+    && npm install -g ajv-cli \
     && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------------------------------------------------------
@@ -286,6 +289,40 @@ if [ -f "${SRC_DIR}/book.toml" ]; then
 fi
 
 echo "==> Documentation build completed"
+
+# ----------------------------------------------------------------------------
+# manifest.json validation
+# ----------------------------------------------------------------------------
+
+if [ -f "${SRC_DIR}/manifest.json" ]; then
+    echo "==> Validating manifest.json"
+
+    SCHEMA_URL=$(grep -oP '"\$schema"\s*:\s*"\K[^"]+' "${SRC_DIR}/manifest.json" || true)
+
+    if [ -z "${SCHEMA_URL}" ]; then
+        echo "ERROR: manifest.json does not declare a \$schema"
+        exit 1
+    fi
+
+    TMP_SCHEMA="/tmp/module-manifest.schema.json"
+
+    echo "==> Downloading schema: ${SCHEMA_URL}"
+
+    curl -fsSL "${SCHEMA_URL}" -o "${TMP_SCHEMA}"
+
+    ajv validate \
+        -s "${TMP_SCHEMA}" \
+        -d "${SRC_DIR}/manifest.json" \
+        --strict=true
+
+    echo "==> manifest.json is valid"
+
+    echo "==> Copying manifest.json to output directory"
+    cp "${SRC_DIR}/manifest.json" "${OUTPUT_DIR}/"
+else
+    echo "ERROR: manifest.json not found"
+    exit 1
+fi
 
 EOF
 

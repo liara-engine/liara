@@ -2,6 +2,11 @@
 
 set -Eeuo pipefail
 
+SRC_DIR="/src"
+OUTPUT_DIR="/docs"
+MDBOOK_SOURCE_DIR="/src/docs"
+DOXYGEN_GEN_DIR="/src/build/doxygen"
+
 BOOK_DIR="${MDBOOK_SOURCE_DIR}"
 SUMMARY_FILE="${BOOK_DIR}/SUMMARY.md"
 
@@ -146,15 +151,6 @@ done
 
 mkdir -p "${OUTPUT_DIR}"
 
-if [ ! -d "${BOOK_DIR}" ]; then
-    echo "ERROR: docs directory not found: ${BOOK_DIR}"
-    exit 1
-fi
-
-if [ ! -f "${SUMMARY_FILE}" ] || [ ! -s "${SUMMARY_FILE}" ]; then
-    generate_summary
-fi
-
 # ----------------------------------------------------------------------------
 # Shared assets
 # ----------------------------------------------------------------------------
@@ -203,6 +199,15 @@ fi
 
 if [ -f "${SRC_DIR}/book.toml" ]; then
     echo "==> Running mdBook"
+
+    if [ ! -d "${BOOK_DIR}" ]; then
+        echo "ERROR: docs directory not found: ${BOOK_DIR}"
+        exit 1
+    fi
+
+    if [ ! -f "${SUMMARY_FILE}" ] || [ ! -s "${SUMMARY_FILE}" ]; then
+        generate_summary
+    fi
 
     mdbook build \
         "${SRC_DIR}" \

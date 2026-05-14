@@ -15,6 +15,36 @@ EXCLUDED_DIRS=(
 )
 
 # ----------------------------------------------------------------------------
+# JSON Schema validation helper
+# ----------------------------------------------------------------------------
+
+validate_schema() {
+    local json_file="$1"
+
+    if [ ! -f "$json_file" ]; then
+        echo "ERROR: File not found: $json_file"
+        exit 1
+    fi
+
+    echo "==> Validating $(basename "$json_file")"
+
+    local schema_url
+    schema_url=$(grep -oP '"\$schema"\s*:\s*"\K[^"]+' "$json_file" || true)
+
+    if [ -z "${schema_url}" ]; then
+        echo "ERROR: $json_file does not declare a \$schema"
+        exit 1
+    fi
+
+    local tmp_schema="/tmp/schema_$(date +%s%N).json"
+
+    curl -fsSL "${schema_url}" -o "${tmp_schema}"
+    ajv validate -s "${tmp_schema}" -d "${json_file}" --strict=true
+
+    rm -f "${tmp_schema}"
+}
+
+# ----------------------------------------------------------------------------
 # Pretty title helper
 # ----------------------------------------------------------------------------
 
@@ -100,6 +130,20 @@ generate_summary() {
 
 echo "==> Starting documentation build"
 
+# Validate manifest.json
+if [ -f "${SRC_DIR}/manifest.json" ]; then
+    validate_schema "${SRC_DIR}/manifest.json"
+else
+    echo "ERROR: manifest.json not found"
+    exit 1
+fi
+
+# Validate documentation modules
+echo "==> Scanning for documentation modules..."
+find "${SRC_DIR}" -name "*.liaradoc.json" | while read -r module_json; do
+    validate_schema "$module_json"
+done
+
 mkdir -p "${OUTPUT_DIR}"
 
 if [ ! -d "${BOOK_DIR}" ]; then
@@ -166,37 +210,3 @@ if [ -f "${SRC_DIR}/book.toml" ]; then
 fi
 
 echo "==> Documentation build completed"
-
-# ----------------------------------------------------------------------------
-# manifest.json validation
-# ----------------------------------------------------------------------------
-
-if [ -f "${SRC_DIR}/manifest.json" ]; then
-    echo "==> Validating manifest.json"
-
-    SCHEMA_URL=$(grep -oP '"\$schema"\s*:\s*"\K[^"]+' "${SRC_DIR}/manifest.json" || true)
-
-    if [ -z "${SCHEMA_URL}" ]; then
-        echo "ERROR: manifest.json does not declare a \$schema"
-        exit 1
-    fi
-
-    TMP_SCHEMA="/tmp/module-manifest.schema.json"
-
-    echo "==> Downloading schema: ${SCHEMA_URL}"
-
-    curl -fsSL "${SCHEMA_URL}" -o "${TMP_SCHEMA}"
-
-    ajv validate \
-        -s "${TMP_SCHEMA}" \
-        -d "${SRC_DIR}/manifest.json" \
-        --strict=true
-
-    echo "==> manifest.json is valid"
-
-    echo "==> Copying manifest.json to output directory"
-    cp "${SRC_DIR}/manifest.json" "${OUTPUT_DIR}/"
-else
-    echo "ERROR: manifest.json not found"
-    exit 1
-fi

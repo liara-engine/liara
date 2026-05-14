@@ -6,6 +6,7 @@ on:
       - 'v*.*.*'
     paths:
       - 'docker/**/Dockerfile'
+      - 'scripts/**'
       - '.github/workflows/generate-and-push-docker.yml'
   workflow_dispatch:
 

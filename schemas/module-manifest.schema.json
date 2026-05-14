@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://liara-engine.github.io/liara/schemas/module-manifest.schema.json",
   "title": "Liara Engine Module Manifest",
   "type": "object",

@@ -112,7 +112,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     coreutils \
     nodejs \
     npm \
-    && npm install -g ajv-cli \
+    && npm install -g ajv-cli@5 ajv@8 \
     && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------------------------------------------------------

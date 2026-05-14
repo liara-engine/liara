@@ -1,0 +1,156 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://liara-engine.github.io/liara/schemas/documentation-module.schema.json",
+  "title": "Liara Documentation Module Schema",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": [
+    "$schema",
+    "metadata"
+  ],
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://liara-engine.github.io/liara/schemas/documentation-module.schema.json",
+      "description": "The URI of the schema that this manifest adheres to."
+    },
+
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Metadata about the module.",
+
+      "required": [
+        "name",
+        "description"
+      ],
+
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The name of the module."
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "A brief description of the module."
+        }
+      }
+    },
+
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Static resources to include in the documentation pages.",
+
+      "properties": {
+        "css": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of CSS file paths to include in the documentation pages."
+        },
+
+        "js": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of JavaScript file paths to include in the documentation pages."
+        },
+
+        "favicon-ico": {
+          "type": "string",
+          "description": "Path to the favicon in .ico format."
+        },
+
+        "favicon-svg": {
+          "type": "string",
+          "description": "Path to the favicon in .svg format."
+        }
+      }
+    },
+
+    "replacements": {
+      "type": "object",
+      "description": "List of replacements to perform in the documentation pages. Each key is a placeholder to replace, and its value defines the replacement content and rules.",
+
+      "additionalProperties": {
+        "$ref": "#/$defs/replacement"
+      }
+    },
+
+    "data": {
+      "type": "object",
+      "description": "Various data that can be used by the JavaScript code in the documentation pages. The structure of this object is flexible and can contain any key-value pairs as needed by the module's scripts.",
+      "additionalProperties": true
+    }
+  },
+
+  "$defs": {
+    "replacement": {
+      "description": "Each replacement can be defined as a simple string (the replacement value) or as an object with more detailed configuration options.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+
+        {
+          "type": "object",
+          "additionalProperties": false,
+
+          "required": ["value"],
+
+          "properties": {
+            "value": {
+              "type": "string",
+              "description": "Path to the file containing the replacement content or the replacement string itself."
+            },
+
+            "is-file": {
+              "type": "boolean",
+              "default": false,
+              "description": "Indicates whether the 'value' is a file path (true) or a direct string replacement (false). If the value is true and the file cannot be found, the replacement will be skipped without causing an error."
+            },
+
+            "only-first-occurrence": {
+              "type": "boolean",
+              "default": false,
+                "description": "If true, only the first occurrence of the placeholder in each file will be replaced."
+            },
+
+            "only-last-occurrence": {
+              "type": "boolean",
+              "default": false,
+                "description": "If true, only the last occurrence of the placeholder in each file will be replaced."
+            },
+
+            "only-in-files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+                "description": "If specified, the replacement will only be applied to files whose names are in this list. If empty, the replacement will be applied to all files."
+            },
+
+            "exclude-files": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+                "description": "If specified, the replacement will not be applied to files whose names are in this list. If empty, the replacement will be applied to all files."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

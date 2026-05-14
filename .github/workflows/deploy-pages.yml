@@ -1,0 +1,53 @@
+name: deploy-pages.yml
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'schemas/**'
+      - 'version.json'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - run: |
+          mkdir -p gh-pages
+          cp -r schemas gh-pages/
+          cp version.json gh-pages/
+
+      - name: Upload as artifact
+        id: deployment
+        uses: actions/upload-page-artifact@v3
+        with:
+          path: gh-pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+        name: github-pages
+        url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4

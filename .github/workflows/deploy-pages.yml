@@ -26,8 +26,14 @@ jobs:
 
       - run: |
           mkdir -p gh-pages
-          cp -r schemas gh-pages/
-          cp version.json gh-pages/
+
+          if [ -d "schemas" ]; then
+            cp -r schemas gh-pages/
+          fi
+
+          if [ -f "version.json" ]; then
+            cp version.json gh-pages/
+          fi
 
       - name: Upload as artifact
         id: deployment

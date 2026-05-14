@@ -79,7 +79,7 @@
 
     "replacements": {
       "type": "object",
-      "description": "List of replacements to perform in the documentation pages. Each key is a placeholder to replace, and its value defines the replacement content and rules.",
+      "description": "List of replacements to perform in the documentation pages. Each key is a placeholder to replace, and its value defines the replacement content and rules. If a key starts with 'regex^', it will be treated as a regular expression pattern, according to the JavaScript RegExp syntax, and all occurrences matching the pattern will be replaced. Else, the key will be treated as a simple string placeholder, and only exact matches will be replaced.",
 
       "additionalProperties": {
         "$ref": "#/$defs/replacement"

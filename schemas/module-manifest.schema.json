@@ -6,13 +6,13 @@
   "additionalProperties": false,
 
   "required": [
-    "schema",
+    "$schema",
     "metadata",
     "versions"
   ],
 
   "properties": {
-    "schema": {
+    "$schema": {
       "type": "string",
       "const": "https://liara-engine.github.io/liara/schemas/module-manifest.schema.json",
       "description": "The URI of the schema that this manifest adheres to."

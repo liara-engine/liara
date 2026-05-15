@@ -28,7 +28,7 @@
       ],
 
       "properties": {
-        "title": {
+        "name": {
           "type": "string",
           "minLength": 1,
           "description": "The name of the module."

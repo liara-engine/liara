@@ -22,6 +22,7 @@ def get_content(val_obj, module_dir):
     return value
 
 def apply_to_file(file_path, pattern, replacement, options):
+    print(f"        Applying to file: {file_path.relative_to(file_path.parent)}")
     content = file_path.read_text(encoding='utf-8')
     is_regex = pattern.startswith("regex^")
     search_pattern = pattern[6:] if is_regex else re.escape(pattern)
@@ -45,6 +46,7 @@ def handle_replacements(replacements, module_dir, manifest_name):
     for pattern, config in replacements.items():
         options = config if isinstance(config, dict) else {}
         replacement_text = get_content(config, module_dir)
+        print(f"    Replacement pattern: '{pattern}' -> '{replacement_text[:30]}...'")
 
         if replacement_text is None:
             continue

@@ -96,6 +96,7 @@ ENV SRC_DIR=/src
 ENV OUTPUT_DIR=/docs
 ENV MDBOOK_SOURCE_DIR=/src/docs
 ENV DOXYGEN_GEN_DIR=/src/build/doxygen
+ENV ADDITIONAL_DIRECTORIES_TO_OUTPUT=""
 
 WORKDIR /
 
@@ -131,10 +132,12 @@ COPY scripts/replacement_processor.py /usr/local/bin/replacement_processor.py
 COPY scripts/build-docs.sh /usr/local/bin/build-docs
 
 RUN ln -s /opt/doxygen/bin/doxygen /usr/local/bin/doxygen \
-    && chmod +x /usr/local/bin/mdbook
+    && chmod +x /usr/local/bin/mdbook \
+    && chmod +x /usr/local/bin/build-docs \
+    && chmod +x /usr/local/bin/processor.py \
+    && chmod +x /usr/local/bin/resource_processor.py \
+    && chmod +x /usr/local/bin/replacement_processor.py
 
 WORKDIR ${SRC_DIR}
-
-RUN chmod +x /usr/local/bin/build-docs
 
 ENTRYPOINT ["build-docs"]

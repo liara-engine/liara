@@ -2,11 +2,6 @@
 
 set -Eeuo pipefail
 
-SRC_DIR="/src"
-OUTPUT_DIR="/docs"
-MDBOOK_SOURCE_DIR="/src/docs"
-DOXYGEN_GEN_DIR="/src/build/doxygen"
-
 BOOK_DIR="${MDBOOK_SOURCE_DIR}"
 SUMMARY_FILE="${BOOK_DIR}/SUMMARY.md"
 
@@ -212,6 +207,22 @@ if [ -f "${SRC_DIR}/book.toml" ]; then
     mdbook build \
         "${SRC_DIR}" \
         --dest-dir "${OUTPUT_DIR}/book"
+fi
+
+# ----------------------------------------------------------------------------
+# Additional outputs
+# ----------------------------------------------------------------------------
+
+if [ -n "${ADDITIONAL_DIRECTORIES_TO_OUTPUT:-}" ]; then
+    echo "==> Copying additional directories to output"
+
+    for dir in ${ADDITIONAL_DIRECTORIES_TO_OUTPUT}; do
+        if [ -d "${SRC_DIR}/${dir}" ]; then
+            cp -r "${SRC_DIR}/${dir}" "${OUTPUT_DIR}/${dir}"
+        else
+            echo "WARNING: Additional directory not found: ${SRC_DIR}/${dir}"
+        fi
+    done
 fi
 
 echo "==> Documentation build completed"

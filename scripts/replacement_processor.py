@@ -15,8 +15,8 @@ def get_content(val_obj, module_dir):
     if path.exists() and path.is_file():
         return path.read_text(encoding='utf-8')
 
-    print(f"    WARNING: File for replacement not found: {value}")
     if is_file_explicit:
+        print(f"    WARNING: File for replacement not found: {value}")
         return None
 
     return value

@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://liara-engine.github.io/liara/schemas/modules-registry.schema.json",
+  "title": "Liara Engine Modules Registry",
+  "description": "Lists the known software modules of the Liara Engine, used by the shared navbar to populate per-module dropdowns without hardcoding. Each entry points at a repository whose manifest.json declares its versions and ABI compatibility.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": ["$schema", "modules"],
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://liara-engine.github.io/liara/schemas/modules-registry.schema.json",
+      "description": "The URI of the schema that this registry adheres to."
+    },
+
+    "modules": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Ordered list of modules. The order is preserved in the navbar.",
+
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "name", "repo"],
+
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "description": "Short identifier used as a CSS hook and in URL parsing. Lowercase, hyphenated. Example: 'core', 'renderer'."
+          },
+
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable display name shown in the navbar pill. Example: 'Core', 'Renderer'."
+          },
+
+          "repo": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "description": "The repository slug as it appears in deployment URLs. Used to fetch the module's manifest.json. Example: 'liara-core', 'liara-renderer'."
+          },
+
+          "is_abi": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, this module is the ABI itself. Its currently viewed version is treated as the current ABI version, and other modules' compatibility is computed against it. Exactly one module should be marked is_abi."
+          }
+        }
+      }
+    }
+  }
+}

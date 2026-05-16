@@ -8,8 +8,8 @@
 > If you want to set up on a different Linux distribution, the
 > Arch instructions are a starting point but you will need to
 > translate package names. Distribution-specific support is not a
-> project goal; community contributions documenting other
-> distributions are welcome but not committed to in this document.
+> project goal; however, community contributions of setup
+> instructions for other distributions are welcome.
 
 ---
 

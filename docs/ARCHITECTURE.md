@@ -561,7 +561,7 @@ break), the recommended reading order is:
    environment.
 5. **[`CONTRIBUTING.md`](CONTRIBUTING.md)** — to understand the
    day-to-day workflow (branches, commits, reviews).
-6. **[`INTERFACES.md`](../liara-interfaces/INTERFACES.md)** (in the
+6. **[`INTERFACES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/dev/book/INTERFACES)** (in the
    `liara-interfaces` repo) — required reading before modifying anything
    that crosses a module boundary.
 

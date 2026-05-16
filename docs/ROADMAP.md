@@ -39,11 +39,11 @@ is no "v0.3 in March". A version ships when its Definition of Done
 is met, the CI is green, and the documentation is updated — not
 before, not on a deadline.
 
-This choice acknowledges the reality of solo development under
-TDAH/TSA constraints: hyperfocus periods may produce two releases in
-a week, and academic or external commitments may produce a month of
-silence. Both rhythms are normal. The project does not stress about
-the silence and does not artificially slow down the bursts.
+This choice acknowledges the reality of solo development: hyperfocus
+periods may produce two releases in a week, and academic or external
+commitments may produce a month of silence. Both rhythms are normal.
+The project does not stress about the silence and does not artificially
+slow down the bursts.
 
 Three corollaries follow from this.
 
@@ -82,9 +82,18 @@ qualification, it means the meta repository at version 0.3. Module
 versions corresponding to a meta release are recorded in the
 compatibility matrix.
 
+Pre-0.1 versions are considered "development versions". They are
+expected to be unstable, to have breaking changes even in patch bumps,
+and to have incomplete documentation. The point of pre-0.1 is to
+construct the infrastructure and prove the architecture; it is not to
+build a usable engine. The version number reflects this: 0.0.x is the
+playground for Phase 0.
+
 Pre-1.0 versions follow the convention that minor bumps may include
 breaking changes. Patch bumps are reserved for bug fixes and
-documentation. Once v1.0 ships, the meta repository follows strict
+documentation.
+
+Once v1.0 ships, the meta repository follows strict
 semantic versioning.
 
 Module repositories (`liara-core`, `liara-renderer`, etc.) follow
@@ -102,21 +111,20 @@ will happen. Phase 0 produces no engine code; it produces an
 environment in which engine code can be productively written.
 
 Phase 0 is treated as a single, atomic unit. It is "complete" only
-when **every** item below is in place. Skipping items "for now and
-adding them later" is what produced the original Liara's
-infrastructure debt; this time, the discipline is upfront.
+when **every** item below is in place.
 
-### Repositories Created
+### ~~Repositories Created~~
 
 The following repositories exist on the `liara-engine` GitHub
 organization:
 
-- `liara` (meta)
-- `liara-interfaces`
-- `liara-core`
-- `liara-renderer`
-- `docs-shared`
-- `.github` (organization-level)
+- ~~`liara` (meta)~~
+- ~~`liara-interfaces`~~
+- ~~`liara-core`~~
+- ~~`liara-renderer`~~
+- ~~`docs-shared`~~
+- ~~`liara-docs`~~
+- ~~`.github` (organization-level)~~
 
 Each module repository contains a minimal stub: a CMakeLists.txt
 that compiles, a README that points to the meta repository's docs,
@@ -132,21 +140,21 @@ written.
 The meta repository contains, at minimum, the following documents,
 all written and reviewed:
 
-- `README.md`
-- `docs/ARCHITECTURE.md`
-- `docs/MODULES.md`
-- `docs/ROADMAP.md`
-- `docs/CONTRIBUTING.md`
-- `docs/CODE_STYLE.md`
-- `docs/TOOLING.md`
-- `docs/BOOTSTRAP.md`
+- ~~`README.md`~~
+- ~~`docs/ARCHITECTURE.md`~~
+- ~~`docs/MODULES.md`~~
+- ~~`docs/ROADMAP.md`~~
+- ~~`docs/CONTRIBUTING.md`~~
+- ~~`docs/CODE_STYLE.md`~~
+- ~~`docs/TOOLING.md`~~
+- ~~`docs/BOOTSTRAP.md`~~
 - `docs/adr/0001-*.md` through whatever ADRs are needed to capture
   the major decisions taken so far.
 
-The `liara-interfaces` repository contains its own `INTERFACES.md`.
+~~The `liara-interfaces` repository contains its own `INTERFACES.md`.~~
 
-The `docs-shared` repository contains the navbar HTML/CSS/JS and
-the Doxygen and mdBook templates that include it.
+~~The `docs-shared` repository contains the navbar HTML/CSS/JS and
+the Doxygen and mdBook templates that include it.~~
 
 ### CI Pipelines Operational
 
@@ -157,9 +165,9 @@ push and pull request:
 - Run clang-format checks.
 - Run clang-tidy.
 - Run the test suite (even if it is just one placeholder test).
-- Generate Doxygen documentation.
-- On pushes to main, deploy the documentation to that module's
-  `gh-pages` branch under a `/dev/` subdirectory.
+- ~~Generate Doxygen and Mdbook documentation.~~
+- ~~On pushes to main, deploy the documentation to that module's
+  `gh-pages` branch under a `/dev/` subdirectory.~~
 
 The reusable workflows that implement these steps live in the
 `.github` organization-level repository and are invoked from each
@@ -188,16 +196,15 @@ meta repository on a system with the required dependencies (Vulkan
 SDK, CMake, vcpkg, compilers), running `./scripts/setup-workspace.sh`
 produces a buildable workspace in under five minutes.
 
-### Documentation Hub Live
+### ~~Documentation Hub Live~~
 
-The meta repository's `gh-pages` branch hosts the documentation hub
-at `liara-engine.github.io`. The hub:
+The hub:
 
-- Displays a landing page with the project's name and description.
-- Includes the shared navbar (consumed from `docs-shared`).
-- Provides a version dropdown (initially listing only `dev`).
-- Provides a module dropdown (listing the four initial modules).
-- Links to each module's documentation on its respective `gh-pages`.
+- ~~Displays a landing page with the project's name and description.~~
+- ~~Includes the shared navbar (consumed from `docs-shared`).~~
+- ~~Provides a version dropdown (initially listing only `dev`).~~
+- ~~Provides a module dropdown (listing the four initial modules).~~
+- ~~Links to each module's documentation on its respective `gh-pages`.~~
 
 In Phase 0, the linked module documentation pages may be empty
 placeholders. The point is that the navigation infrastructure works.
@@ -215,8 +222,8 @@ Phase 0 is complete when:
 - [ ] All listed repositories exist and are configured.
 - [ ] All listed documents are written.
 - [ ] CI is green on every repository (even if testing only stubs).
-- [ ] Documentation is generated and deployed to gh-pages.
-- [ ] The hub at `liara-engine.github.io` is accessible and renders
+- [x] Documentation is generated and deployed to cloudflare pages.
+- [x] The hub at `liara-engine.github.io` is accessible and renders
       with the navbar.
 - [ ] The workspace bootstrap script runs successfully on a clean
       Arch Linux machine.

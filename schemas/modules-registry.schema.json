@@ -48,6 +48,18 @@
             "type": "boolean",
             "default": false,
             "description": "If true, this module is the ABI itself. Its currently viewed version is treated as the current ABI version, and other modules' compatibility is computed against it. Exactly one module should be marked is_abi."
+          },
+
+          "only_mdbook": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, this module will not show the sub-nav, and only book pages will be exposed."
+          },
+
+          "only_doxygen": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, this module will not show the sub-nav, and only API reference pages will be exposed."
           }
         }
       }

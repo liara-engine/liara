@@ -73,6 +73,15 @@
         "favicon-svg": {
           "type": "string",
           "description": "Path to the favicon in .svg format."
+        },
+
+        "unspecified": {
+          "type": "object",
+          "description": "Any additional resources that don't fit into the predefined categories (css, js, favicon-ico, favicon-svg) can be added here. Each key is a custom identifier for the resource, and its value should follow the same structure as defined in the 'resource' definition in $defs. This allows for flexible inclusion of various types of resources as needed by the module.",
+
+          "additionalProperties": {
+            "$ref": "#/$defs/resource"
+          }
         }
       }
     },
@@ -94,6 +103,46 @@
   },
 
   "$defs": {
+    "resource": {
+      "oneOf": [
+        {
+          "type": "string",
+            "description": "Path to the resource file."
+        },
+
+        {
+          "type": "object",
+          "additionalProperties": false,
+
+          "required": ["path"],
+
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Path to the resource file."
+            },
+
+            "is-folder": {
+              "type": "boolean",
+              "default": false,
+              "description": "Indicates whether the 'path' is a folder (true) or a single file (false). If true, all files within the specified folder will be included as resources."
+            },
+
+            "folder-depth": {
+              "type": "integer",
+              "default": 1,
+              "description": "If 'is-folder' is true, this property specifies how many levels of subfolders to include. A value of 0 means only the files directly within the specified folder will be included, while a value of 1 means files in the specified folder and its immediate subfolders will be included, and so on. -1 can be used to include all levels of subfolders."
+            },
+
+            "copy-name": {
+              "type": "string",
+              "description": "If specified, the resource will be copied to the output directory with this name instead of its original name. This can be useful for avoiding name conflicts or for providing a more descriptive name for the resource in the documentation."
+            }
+          }
+        }
+      ]
+    },
+
     "replacement": {
       "description": "Each replacement can be defined as a simple string (the replacement value) or as an object with more detailed configuration options.",
       "oneOf": [

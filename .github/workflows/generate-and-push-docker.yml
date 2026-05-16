@@ -3,7 +3,7 @@ name: Generate and Push Docker Images
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'docker-*/v*.*.*'
     paths:
       - 'docker/**/Dockerfile'
       - 'scripts/**'

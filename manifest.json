@@ -2,7 +2,7 @@
   "$schema": "https://liara-engine.github.io/liara/schemas/module-manifest.schema.json",
   "metadata": {
     "name": "Liara Engine Meta Repo",
-    "description": "Meta documentation about the Liara Engine project, including tooling, contribution guidelines, and other non-module-specific information."
+    "description": "Meta documentation about the Liara Engine project, including tooling, contribution guidelines, and other non-module-specific information.",
     "latest": "dev"
   },
   "versions": {

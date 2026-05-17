@@ -35,7 +35,7 @@ FROM debian:bookworm-slim AS downloader
 
 ARG DOXYGEN_VERSION=1.16.1
 ARG MDBOOK_VERSION=0.5.2
-ARG DOCS_SHARED_VERSION=0.0.5
+ARG DOCS_SHARED_VERSION=0.0.6
 ARG DOCS_SHARED_REPO=https://github.com/liara-engine/docs-shared
 
 WORKDIR /tmp
@@ -77,7 +77,8 @@ RUN git clone \
     --depth 1 \
     --branch "v${DOCS_SHARED_VERSION}" \
     "${DOCS_SHARED_REPO}" \
-    /docs-shared
+    /docs-shared && \
+    rm -rf /docs-shared/.git /docs-shared/.github /docs-shared/docs /docs-shared/hub /docs-shared/shared-content
 
 
 

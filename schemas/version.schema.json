@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://liara-engine.github.io/liara/schemas/version.schema.json",
+  "title": "Versions configuration",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": ["versions", "current_dev", "latest_release", "$schema"],
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://liara-engine.github.io/liara/schemas/version.schema.json",
+      "description": "The URI of the schema that this registry adheres to."
+    },
+
+    "current_dev": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Label of the current development version, which is expected to be the first entry in the versions list. Example: 'dev'."
+    },
+
+    "latest_release": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Label of the latest stable release version. Example: '1.0.0'."
+    },
+
+    "versions": {
+      "type": "array",
+      "description": "Ordered list of versions. The order is preserved in the version selector dropdown. The first entry is expected to be the current development version.",
+      "additionalProperties": false,
+
+      "items": {
+        "type": "object",
+        "required": ["label", "note"],
+        "additionalProperties": false,
+
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(dev|\\d+\\.\\d+\\.\\d+)$",
+            "description": "Version label, used in the version selector dropdown. Example: 'dev', '1.0.0'."
+          },
+
+          "note": {
+            "type": "string",
+            "description": "A brief note about the version, shown in the version selector dropdown. Example: 'Current development', 'Latest stable release'."
+          },
+
+          "modules": {
+            "type": "object",
+            "description": "Mapping of module keys to their documentation URLs for this version. The module keys should match those defined in the modules registry. This is used to populate the 'Documentation' dropdown in the navbar for each version.",
+            "properties": {
+              "user": {
+                "type": "string",
+                "format": "uri-reference",
+                "description": "Example: 'liara-core/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
+              },
+
+              "renderer": {
+                "type": "string",
+                "format": "uri-reference",
+                "description": "Example: 'liara-renderer/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
+              },
+
+              "abi": {
+                "type": "string",
+                "format": "uri-reference",
+                "description": "Example: 'liara-interfaces/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
+              },
+
+              "core": {
+                "type": "string",
+                "format": "uri-reference",
+                "description": "Example: 'liara-core/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

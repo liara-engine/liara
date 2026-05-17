@@ -50,6 +50,12 @@
             "description": "If true, this module is the ABI itself. Its currently viewed version is treated as the current ABI version, and other modules' compatibility is computed against it. Exactly one module should be marked is_abi."
           },
 
+          "meta": {
+            "type": "boolean",
+            "default": false,
+            "description": "Defines a meta module that doesn't represent a software module, but tools, documentation, or other resources related to the project as a whole. Meta modules are not considered when computing ABI compatibility, cause it makes no sense to talk about their 'ABI'."
+          },
+
           "only_mdbook": {
             "type": "boolean",
             "default": false,

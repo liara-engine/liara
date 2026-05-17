@@ -9,6 +9,7 @@ on:
       - 'docs/**'
       - 'book.toml'
       - 'manifest.json'
+      - 'README.md'
   workflow_dispatch:
 
 jobs:

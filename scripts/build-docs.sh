@@ -93,22 +93,36 @@ generate_summary() {
         echo "# Summary"
         echo
 
-        eval find "\"${BOOK_DIR}\"" \
-            -type f \
-            -name "\"*.md\"" \
-            ! -name "\"SUMMARY.md\"" \
-            ${excludes} \
-            "|" sort \
-        | while read -r file; do
+        mapfile -t files < <(
+            eval find "\"${BOOK_DIR}\"" \
+                -type f \
+                -name "\"*.md\"" \
+                ! -name "\"SUMMARY.md\"" \
+                ${excludes} \
+                "|" sort
+        )
+
+        for file in "${files[@]}"; do
+            [[ "$(basename "$file")" == "README.md" ]] || continue
 
             rel="${file#${BOOK_DIR}/}"
+            title="$(pretty_title "$(basename "$(dirname "$file")")")"
 
-            # README.md becomes directory entry
-            if [[ "$(basename "$file")" == "README.md" ]]; then
-                title="$(pretty_title "$(basename "$(dirname "$file")")")"
-            else
-                title="$(pretty_title "$(basename "$file")")"
-            fi
+            depth=$(awk -F/ '{print NF-1}' <<< "${rel}")
+
+            indent=""
+            for ((i=0; i<depth; i++)); do
+                indent="${indent}  "
+            done
+
+            echo "${indent}- [${title}](${rel})"
+        done
+
+        for file in "${files[@]}"; do
+            [[ "$(basename "$file")" == "README.md" ]] && continue
+
+            rel="${file#${BOOK_DIR}/}"
+            title="$(pretty_title "$(basename "$file")")"
 
             depth=$(awk -F/ '{print NF-1}' <<< "${rel}")
 

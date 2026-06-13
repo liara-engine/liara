@@ -35,7 +35,7 @@ FROM debian:bookworm-slim AS downloader
 
 ARG DOXYGEN_VERSION=1.17.0
 ARG MDBOOK_VERSION=0.5.2
-ARG DOCS_SHARED_VERSION=0.0.6.2
+ARG DOCS_SHARED_VERSION=0.0.6
 ARG DOCS_SHARED_REPO=https://github.com/liara-engine/docs-shared
 
 WORKDIR /tmp

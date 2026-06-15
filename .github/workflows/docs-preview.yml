@@ -1,0 +1,57 @@
+name: docs-preview
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+jobs:
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      docs: ${{ steps.f.outputs.docs }}
+      image: ${{ steps.check-image.outputs.image }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: f
+        with:
+          filters: |
+            docs:
+              - '.github/workflows/**'
+              - 'docs/**'
+              - 'book.toml'
+              - 'Doxyfile'
+              - 'include/**'
+              - 'manifest.json'
+              - 'README.md'
+
+      - id: check-image
+        run: |
+          IMAGE_BASE="ghcr.io/liara-engine/liara-documentation-builder"
+          PR_TAG="pr-${{ github.event.pull_request.number }}"
+          
+          echo "${{ secrets.GITHUB_TOKEN }}" | skopeo login ghcr.io -u ${{ github.actor }} --password-stdin
+          
+          if skopeo inspect docker://${IMAGE_BASE}:${PR_TAG} > /dev/null 2>&1; then
+            echo "Image exists: ${IMAGE_BASE}:${PR_TAG}"
+            echo "image=$IMAGE_BASE:$PR_TAG" >> $GITHUB_OUTPUT
+          else
+            echo "Image does not exist: ${IMAGE_BASE}:${PR_TAG}"
+            echo "image=$IMAGE_BASE:latest" >> $GITHUB_OUTPUT
+          fi
+
+  preview:
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: write
+    needs: changes
+    if: >
+      needs.changes.outputs.docs == 'true' ||
+      contains(github.event.pull_request.labels.*.name, 'docs-preview')
+    uses: liara-engine/.github/.github/workflows/reusable-docs-preview.yml@v0
+    with:
+      image: ${{ needs.changes.outputs.image }}
+      output-repository: liara-engine/liara-docs
+    secrets:
+      ghcr-token: ${{ secrets.GITHUB_TOKEN }}
+      push-token: ${{ secrets.DOCS_PUSH_TOKEN }}

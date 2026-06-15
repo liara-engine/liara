@@ -35,6 +35,7 @@ FROM debian:bookworm-slim AS downloader
 
 ARG DOXYGEN_VERSION=1.17.0
 ARG MDBOOK_VERSION=0.5.2
+ARG MDBOOK_MERMAID_VERSION=0.17.0
 ARG DOCS_SHARED_VERSION=0.1.0
 ARG DOCS_SHARED_REPO=https://github.com/liara-engine/docs-shared
 
@@ -68,6 +69,14 @@ RUN curl -fsSL \
     && tar -xzf mdbook.tar.gz \
     && chmod +x mdbook \
     && rm mdbook.tar.gz
+
+# ----------------------------------------------------------------------------
+# Download mdBook-mermaid
+# ----------------------------------------------------------------------------
+RUN curl -fsSL \
+    "https://github.com/badboy/mdbook-mermaid/releases/download/v${MDBOOK_MERMAID_VERSION}/mdbook-mermaid-v${MDBOOK_MERMAID_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+    -o mdbook-mermaid.tar.gz \
+    && tar -xzf mdbook-mermaid.tar.gz && chmod +x mdbook-mermaid && rm mdbook-mermaid.tar.gz
 
 # ----------------------------------------------------------------------------
 # Download docs-shared
@@ -127,6 +136,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=downloader /opt/doxygen /opt/doxygen
 COPY --from=downloader /tmp/mdbook /usr/local/bin/mdbook
+COPY --from=downloader /tmp/mdbook-mermaid /usr/local/bin/mdbook-mermaid
 COPY --from=downloader /docs-shared /opt/docs-shared
 
 COPY scripts/processor.py /usr/local/bin/processor.py
@@ -137,6 +147,7 @@ COPY scripts/build-docs.sh /usr/local/bin/build-docs
 
 RUN ln -s /opt/doxygen/bin/doxygen /usr/local/bin/doxygen \
     && chmod +x /usr/local/bin/mdbook \
+    && chmod +x /usr/local/bin/mdbook-mermaid \
     && chmod +x /usr/local/bin/build-docs \
     && chmod +x /usr/local/bin/processor.py \
     && chmod +x /usr/local/bin/resource_processor.py \

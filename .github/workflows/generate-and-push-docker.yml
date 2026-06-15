@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - 'docker-v*.*.*'
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    paths:
+      - 'docker/**'
+      - 'scripts/**'
   workflow_dispatch:
 
 
@@ -40,12 +45,12 @@ jobs:
               MATRIX+=("{\"target\":\"$TARGET\", \"image\":\"$IMAGE\", \"dockerfile\":\"$DOCKERFILE_PATH\"}")
             fi
           done
-          
+
           # Convert the array to a JSON string
           JSON=$(printf '%s\n' "${MATRIX[@]}" | jq -cs '.')
 
           echo "matrix={\"include\":$JSON}" >> $GITHUB_OUTPUT
-          
+
           # Debug output
           echo "Generated matrix: $JSON"
 
@@ -65,5 +70,12 @@ jobs:
     with:
       target: ${{ matrix.target }}
       image-name: ${{ matrix.image }}
-      image-tag: ${{ github.ref_name }}
+      image-tag: >-
+        ${{ github.event_name == 'pull_request'
+            && format('pr-{0}', github.event.pull_request.number)
+            || github.ref_name }}
+      tag-latest: >-
+        ${{ github.event_name == 'push'
+            && startsWith(github.ref, 'refs/tags/docker-v') }}
+
       dockerfile-path: ${{ matrix.dockerfile }}

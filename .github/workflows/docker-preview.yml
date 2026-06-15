@@ -1,0 +1,49 @@
+name: docker-preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'docker/**'
+      - 'scripts/**'
+
+env:
+  IMAGE: ghcr.io/liara-engine/liara-documentation-builder
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build & push preview image
+        run: |
+          set -euo pipefail
+          docker buildx build \
+            --tag "${IMAGE}:pr-${{ github.event.number }}" \
+            # --tag "${IMAGE}:preview" \
+            --push \
+            docker/liara-documentation-builder
+
+      - name: Comment image reference
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: docker-preview
+          message: |
+            **Builder image preview** pushed:
+
+            `${{ env.IMAGE }}:pr-${{ github.event.number }}`
+
+            This PR modifies the Dockerfiles or scripts, so a preview image has been built and pushed to GHCR.
+            All documentation preview of this PR will use this image for building the documentation.
+            
+            <sub>Note: This image is temporary and will be deleted after the PR is closed or merged.</sub>

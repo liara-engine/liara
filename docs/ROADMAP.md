@@ -166,8 +166,7 @@ push and pull request:
 - Run clang-tidy.
 - Run the test suite (even if it is just one placeholder test).
 - ~~Generate Doxygen and Mdbook documentation.~~
-- ~~On pushes to main, deploy the documentation to that module's
-  `gh-pages` branch under a `/dev/` subdirectory.~~
+- ~~On pushes to main, deploy the documentation to Cloudflare Pages.~~
 
 The reusable workflows that implement these steps live in the
 `.github` organization-level repository and are invoked from each

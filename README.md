@@ -57,7 +57,7 @@ organization. This meta repository orchestrates the lot.
 
 ## Why Another Engine?
 
-Three honest reasons:
+Three reasons:
 
 1. **Learning.** Modern graphics programming, Vulkan, modern C++,
    large-scale software architecture, build systems, CI/CD. Building
@@ -89,7 +89,7 @@ cmake --build --preset=linux-release-clang
 ```
 
 For Windows, or for the full setup procedure, see
-[`docs/BOOTSTRAP.md`](./docs/BOOTSTRAP.md).
+[`docs/BOOTSTRAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP).
 
 ---
 
@@ -98,23 +98,22 @@ For Windows, or for the full setup procedure, see
 The project documentation is structured as separate documents, each
 focused on one aspect:
 
-| Document                                            | Purpose                                        |
-|-----------------------------------------------------|------------------------------------------------|
-| [`ARCHITECTURE.md`](./docs/ARCHITECTURE.md)         | Foundational design, philosophy, principles   |
-| [`MODULES.md`](./docs/MODULES.md)                   | Concrete module decomposition and boundaries  |
-| [`ROADMAP.md`](./docs/ROADMAP.md)                   | Phase 0 → v2.0 milestones with exit criteria  |
-| [`CONTRIBUTING.md`](./docs/CONTRIBUTING.md)         | Daily workflow: branches, PRs, reviews        |
-| [`CODE_STYLE.md`](./docs/CODE_STYLE.md)             | C++ conventions, clang-format, clang-tidy     |
-| [`TOOLING.md`](./docs/TOOLING.md)                   | CI/CD, build, vcpkg, releases, docs           |
-| [`BOOTSTRAP.md`](./docs/BOOTSTRAP.md)               | Setting up Arch and Windows for development   |
+| Document                                                                                                        | Purpose                                       |
+|-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+| [`ARCHITECTURE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ARCHITECTURE) | Foundational design, philosophy, principles   |
+| [`MODULES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/MODULES)           | Concrete module decomposition and boundaries  |
+| [`ROADMAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ROADMAP)           | Phase 0 → v2.0 milestones with exit criteria  |
+| [`CONTRIBUTING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CONTRIBUTING) | Daily workflow: branches, PRs, reviews        |
+| [`CODE_STYLE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CODE_STYLE)     | C++ conventions, clang-format, clang-tidy     |
+| [`TOOLING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/TOOLING)           | CI/CD, build, vcpkg, releases, docs           |
+| [`BOOTSTRAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP)       | Setting up Arch and Windows for development   |
 
 Interface design rules live in their own document, in the
 `liara-interfaces` repository:
-[`INTERFACES.md`](https://github.com/liara-engine/liara-interfaces/blob/main/INTERFACES.md).
+[`INTERFACES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/book/INTERFACES).
 
 User-facing documentation (tutorials, guides) is hosted at
-[liara-engine.github.io](https://liara-engine.github.io) once Phase 0
-is complete.
+[liara-engine.liara-engine-documentation.workers.dev](https://liara-engine.liara-engine-documentation.workers.dev/).
 
 For newcomers, the recommended reading order is the sequence above,
 top to bottom.
@@ -139,15 +138,15 @@ liara-engine/
 ```
 
 The interfaces repository is the contract; everything else
-implements or consumes it. See [`MODULES.md`](./docs/MODULES.md) for
-the full picture.
+implements or consumes it. See [`MODULES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/MODULES)
+for the full picture.
 
 ---
 
 ## Roadmap at a Glance
 
-The full roadmap is in [`ROADMAP.md`](./docs/ROADMAP.md). The
-high-level shape:
+The full roadmap is in [`ROADMAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ROADMAP).
+The high-level shape:
 
 - **Phase 0** — Infrastructure, repositories, CI, documentation.
 - **v0.1** — "Hello Triangle" through the modular pipeline.
@@ -169,8 +168,9 @@ Pauses happen and are not failures.
 ## Technical Overview
 
 A condensed summary of the choices documented in
-[`ARCHITECTURE.md`](./docs/ARCHITECTURE.md) and
-[`TOOLING.md`](./docs/TOOLING.md):
+[`ARCHITECTURE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ARCHITECTURE)
+and
+[`TOOLING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/TOOLING):
 
 | Concern             | Choice                                             |
 |---------------------|----------------------------------------------------|
@@ -203,14 +203,14 @@ Contributions are welcome but optional. The project's primary mode is
 solo development, and the workflow reflects that. If you would like
 to contribute:
 
-- Read [`CONTRIBUTING.md`](./docs/CONTRIBUTING.md) for the workflow.
+- Read [`CONTRIBUTING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CONTRIBUTING) for the workflow.
 - Open an issue before a substantial PR, so the change can be
   discussed before code is written.
 - Small PRs (typo fixes, doc clarifications, obvious bug fixes) can
   be opened directly without prior discussion.
 
 The project follows the [Contributor Covenant](https://www.contributor-covenant.org/)
-code of conduct (a copy lives in `CODE_OF_CONDUCT.md`).
+code of conduct (a copy lives in `CODE_OF_CONDUCT.md`) [TODO].
 
 ---
 
@@ -262,7 +262,7 @@ The architectural patterns owe debt to:
 
 - **Issues**: per repository on GitHub.
 - **Discussions**: on this meta repository.
-- **Documentation**: [liara-engine.github.io](https://liara-engine.github.io).
+- **Documentation**: [liara-engine.liara-engine-documentation.workers.dev](https://liara-engine.liara-engine-documentation.workers.dev/)
 
 ---
 

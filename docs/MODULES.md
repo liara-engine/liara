@@ -512,27 +512,30 @@ discipline as `docs-shared`, applied to CI.
 
 The static dependency graph between repositories is:
 
-```
-                         ┌─────────────────────┐
-                         │   liara-interfaces  │
-                         │  (C headers only)   │
-                         └──────────┬──────────┘
-                                    │
-                  ┌─────────────────┼─────────────────┐
-                  │                 │                 │
-                  ▼                 ▼                 ▼
-           ┌────────────┐    ┌──────────────┐  ┌──────────────┐
-           │ liara-core │    │liara-renderer│  │liara-physics │
-           │            │    │              │  │  (post-v1)   │
-           └─────┬──────┘    └──────────────┘  └──────────────┘
-                 │                  │                  │
-                 └────────┬─────────┴────────┬─────────┘
-                          │                  │
-                          ▼                  ▼
-                   ┌────────────┐     ┌──────────────┐
-                   │   liara    │     │ liara-editor │
-                   │ (launcher) │     │  (post-v1)   │
-                   └────────────┘     └──────────────┘
+```mermaid
+flowchart TB
+
+    interfaces["liara-interfaces<br/>(C headers only)"]
+
+    core["liara-core"]
+    renderer["liara-renderer"]
+    physics["liara-physics<br/>(post-v1)"]
+
+    launcher["liara<br/>(launcher)"]
+    editor["liara-editor<br/>(post-v1)"]
+
+    interfaces --> core
+    interfaces --> renderer
+    interfaces --> physics
+
+    merge1((.))
+
+    core --> merge1
+    renderer --> merge1
+    physics --> merge1
+
+    merge1 --> launcher
+    merge1 --> editor
 ```
 
 Reading the graph:

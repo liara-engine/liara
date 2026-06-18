@@ -1,0 +1,65 @@
+name: clean-ghcr
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Runs every Sunday at midnight
+  workflow_dispatch:
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Generate Build Matrix
+        id: detect
+        run: |
+          # Get the list of all dockerfiles in the repository
+          ALL_DOCKERFILES=$(find docker -type f -name 'Dockerfile')
+
+          # Initialize an empty array for the matrix
+          MATRIX=()
+          # Loop through all files and extract target, image, and dockerfile path
+          for FILE in $ALL_DOCKERFILES; do
+            if [[ $FILE == docker/*/Dockerfile ]]; then
+              TARGET=$(echo $FILE | cut -d'/' -f2)
+              IMAGE="liara-engine/${TARGET}"
+              DOCKERFILE_PATH=$FILE
+              MATRIX+=("{\"target\":\"$TARGET\", \"image\":\"$IMAGE\", \"dockerfile\":\"$DOCKERFILE_PATH\"}")
+            fi
+          done
+
+          # Convert the array to a JSON string
+          JSON=$(printf '%s\n' "${MATRIX[@]}" | jq -cs '.')
+          
+          echo "matrix={\"include\":$JSON}" >> $GITHUB_OUTPUT
+        
+          # Debug output
+          echo "Generated matrix: $JSON"
+
+  clean:
+    needs: detect
+    if: needs.detect.outputs.matrix != '{"include":[]}'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
+
+    steps:
+      - uses: liara-engine/.github/.github/workflows/reusable-clean-ghcr.yml@v0
+        with:
+          package-name: ${{ matrix.image }}
+          min-versions-to-keep: 3

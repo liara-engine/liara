@@ -49,7 +49,6 @@ jobs:
   clean:
     needs: detect
     if: needs.detect.outputs.matrix != '{"include":[]}'
-    runs-on: ubuntu-latest
 
     permissions:
       contents: read

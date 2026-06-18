@@ -58,8 +58,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
 
-    steps:
-      - uses: liara-engine/.github/.github/workflows/reusable-clean-ghcr.yml@v0
-        with:
-          package-name: ${{ matrix.image }}
-          min-versions-to-keep: 3
+    uses: liara-engine/.github/.github/workflows/reusable-clean-ghcr.yml@v0
+    with:
+      package-name: ${{ matrix.image }}
+      min-versions-to-keep: 3

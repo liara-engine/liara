@@ -32,7 +32,7 @@ jobs:
           for FILE in $ALL_DOCKERFILES; do
             if [[ $FILE == docker/*/Dockerfile ]]; then
               TARGET=$(echo $FILE | cut -d'/' -f2)
-              IMAGE="liara-engine/${TARGET}"
+              IMAGE="${TARGET}"
               DOCKERFILE_PATH=$FILE
               MATRIX+=("{\"target\":\"$TARGET\", \"image\":\"$IMAGE\", \"dockerfile\":\"$DOCKERFILE_PATH\"}")
             fi

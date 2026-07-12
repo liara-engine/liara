@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.3](https://github.com/liara-engine/liara/compare/v0.0.2...v0.0.3) (2026-07-12)
+
+
+### Features
+
+* **release:** add config and manifest file specifications to release configuration ([77d949e](https://github.com/liara-engine/liara/commit/77d949e91b5efd4bb4131c4362c9f9a3d50ec0b1))
+
+
+### Bug Fixes
+
+* **release:** remove release-as version specification from configuration ([95cd5a9](https://github.com/liara-engine/liara/commit/95cd5a9f5d8b64071aecc18a62dc2503a1320e4b))
+
 ## [0.0.2](https://github.com/liara-engine/liara/compare/v0.0.1...v0.0.2) (2026-07-12)
 
 

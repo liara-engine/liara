@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.3](https://github.com/liara-engine/liara/compare/v0.0.2...v0.0.3) (2026-07-12)
+
+
+### Bug Fixes
+
+* **release:** enable force tag creation in docker and schemas configurations ([4e6b21d](https://github.com/liara-engine/liara/commit/4e6b21de5ab1a32aa25d9007c66b4a8ff6b32cc2))
+* **release:** remove comma ([0e06fc3](https://github.com/liara-engine/liara/commit/0e06fc398fe0ea91d383832e51479f9ce9cd48ee))
+* **release:** remove release version specification from configuration ([4e13cb0](https://github.com/liara-engine/liara/commit/4e13cb03e1800eb76f49b7e35225ba42784a7fc1))
+
 ## [0.0.2](https://github.com/liara-engine/liara/compare/v0.0.1...v0.0.2) (2026-07-12)
 
 

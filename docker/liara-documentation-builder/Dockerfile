@@ -139,11 +139,11 @@ COPY --from=downloader /tmp/mdbook /usr/local/bin/mdbook
 COPY --from=downloader /tmp/mdbook-mermaid /usr/local/bin/mdbook-mermaid
 COPY --from=downloader /docs-shared /opt/docs-shared
 
-COPY scripts/processor.py /usr/local/bin/processor.py
-COPY scripts/resource_processor.py /usr/local/bin/resource_processor.py
-COPY scripts/replacement_processor.py /usr/local/bin/replacement_processor.py
+COPY docker/scripts/processor.py /usr/local/bin/processor.py
+COPY docker/scripts/resource_processor.py /usr/local/bin/resource_processor.py
+COPY docker/scripts/replacement_processor.py /usr/local/bin/replacement_processor.py
 
-COPY scripts/build-docs.sh /usr/local/bin/build-docs
+COPY docker/scripts/build-docs.sh /usr/local/bin/build-docs
 
 RUN ln -s /opt/doxygen/bin/doxygen /usr/local/bin/doxygen \
     && chmod +x /usr/local/bin/mdbook \

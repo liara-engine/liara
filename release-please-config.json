@@ -3,6 +3,8 @@
   "packages": {
     ".": {
       "release-type": "simple",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
       "exclude-paths": [
         "docker/**",
         "schemas/**"
@@ -17,11 +19,15 @@
     },
     "docker": {
       "release-type": "simple",
-      "include-component-in-tag": true
+      "include-component-in-tag": true,
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
     },
     "schemas": {
       "release-type": "simple",
-      "include-component-in-tag": true
+      "include-component-in-tag": true,
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
     }
   }
 }

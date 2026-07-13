@@ -128,7 +128,7 @@ organization:
 
 Each module repository contains a minimal stub: a CMakeLists.txt
 that compiles, a README that points to the meta repository's docs,
-LICENSE, .gitignore, .editorconfig, .clang-format, .clang-tidy,
+~~LICENSE~~, .gitignore, .editorconfig, .clang-format, .clang-tidy,
 and a placeholder test that passes.
 
 The `liara-editor` and `liara-physics` repositories are **not**
@@ -172,12 +172,12 @@ The reusable workflows that implement these steps live in the
 `.github` organization-level repository and are invoked from each
 module's workflows.
 
-### Release-Please Configured
+### ~~Release-Please Configured~~
 
-Each repository has `release-please` configured to track conventional
+~~Each repository has `release-please` configured to track conventional
 commits and produce release PRs automatically. The configuration is
 in `.release-please-manifest.json` and `release-please-config.json`
-at each repository's root.
+at each repository's root.~~
 
 ### Workspace Bootstrap Working
 

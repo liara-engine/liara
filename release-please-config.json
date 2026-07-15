@@ -10,6 +10,7 @@
       "bump-patch-for-minor-pre-major": true,
       "exclude-paths": [
         "docker/**",
+        "launcher/**",
         "schemas/**"
       ],
       "extra-files": [
@@ -33,6 +34,14 @@
       "include-component-in-tag": true,
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true
+    },
+    "launcher": {
+      "package-name": "launcher",
+      "release-type": "simple",
+      "include-component-in-tag": true,
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "release-as": "0.0.1"
     }
   }
 }

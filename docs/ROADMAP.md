@@ -222,8 +222,8 @@ Phase 0 is complete when:
 - [ ] All listed documents are written.
 - [ ] CI is green on every repository (even if testing only stubs).
 - [x] Documentation is generated and deployed to cloudflare pages.
-- [x] The hub at `liara-engine.github.io` is accessible and renders
-      with the navbar.
+- [x] The hub at `liara-engine.liara-engine-documentation.workers.dev`
+      is accessible and renders with the navbar.
 - [ ] The workspace bootstrap script runs successfully on a clean
       Arch Linux machine.
 - [ ] The workspace bootstrap script runs successfully on a clean

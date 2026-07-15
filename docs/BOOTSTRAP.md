@@ -22,7 +22,7 @@ If everything works first try, the procedure is:
 ```bash
 # 1. Install system dependencies
 sudo pacman -S --needed base-devel cmake ninja git vulkan-devel \
-    vulkan-validation-layers shaderc clang gcc mold
+    vulkan-validation-layers shaderc clang gcc mold python
 
 # 2. Install vcpkg
 git clone https://github.com/microsoft/vcpkg.git ~/.vcpkg
@@ -83,25 +83,27 @@ detail and lists known issues.
 
 The following packages are required:
 
-| Package                       | Purpose                              |
-|-------------------------------|--------------------------------------|
-| `base-devel`                  | Compilers, make, autotools           |
-| `cmake`                       | Build system (3.29+ via current Arch)|
-| `ninja`                       | Build executor for CMake             |
-| `git`                         | Source control                       |
-| `vulkan-devel`                | Vulkan headers and loader            |
-| `vulkan-validation-layers`    | Debug-build validation               |
-| `shaderc`                     | `glslc` for shader compilation       |
-| `clang`                       | Clang toolchain (recommended)        |
-| `gcc`                         | GCC toolchain (also tested)          |
-| `mold`                        | Fast linker (recommended)            |
-| `clang-tools-extra`           | clang-format, clang-tidy             |
+| Package                    | Purpose                               |
+|----------------------------|---------------------------------------|
+| `base-devel`               | Compilers, make, autotools            |
+| `cmake`                    | Build system (3.29+ via current Arch) |
+| `ninja`                    | Build executor for CMake              |
+| `git`                      | Source control                        |
+| `vulkan-devel`             | Vulkan headers and loader             |
+| `vulkan-validation-layers` | Debug-build validation                |
+| `shaderc`                  | `glslc` for shader compilation        |
+| `clang`                    | Clang toolchain (recommended)         |
+| `gcc`                      | GCC toolchain (also tested)           |
+| `mold`                     | Fast linker (recommended)             |
+| `clang-tools-extra`        | clang-format, clang-tidy              |
+| `python`                   | Python interpreter                    |
 
 Installation:
 
 ```bash
 sudo pacman -S --needed base-devel cmake ninja git vulkan-devel \
-    vulkan-validation-layers shaderc clang gcc mold clang-tools-extra
+     vulkan-validation-layers shaderc clang gcc mold \
+     clang-tools-extra python
 ```
 
 Verify the toolchain versions meet the project's requirements:
@@ -140,11 +142,6 @@ vulkaninfo --summary
 The output should list at least one GPU with Vulkan 1.3 support. If
 no GPU is listed, the issue is GPU drivers (Mesa for AMD/Intel,
 proprietary or NVK for NVIDIA), not Liara — fix the drivers first.
-
-For your specific hardware (Framework Laptop 16 with Ryzen 7 7840HS,
-desktop with Radeon RX 6800), the Mesa drivers are the right choice.
-The relevant packages are typically already pulled in by
-`vulkan-devel` and a working desktop environment.
 
 ### 2.3 vcpkg Installation
 

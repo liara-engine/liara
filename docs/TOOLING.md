@@ -623,9 +623,13 @@ configuration lives in `Doxyfile` at the repo root, customized to:
 - Include a search index.
 - Cross-reference symbols across modules where relevant.
 
-The generated HTML is published to the module's `gh-pages` branch
-under a subdirectory named after the version (`dev/`, `v0.1.0/`,
-etc.). The reusable docs workflow handles the publication.
+The generated HTML is built inside the
+`liara-documentation-builder` container image and pushed to the
+`liara-docs` repository (branch `cloudflare-pages`) under
+`site/<repo>/<version>/doxygen/`, where `<version>` is `dev` or
+`X.Y.Z`. The reusable docs workflow handles the publication. See
+[documentation-pipeline.md](https://liara-engine.liara-engine-documentation.workers.dev/docs-shared/latest/book/documentation-pipeline)
+for the full picture
 
 ### User Documentation: mdBook
 
@@ -643,18 +647,23 @@ User documentation covers:
 - Reference: configuration options, environment variables,
   command-line flags.
 
-The mdBook output is published to the meta repository's `gh-pages`
-branch under `user/`.
+he meta repository's book is built and published like any other
+module's: the mdBook output lands in the `liara-docs` repository
+under `site/liara/<version>/book/`.
 
 ### The Documentation Hub
 
-The meta repository's `gh-pages` branch hosts the documentation
-hub at `liara-engine.github.io`. The hub:
+The hub's sources live in the `docs-shared` repository (`hub/`).
+It is deployed to the root of the documentation site — the
+`liara-docs` repository, branch `cloudflare-pages` — by the
+reusable docs workflow invoked with `deploy-as-hub: true`. The
+hub:
 
 - Displays a landing page introducing the engine.
 - Provides links to the user documentation (mdBook).
-- Links to per-module API documentation, with the version dropdown
-  consuming `version.json`.
+- Links to per-module documentation, with the version dropdown
+  consuming `version.json` (validated against
+  `version.schema.json` from the meta repository's `schemas/`).
 - Links to GitHub repositories.
 
 The hub uses the navbar from `docs-shared`, ensuring consistency
@@ -663,28 +672,23 @@ URLs across all linked documentation simultaneously.
 
 ### `version.json`
 
-The `version.json` file at the root of the hub lists available
-versions and the URLs for each module's documentation at each
-version:
+The `version.json` file at the root of the site lists the
+available versions. Module URLs are URI references resolved
+against the site's base URL, not absolute URLs:
 
 ```json
 {
+  "$schema": "https://liara-engine.github.io/liara/schemas/version.schema.json",
   "current_dev": "dev",
+  "latest_release": "dev",
   "versions": [
     {
       "label": "dev",
+      "note": "Current development",
       "modules": {
-        "core": "https://liara-engine.github.io/liara-core/dev/",
-        "renderer": "https://liara-engine.github.io/liara-renderer/dev/",
-        "interfaces": "https://liara-engine.github.io/liara-interfaces/dev/"
-      }
-    },
-    {
-      "label": "v1.0.0",
-      "modules": {
-        "core": "https://liara-engine.github.io/liara-core/v1.0.0/",
-        "renderer": "https://liara-engine.github.io/liara-renderer/v1.0.0/",
-        "interfaces": "https://liara-engine.github.io/liara-interfaces/v1.0.0/"
+        "abi": "liara-interfaces/dev/book/",
+        "core": "liara-core/dev/book/",
+        "renderer": "liara-renderer/dev/book/"
       }
     }
   ]
@@ -704,41 +708,54 @@ the Codecov API.
 
 ---
 
-## 11. GitHub Pages Deployment
+## 11. Documentation Hosting
 
-### Per-Module gh-pages Branch
+### The liara-docs Repository
 
-Each module repository has a `gh-pages` branch that hosts its API
-documentation. The branch is automatically populated by the
-reusable docs workflow:
+All generated documentation is hosted from a single repository,
+`liara-docs`, on its `cloudflare-pages` branch. The reusable
+deploy workflow pushes each build under `site/<repo>/<version>/`:
 
 ```
-liara-core/gh-pages/
-├── dev/                    # Current development docs
-│   ├── index.html
-│   └── ...
-├── v0.1.0/                 # Released version docs
-│   └── ...
-├── v0.2.0/
-│   └── ...
+liara-docs/cloudflare-pages/site/
+├── index.html                  # The hub
+├── version.json
+├── shared-content/             # Runtime shared assets
+├── liara-interfaces/
+│   ├── manifest.json
+│   ├── dev/
+│   │   ├── book/
+│   │   └── doxygen/
+│   └── v0.1.0/
+│       └── ...
 └── ...
 ```
 
 The deployment is non-destructive: pushing new docs to `dev/` does
-not touch `v0.1.0/`. Tagged releases produce a new versioned
-subdirectory by copying `dev/` at the time of the tag.
+not touch released versions. PR previews land under
+`site/<repo>/pr-<n>/` and are removed by a scheduled cleanup job.
+
+### Serving
+
+The branch is deployed through Cloudflare's Git integration as a
+Workers Static Assets project. Static files are served directly; a
+small Worker (`src/index.js` in `liara-docs`) handles only
+fall-through requests: resolving `/<repo>/latest/…` from the
+module's `manifest.json`, redirecting `/<repo>/<version>/` to
+`book/` (or `doxygen/`), and serving the custom 404 page.
 
 ### Branch Protection
 
-The `gh-pages` branches do not have branch protection. They are
-written to exclusively by CI; manual writes are not expected.
+The `cloudflare-pages` branch does not have branch protection. It
+is written to exclusively by CI; manual writes are not expected.
 
-### Custom Domain
+### Domain
 
-The hub's URL is `liara-engine.github.io`, the default GitHub Pages
-URL for an organization. A custom domain is not configured; doing
-so would add operational burden (DNS management, certificate
-renewal) for marginal benefit.
+The site is served at
+`liara-engine.liara-engine-documentation.workers.dev`, the default
+domain of the Cloudflare project. A custom domain is not
+configured; doing so would add operational burden (DNS management)
+for marginal benefit.
 
 ---
 
@@ -785,8 +802,16 @@ The recommended local setup:
 
 1. Clone the meta repository.
 2. Run `./scripts/setup-workspace.sh`. This clones every module
-   repository into `workspace/`, configures vcpkg, and produces a
-   superbuild CMakeLists.txt.
+   repository into `workspace/`, generates the superbuild
+   CMakeLists.txt, a merged vcpkg manifest (union of every
+   module's dependencies and features), and workspace-level CMake
+   presets, then configures CMake (`linux-debug-clang` by default;
+   `--preset` to change, `--no-configure` to skip) and symlinks
+   `compile_commands.json` at the workspace root. vcpkg dependency
+   resolution happens during this configure step. Re-running the script is
+   safe and is the standard way to refresh the workspace; existing
+   clones are updated with a fast-forward pull only (`--no-pull`
+   to leave them untouched, e.g. while working on a branch).
 3. Open `workspace/` in the editor of choice (CLion, VSCode, Neovim
    with clangd).
 4. Configure CMake with a preset of choice

@@ -179,16 +179,16 @@ commits and produce release PRs automatically. The configuration is
 in `.release-please-manifest.json` and `release-please-config.json`
 at each repository's root.~~
 
-### Workspace Bootstrap Working
+### ~~Workspace Bootstrap Working~~
 
-The meta repository contains a `scripts/setup-workspace.sh` script
-that:
+~~The meta repository contains a `scripts/setup-workspace.sh` script
+that:~~
 
-- Clones each module repository into a `workspace/` directory.
-- Generates a top-level `CMakeLists.txt` that uses `add_subdirectory`
-  to include each module.
-- Configures CMake with the appropriate presets.
-- Produces a `compile_commands.json` for clangd consumers.
+- ~~Clones each module repository into a `workspace/` directory.~~
+- ~~Generates a top-level `CMakeLists.txt` that uses `add_subdirectory`
+  to include each module.~~
+- ~~Configures CMake with the appropriate presets.~~
+- ~~Produces a `compile_commands.json` for clangd consumers.~~
 
 The script's success criterion: starting from a fresh clone of the
 meta repository on a system with the required dependencies (Vulkan

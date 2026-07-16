@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.3](https://github.com/liara-engine/liara/compare/v0.0.2...v0.0.3) (2026-07-16)
+
+
+### Features
+
+* **ci:** add commitlint and manifest validation workflows ([2e213b5](https://github.com/liara-engine/liara/commit/2e213b59edb2c56b458d3cff714a6155d3695120))
+
+
+### Bug Fixes
+
+* **docs:** update bootstrap instructions and documentation hosting details ([d3cce51](https://github.com/liara-engine/liara/commit/d3cce5199d4a153994ce2cde48782a727cb1ba05))
+* **release:** add include-component-in-tag option to configuration ([27a17bb](https://github.com/liara-engine/liara/commit/27a17bb111c9e221912cc19d79fc6ef10b51cf3c))
+* **release:** remove release-as version from release-please configuration ([763f156](https://github.com/liara-engine/liara/commit/763f156923db6a3c290c1314e532eaceb1d2e751))
+
 ## [0.0.2](https://github.com/liara-engine/liara/compare/liara-v0.0.1...liara-v0.0.2) (2026-07-13)
 
 

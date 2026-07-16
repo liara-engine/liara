@@ -25,24 +25,28 @@ sudo pacman -S --needed base-devel cmake ninja git vulkan-devel \
     vulkan-validation-layers shaderc clang gcc mold python
 
 # 2. Install vcpkg
-git clone https://github.com/microsoft/vcpkg.git ~/.vcpkg
+git clone [https://github.com/microsoft/vcpkg.git](https://github.com/microsoft/vcpkg.git) ~/.vcpkg
 ~/.vcpkg/bootstrap-vcpkg.sh
 echo 'export VCPKG_ROOT="$HOME/.vcpkg"' >> ~/.zshrc
 echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
 source ~/.zshrc
 
-# 3. Clone the meta repository and bootstrap the workspace
-git clone https://github.com/liara-engine/liara.git
+# 3. Clone the meta repository
+git clone [https://github.com/liara-engine/liara.git](https://github.com/liara-engine/liara.git)
 cd liara
-./scripts/setup-workspace.sh
 
-# 4. Configure and build
-cd workspace
-cmake --preset=linux-release-clang
-cmake --build --preset=linux-release-clang
+# 4. Verify the environment
+./scripts/liara.sh verify # Should succeed with no errors
 
-# 5. Run the demo
-./build/linux-release-clang/launcher/liara_launcher
+# 5. Bootstrap the workspace
+./scripts/liara.sh setup
+
+# 6. Configure, build and test
+./scripts/liara.sh build --preset linux-release-clang
+./scripts/liara.sh test --preset linux-release-clang
+
+# 7. Run the demo
+./scripts/liara.sh launch --preset linux-release-clang
 ```
 
 **On Windows 11:**
@@ -58,18 +62,22 @@ git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
 C:\vcpkg\bootstrap-vcpkg.bat
 [Environment]::SetEnvironmentVariable("VCPKG_ROOT", "C:\vcpkg", "User")
 
-# 4. Clone the meta repository and bootstrap the workspace
+# 4. Clone the meta repository
 git clone https://github.com/liara-engine/liara.git
 cd liara
-.\scripts\setup-workspace.ps1
 
-# 5. Configure and build
-cd workspace
-cmake --preset=windows-release
-cmake --build --preset=windows-release
+# 5. Verify the environment
+.\scripts\liara.ps1 verify # Should succeed with no errors
 
-# 6. Run the demo
-.\build\windows-release\launcher\Release\liara_launcher.exe
+# 6. Bootstrap the workspace
+.\scripts\liara.ps1 setup
+
+# 7. Configure, build and test
+.\scripts\liara.ps1 build --preset windows-release
+.\scripts\liara.ps1 test --preset windows-release
+
+# 8. Run the demo
+.\scripts\liara.ps1 launch --preset windows-release
 ```
 
 If anything fails, the rest of this document explains each step in
@@ -175,21 +183,23 @@ vcpkg --version
 
 ### 2.4 Clone and Bootstrap the Workspace
 
-The meta repository's bootstrap script clones the other repositories
-and configures the workspace:
+The meta repository's unified Python orchestrator clones the other repositories,
+resolves dependencies and configures the workspace:
 
 ```bash
 git clone https://github.com/liara-engine/liara.git
 cd liara
-./scripts/setup-workspace.sh
+./scripts/liara.sh setup
 ```
 
 The script performs:
 
-- Clone of `liara-interfaces`, `liara-core`, `liara-renderer` into
+- Clone or fast-forward update of `liara-interfaces`, `liara-core`, `liara-renderer` into
   `workspace/`.
 - Generation of a top-level `CMakeLists.txt` that includes each
   module via `add_subdirectory()`.
+- Merge of all submodules' dependencies into a single root `workspace/vcpkg.json` manifest.
+- Generation of workspace-level `CMakePresets.json` with pre-defined presets.
 - Initial vcpkg dependency resolution (this can take 10-30 minutes
   on first run; subsequent runs are cached).
 - Generation of `compile_commands.json` for clangd consumers.
@@ -199,12 +209,17 @@ designed to be idempotent: running it twice does not break anything.
 
 ### 2.5 Build and Test
 
-The first build:
+To build and test the project using the orchestrator:
 
 ```bash
-cd workspace
-cmake --preset=linux-release-clang
-cmake --build --preset=linux-release-clang
+# Build the default development preset (linux-debug-clang)
+./scripts/liara.sh build
+
+# Or build with a specific preset
+./scripts/liara.sh build --preset linux-release-clang
+
+# Run the test suite for the compiled preset
+./scripts/liara.sh test --preset linux-release-clang
 ```
 
 The `linux-release-clang` preset is the recommended default for
@@ -215,12 +230,7 @@ development. The other available presets:
 - `linux-release-gcc` — release build with GCC.
 - `linux-release-clang` — release build with Clang. Default.
 
-After a successful build, run the test suite:
-
-```bash
-ctest --preset=linux-debug-clang --output-on-failure
-```
-
+After a successful build, run the test suite.
 If all tests pass, the setup is complete.
 
 ### 2.6 Run the Demo
@@ -229,7 +239,8 @@ The launcher built from the meta repository runs the engine's
 sample scene:
 
 ```bash
-./build/linux-release-clang/launcher/liara_launcher
+# Run the demo with the default preset
+./scripts/liara.sh launch --preset linux-release-clang
 ```
 
 The demo opens a window showing the version-appropriate scene. In
@@ -332,7 +343,7 @@ If `vulkaninfo` does not list a GPU with Vulkan 1.3, the issue is
 GPU drivers. Update from your GPU vendor's website (NVIDIA, AMD,
 Intel) before continuing.
 
-### 3.3 CMake and Git
+### 3.3 CMake, Git and Python
 
 CMake is included with Visual Studio's CMake tools, but a standalone
 CMake 3.29+ is recommended for command-line work:
@@ -353,6 +364,18 @@ Verify:
 ```powershell
 cmake --version    # Must be 3.29 or newer
 git --version
+```
+
+Python is included with Visual Studio, but a standalone Python 3.12+installation is recommended for scripts:
+
+```powershell
+winget install Python.Python.3.12
+```
+
+Verify:
+
+```powershell
+python --version
 ```
 
 ### 3.4 vcpkg
@@ -383,14 +406,15 @@ vcpkg --version
 ### 3.5 Clone and Bootstrap
 
 ```powershell
-git clone https://github.com/liara-engine/liara.git
+git clone [https://github.com/liara-engine/liara.git](https://github.com/liara-engine/liara.git)
 cd liara
-.\scripts\setup-workspace.ps1
+.\scripts\liara.ps1 setup
 ```
 
-The PowerShell version of the bootstrap script does the same as the
-Linux version: clones modules into `workspace\`, generates the
-top-level `CMakeLists.txt`, and resolves vcpkg dependencies.
+The PowerShell wrapper runs the unified Python CLI orchestrator which performs the
+exact same workspace setup as Linux: clones modules into `workspace\`, generates the
+top-level `CMakeLists.txt`, creates the merged `vcpkg.json` manifest, generates presets,
+and runs CMake configure.
 
 If PowerShell refuses to run the script due to execution policy:
 
@@ -403,9 +427,14 @@ Then re-run.
 ### 3.6 Build and Test
 
 ```powershell
-cd workspace
-cmake --preset=windows-release
-cmake --build --preset=windows-release
+# Build the default development preset (windows-release)
+.\scripts\liara.ps1 build
+
+# Or build with a specific preset
+.\scripts\liara.ps1 build --preset windows-debug
+
+# Run tests
+.\scripts\liara.ps1 test --preset windows-debug
 ```
 
 Available Windows presets:
@@ -413,16 +442,14 @@ Available Windows presets:
 - `windows-debug` — debug build, single configuration.
 - `windows-release` — release build. Default for development.
 
-Run tests:
-
-```powershell
-ctest --preset=windows-debug --output-on-failure
-```
+After a successful build, run the test suite. If all tests pass, the
+setup is complete.
 
 ### 3.7 Run the Demo
 
 ```powershell
-.\build\windows-release\launcher\Release\liara_launcher.exe
+# Run the demo with the default preset
+.\scripts\liara.ps1 launch --preset windows-release
 ```
 
 The Visual Studio generator places binaries under a configuration
@@ -464,14 +491,14 @@ extension's `clangd.path` setting if needed.
 ## 4. Verifying the Setup
 
 After completing the platform-specific setup, run the verification
-script provided by the meta repository:
+CLI command provided by the meta repository:
 
 ```bash
 # Linux
-./scripts/verify-environment.sh
+./scripts/liara.sh verify
 
 # Windows
-.\scripts\verify-environment.ps1
+.\scripts\liara.ps1 verify
 ```
 
 The script checks:
@@ -480,11 +507,22 @@ The script checks:
 - `VCPKG_ROOT` is set and points to a valid vcpkg installation.
 - The Vulkan SDK is functional.
 - A trivial CMake project configures successfully.
-- The compile commands database is generated (Linux only).
 
 The script's exit code is the source of truth. If it succeeds, the
 environment is ready. If it fails, the message indicates what is
 missing or misconfigured.
+
+o also check optional but recommended development tools (such as
+`clang-format`, `clang-tidy`, `ccache`, `mold`, etc.), add the
+`--optional` flag:
+
+```bash
+# Linux
+./scripts/liara.sh verify --optional
+
+# Windows
+.\scripts\liara.ps1 verify --optional
+```
 
 ---
 
@@ -551,14 +589,11 @@ CLion's CMake preset support requires the project to be opened at
 the level where `CMakePresets.json` lives. For Liara, this is
 `workspace/`, not the meta repo's root.
 
-If presets still don't appear, regenerate the workspace:
+If presets still don't appear, you can force-regenerate the workspace by re-running the setup step:
 
 ```bash
-./scripts/setup-workspace.sh --force
+./scripts/liara.sh setup
 ```
-
-The `--force` flag wipes and recreates the workspace's
-`CMakeLists.txt` and `CMakePresets.json`.
 
 ### Slow Linker on Linux
 
@@ -716,7 +751,8 @@ winget upgrade --all
 After a major system update, re-run the verification script:
 
 ```bash
-./scripts/verify-environment.sh
+./scripts/liara.sh verify --optional  # Linux
+.\scripts\liara.ps1 verify --optional  # Windows
 ```
 
 ### Updating vcpkg
@@ -741,10 +777,16 @@ When module repositories receive updates, refresh the workspace:
 ```bash
 cd liara
 git pull
-./scripts/setup-workspace.sh
+./scripts/liara.sh setup  # Or .ps1 on Windows
 ```
 
-The bootstrap script `git pull`s each module repository.
+The orchestrator will automatically pull (`git pull`) each module
+repository and update the merged files. If you want to configure
+the workspace without fetching new git changes, you can use:
+
+```bash
+./scripts/liara.sh setup --no-pull  # Or .ps1 on Windows
+```
 
 ### Updating the Vulkan SDK (Windows)
 
@@ -812,7 +854,7 @@ If something in this document does not work as described:
   - Compiler version
   - The exact command that failed
   - The complete error output
-  - The output of `./scripts/verify-environment.sh`
+  - The output of `./scripts/liara.sh verify --optional` (or `.ps1` on Windows)
 
 For general questions about how something works (as opposed to
 "this is broken"), use **GitHub Discussions** on the meta

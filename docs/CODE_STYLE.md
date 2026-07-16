@@ -106,39 +106,41 @@ SpacesBeforeTrailingComments: 2
 # === BRACES ===
 BreakBeforeBraces: Custom
 BraceWrapping:
-  AfterCaseLabel:        false
-  AfterClass:            true
+  AfterCaseLabel: false
+  AfterClass: true
   AfterControlStatement: Never
-  AfterEnum:             true
-  AfterFunction:         false
-  AfterNamespace:        true
-  AfterStruct:           true
-  AfterUnion:            true
-  AfterExternBlock:      false
-  BeforeCatch:           true
-  BeforeElse:            true
-  BeforeWhile:           true
-  IndentBraces:          false
-  SplitEmptyFunction:    false
-  SplitEmptyRecord:      true
-  SplitEmptyNamespace:   true
+  AfterEnum: true
+  AfterFunction: false
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: false
+  BeforeCatch: true
+  BeforeElse: true
+  BeforeWhile: true
+  IndentBraces: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: true
 
 # === SPACING ===
-SpaceAfterCStyleCast:               false
-SpaceAfterLogicalNot:               false
-SpaceAfterTemplateKeyword:          true
-SpaceBeforeAssignmentOperators:     true
-SpaceBeforeCpp11BracedList:         false
-SpaceBeforeCtorInitializerColon:    true
-SpaceBeforeInheritanceColon:        true
-SpaceBeforeParens:                  ControlStatements
-SpaceBeforeRangeBasedForLoopColon:  true
-SpaceInEmptyParentheses:            false
-SpacesInAngles:                     false
-SpacesInContainerLiterals:          false
-SpacesInCStyleCastParentheses:      false
-SpacesInParentheses:                false
-SpacesInSquareBrackets:             false
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpacesInAngles: Never
+SpacesInContainerLiterals: false
+SpacesInSquareBrackets: false
+
+SpacesInParens: Custom
+SpacesInParensOptions:
+  InEmptyParentheses: false
+  InCStyleCasts: false
 
 # === POINTERS & REFERENCES ===
 PointerAlignment: Left      # Type* var
@@ -182,21 +184,24 @@ IncludeCategories:
     SortPriority: 7
 
 # === ALIGNMENT ===
-AlignAfterOpenBracket: Align
-AlignArrayOfStructures: Left
+AlignAfterOpenBracket: true
+AlignArrayOfStructures: Right
 AlignConsecutiveAssignments: false
 AlignConsecutiveBitFields: Consecutive
 AlignConsecutiveDeclarations: false
 AlignConsecutiveMacros: Consecutive
 AlignEscapedNewlines: Left
-AlignOperands: AlignAfterOperator
+AlignOperands: Align
 
 # === BREAK / WRAP ===
-AlwaysBreakAfterReturnType: None
+BreakAfterReturnType: Automatic
+PenaltyReturnTypeOnItsOwnLine: 100000
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: Yes
 BinPackArguments: false
 BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeConceptDeclarations: Always
 BreakBeforeTernaryOperators: true
@@ -210,12 +215,12 @@ AllowShortLambdasOnASingleLine: All
 LambdaBodyIndentation: Signature
 
 # === CONTROL FLOW ===
-AllowShortBlocksOnASingleLine: Empty
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortEnumsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortIfStatementsOnASingleLine: WithoutElse
-AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortEnumsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
 
 # === EMPTY LINES ===
 EmptyLineAfterAccessModifier: Never
@@ -280,7 +285,6 @@ Checks: >
   -bugprone-easily-swappable-parameters,
   -bugprone-narrowing-conversions,
   cert-*,
-  -cert-err58-cpp,
   clang-analyzer-*,
   concurrency-*,
   cppcoreguidelines-*,
@@ -293,7 +297,6 @@ Checks: >
   -cppcoreguidelines-avoid-non-const-global-variables,
   misc-*,
   -misc-non-private-member-variables-in-classes,
-  -misc-no-recursion,
   modernize-*,
   -modernize-use-trailing-return-type,
   -modernize-avoid-c-arrays,
@@ -302,9 +305,10 @@ Checks: >
   readability-*,
   -readability-magic-numbers,
   -readability-identifier-length,
-  -readability-named-parameter,
 
-WarningsAsErrors: ''
+WarningsAsErrors: >
+  *,
+  -readability-identifier-naming
 
 HeaderFilterRegex: '^(src|include)/.*\.(h|hpp|tpp)$'
 
@@ -402,20 +406,20 @@ doesn't distinguish them from real classes.
 The naming conventions are enforced by the clang-tidy
 `readability-identifier-naming` checks listed above. The summary:
 
-| Identifier kind            | Convention      | Example                  |
-|----------------------------|-----------------|--------------------------|
-| Class, struct, enum, union | CamelCase       | `Renderer`, `Transform`  |
-| Namespace                  | CamelCase       | `Liara::Graphics`        |
-| Function, method           | CamelCase       | `CreateInstance`, `GetSize` |
+| Identifier kind            | Convention      | Example                      |
+|----------------------------|-----------------|------------------------------|
+| Class, struct, enum, union | CamelCase       | `Renderer`, `Transform`      |
+| Namespace                  | CamelCase       | `Liara::Graphics`            |
+| Function, method           | CamelCase       | `CreateInstance`, `GetSize`  |
 | Local variable             | camelBack       | `frameCount`, `vertexBuffer` |
-| Function parameter         | camelBack       | `deltaTime`, `windowHandle` |
-| Member variable            | m_CamelCase     | `m_Device`, `m_Pipeline`  |
-| Static constant            | UPPER_CASE      | `MAX_FRAMES_IN_FLIGHT`    |
-| Global constant            | UPPER_CASE      | `DEFAULT_BUFFER_SIZE`     |
-| Macro                      | UPPER_CASE      | `LIARA_ASSERT`            |
-| Enum value                 | CamelCase       | `LightType::Directional`  |
-| Template parameter         | CamelCase       | `TComponent`, `TView`     |
-| Type alias / typedef       | CamelCase       | `EntityHandle`, `MeshPtr` |
+| Function parameter         | camelBack       | `deltaTime`, `windowHandle`  |
+| Member variable            | m_CamelCase     | `m_Device`, `m_Pipeline`     |
+| Static constant            | UPPER_CASE      | `MAX_FRAMES_IN_FLIGHT`       |
+| Global constant            | UPPER_CASE      | `DEFAULT_BUFFER_SIZE`        |
+| Macro                      | UPPER_CASE      | `LIARA_ASSERT`               |
+| Enum value                 | CamelCase       | `LightType::Directional`     |
+| Template parameter         | CamelCase       | `TComponent`, `TView`        |
+| Type alias / typedef       | CamelCase       | `EntityHandle`, `MeshPtr`    |
 
 This style follows the Unreal Engine convention (PascalCase for
 types and methods, m_-prefix for members) and is consistent with the

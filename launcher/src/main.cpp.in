@@ -1,0 +1,45 @@
+/**
+* @file main.cpp
+ * @brief Phase 0 launcher: hello world + ABI version smoke check.
+ */
+
+#include <liara/abi_version.h>
+
+#include <cstdint>
+#include <format>
+#include <iostream>
+
+#include <liara/version.h>
+
+#define LIARA_LAUNCHER_VERSION LIARA_MAKE_VERSION_UNSAFE( \
+    @PROJECT_VERSION_MAJOR@,                              \
+    @PROJECT_VERSION_MINOR@,                              \
+    @PROJECT_VERSION_PATCH@                               \
+)
+
+int main() {
+    std::cout << "Hello from the Liara launcher!\n\n";
+    std::cout << std::format("Launcher version: {}.{}.{} (0x{:08x})\n",
+                             LIARA_VERSION_MAJOR(LIARA_LAUNCHER_VERSION),
+                             LIARA_VERSION_MINOR(LIARA_LAUNCHER_VERSION),
+                             LIARA_VERSION_PATCH(LIARA_LAUNCHER_VERSION),
+                             LIARA_LAUNCHER_VERSION);
+
+    std::cout << std::format("ABI version:      {}.{}.{} (0x{:08x})\n\n",
+                             static_cast<uint32_t>(LIARA_ABI_VERSION_MAJOR),
+                             static_cast<uint32_t>(LIARA_ABI_VERSION_MINOR),
+                             static_cast<uint32_t>(LIARA_ABI_VERSION_PATCH),
+                             LIARA_ABI_VERSION);
+
+    if (liara_abi_version_satisfies(LIARA_MAKE_VERSION_UNSAFE(0, 0, 1))) {
+        std::cout << "Warning: ABI 0.0.1 is supported, but not recommended. Please consider updating to a newer version.\n";
+        std::cout << "         You may experience limited functionality.\n";
+    } else if (liara_abi_version_satisfies(LIARA_MAKE_VERSION_UNSAFE(0, 0, 2))) {
+        std::cout << "You use the recommended ABI version 0.0.2. All features are supported.\n";
+    } else {
+        std::cout << "Error: ABI version is not supported. Please update your Liara installation to a compatible version.\n";
+        return 1;
+    }
+
+    return 0;
+}

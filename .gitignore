@@ -11,3 +11,9 @@ book
 *.swp
 *.swo
 *.DS_Store
+
+workspace/CMakeLists.txt
+workspace/CMakePresets.json
+workspace/compile_commands.json
+workspace/vcpkg.json
+workspace/vcpkg-configuration.json

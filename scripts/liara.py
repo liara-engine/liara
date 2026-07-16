@@ -61,6 +61,27 @@ def version_ge(actual, minimum):
     min_parts = [int(x) for x in minimum.split('.')]
     return actual_parts >= min_parts
 
+# --- Source Discovery -----------------------------------------
+
+def collect_sources(workspace_path):
+    sources = []
+    if not workspace_path.exists():
+        return sources
+
+    for item in workspace_path.iterdir():
+        if item.is_dir() and (item / ".git").exists():
+            # git ls-files command filtered by typical C/C++ extensions
+            code, out = run_cmd(
+                ["git", "-C", str(item), "ls-files", "--", "*.h", "*.hpp", "*.c", "*.cc", "*.cpp", "*.cxx"],
+                capture=True
+            )
+            if code == 0 and out:
+                for line in out.splitlines():
+                    line = line.strip()
+                    if line:
+                        sources.append(str(item / line))
+    return sources
+
 # --- Verification Logic ------------------------------------------------------
 
 def do_verify(args):
@@ -422,6 +443,108 @@ def do_clean(args):
     ok("Clean succeeded!")
 
 
+def do_check(args):
+    script_dir = Path(__file__).resolve().parent
+    workspace = script_dir.parent / "workspace"
+    if not workspace.exists():
+        fatal("No workspace found. Run './liara.py setup' first.")
+
+    preset_to_use = args.preset or DEFAULT_PRESETS[platform.system()]
+    failed_steps = []
+
+    def run_step(name, fn):
+        info(name)
+        if fn():
+            ok(f"{name}: OK")
+        else:
+            warn(f"{name}: FAILED")
+            failed_steps.append(name)
+
+    # Only fetch sources if we are running steps that require them
+    sources = []
+    if not args.no_format or not args.no_tidy:
+        sources = collect_sources(workspace)
+
+    # 1. clang-format
+    if not args.no_format:
+        def step_format():
+            if not has_tool("clang-format"):
+                print("  clang-format not found.", file=sys.stderr)
+                return False
+            if not sources:
+                print("  No C/C++ sources found; nothing to format.")
+                return True
+
+            if args.fix:
+                code, _ = run_cmd(["clang-format", "-i"] + sources)
+                if code == 0:
+                    print(f"  Formatted {len(sources)} file(s).")
+                return code == 0
+            else:
+                code, _ = run_cmd(["clang-format", "--dry-run", "--Werror"] + sources)
+                if code == 0:
+                    print(f"  Checked {len(sources)} file(s).")
+                return code == 0
+
+        run_step("clang-format", step_format)
+
+    # 2. CMake Build
+    if not args.no_build:
+        def step_build():
+            build_dir = workspace / "build" / preset_to_use
+            if not build_dir.exists():
+                info(f"Build directory missing; configuring preset '{preset_to_use}' first")
+                code, _ = run_cmd(["cmake", "-S", str(workspace), "--preset", preset_to_use])
+                if code != 0:
+                    return False
+            code, _ = run_cmd(["cmake", "--build", "--preset", preset_to_use], cwd=workspace)
+            return code == 0
+
+        run_step("build", step_build)
+
+    # 3. clang-tidy
+    if not args.no_tidy:
+        def step_tidy():
+            if not has_tool("clang-tidy"):
+                print("  clang-tidy not found.", file=sys.stderr)
+                return False
+
+            build_dir = workspace / "build" / preset_to_use
+            compile_commands = build_dir / "compile_commands.json"
+            if not compile_commands.exists():
+                print(f"  No compile_commands.json in {build_dir}; configure first.", file=sys.stderr)
+                # On Windows with VS Generators, compile_commands.json isn't generated natively by default.
+                # Highlight that this requires a ninja or compatible generator setup.
+                return False
+
+            tu_sources = [s for s in sources if s.endswith(('.c', '.cc', '.cpp', '.cxx'))]
+            if not tu_sources:
+                print("  No translation units found; nothing for clang-tidy.")
+                return True
+
+            if has_tool("run-clang-tidy"):
+                code, _ = run_cmd(["run-clang-tidy", "-quiet", "-p", str(build_dir)] + tu_sources)
+            else:
+                code, _ = run_cmd(["clang-tidy", "-p", str(build_dir)] + tu_sources)
+            return code == 0
+
+        run_step("clang-tidy", step_tidy)
+
+    # 4. Doctest / CTest
+    if not args.no_tests:
+        def step_tests():
+            code, _ = run_cmd(["ctest", "--preset", preset_to_use], cwd=workspace)
+            return code == 0
+
+        run_step("tests", step_tests)
+
+    print()
+    if not failed_steps:
+        print(f"{Term.BOLD}All checks passed.{Term.RESET}")
+    else:
+        fatal(f"Failed step(s): {', '.join(failed_steps)}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Liara Engine unified CLI orchestrator")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -454,6 +577,15 @@ def main():
     clean_parser = subparsers.add_parser("clean", help="Clean build artifacts")
     clean_parser.add_argument("--preset", help="Override CMake build preset for cleaning")
 
+    # Sub-command: check
+    check_parser = subparsers.add_parser("check", help="Run local quality and build checks (CI-like)")
+    check_parser.add_argument("--preset", help="Override CMake preset to use")
+    check_parser.add_argument("--fix", action="store_true", help="Apply clang-format fixes instead of just checking")
+    check_parser.add_argument("--no-format", action="store_true", help="Skip the clang-format step")
+    check_parser.add_argument("--no-build", action="store_true", help="Skip the build step")
+    check_parser.add_argument("--no-tidy", action="store_true", help="Skip the clang-tidy step")
+    check_parser.add_argument("--no-tests", action="store_true", help="Skip the test step")
+
     args = parser.parse_args()
 
     if args.command == "verify":
@@ -468,6 +600,8 @@ def main():
         do_launch(args)
     elif args.command == "clean":
         do_clean(args)
+    elif args.command == "check":
+        do_check(args)
 
 if __name__ == "__main__":
     main()

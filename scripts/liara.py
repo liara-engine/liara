@@ -321,50 +321,7 @@ def do_setup(args):
     # 4. Generate CMakePresets.json
     info("Generating CMakePresets.json...")
     presets_template = (script_dir / "CMakePresets.json.template")
-    presets_data = {
-        "version": 6,
-        "cmakeMinimumRequired": { "major": 3, "minor": 29, "patch": 0 },
-        "configurePresets": [
-            {
-                "name": "common", "hidden": True,
-                "binaryDir": "${sourceDir}/build/${presetName}",
-                "cacheVariables": {
-                    "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-                    "VCPKG_MANIFEST_FEATURES": "tests",
-                    "LIARA_INTERFACES_BUILD_TESTS": "ON",
-                    "LIARA_CORE_BUILD_TESTS": "ON",
-                    "LIARA_RENDERER_BUILD_TESTS": "ON",
-                    "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-                }
-            },
-            { "name": "linux-base", "hidden": True, "inherits": "common", "generator": "Ninja", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" } },
-            { "name": "windows-base", "hidden": True, "inherits": "common", "generator": "Visual Studio 17 2022", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" } },
-            { "name": "linux-debug-gcc", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" } },
-            { "name": "linux-release-gcc", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" } },
-            { "name": "linux-debug-clang", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" } },
-            { "name": "linux-release-clang", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" } },
-            { "name": "windows-debug", "inherits": "windows-base" },
-            { "name": "windows-release", "inherits": "windows-base" }
-        ],
-        "buildPresets": [
-            { "name": "linux-debug-gcc", "configurePreset": "linux-debug-gcc" },
-            { "name": "linux-release-gcc", "configurePreset": "linux-release-gcc" },
-            { "name": "linux-debug-clang", "configurePreset": "linux-debug-clang" },
-            { "name": "linux-release-clang", "configurePreset": "linux-release-clang" },
-            { "name": "windows-debug", "configurePreset": "windows-debug", "configuration": "Debug" },
-            { "name": "windows-release", "configurePreset": "windows-release", "configuration": "Release" }
-        ],
-        "testPresets": [
-            { "name": "common-test", "hidden": True, "output": { "outputOnFailure": True }, "execution": { "noTestsAction": "error", "stopOnFailure": False } },
-            { "name": "linux-debug-gcc", "configurePreset": "linux-debug-gcc", "inherits": "common-test" },
-            { "name": "linux-release-gcc", "configurePreset": "linux-release-gcc", "inherits": "common-test" },
-            { "name": "linux-debug-clang", "configurePreset": "linux-debug-clang", "inherits": "common-test" },
-            { "name": "linux-release-clang", "configurePreset": "linux-release-clang", "inherits": "common-test" },
-            { "name": "windows-debug", "configurePreset": "windows-debug", "inherits": "common-test", "configuration": "Debug" },
-            { "name": "windows-release", "configurePreset": "windows-release", "inherits": "common-test", "configuration": "Release" }
-        ]
-    }
-    (workspace / "CMakePresets.json").write_text(json.dumps(presets_data, indent=2), encoding="utf-8")
+    (workspace / "CMakePresets.json").write_text(presets_template.read_text(encoding="utf-8"), encoding="utf-8")
 
     # 5. Configure CMake
     preset_to_use = args.preset or DEFAULT_PRESETS[platform.system()]

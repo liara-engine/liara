@@ -115,8 +115,8 @@ when **every** item below is in place.
 
 ### ~~Repositories Created~~
 
-The following repositories exist on the `liara-engine` GitHub
-organization:
+~~The following repositories exist on the `liara-engine` GitHub
+organization:~~
 
 - ~~`liara` (meta)~~
 - ~~`liara-interfaces`~~
@@ -126,10 +126,10 @@ organization:
 - ~~`liara-docs`~~
 - ~~`.github` (organization-level)~~
 
-Each module repository contains a minimal stub: a CMakeLists.txt
+~~Each module repository contains a minimal stub: a CMakeLists.txt
 that compiles, a README that points to the meta repository's docs,
-~~LICENSE~~, .gitignore, .editorconfig, .clang-format, .clang-tidy,
-and a placeholder test that passes.
+LICENSE, .gitignore, .editorconfig, .clang-format, .clang-tidy,
+and a placeholder test that passes.~~
 
 The `liara-editor` and `liara-physics` repositories are **not**
 created in Phase 0. They will be created when their first code is
@@ -218,7 +218,7 @@ expected versions of each module. In Phase 0, all modules are at
 
 Phase 0 is complete when:
 
-- [ ] All listed repositories exist and are configured.
+- [x] All listed repositories exist and are configured.
 - [ ] All listed documents are written.
 - [ ] CI is green on every repository (even if testing only stubs).
 - [x] Documentation is generated and deployed to cloudflare pages.

@@ -10,8 +10,8 @@ project(LiaraLauncher
         LANGUAGES CXX)
 
 configure_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/generated/main.cpp"
+        "${CMAKE_CURRENT_SOURCE_DIR}/include/liara/launcher/config.h.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated/config.h"
         @ONLY)
 
 if(NOT TARGET Liara::Interfaces)
@@ -20,9 +20,25 @@ if(NOT TARGET Liara::Interfaces)
             "workspace superbuild (see scripts/setup-workspace.sh).")
 endif()
 
-add_executable(liara_launcher "${CMAKE_CURRENT_BINARY_DIR}/generated/main.cpp")
+if(NOT TARGET Liara::Renderer)
+    message(FATAL_ERROR
+            "Liara::Renderer is not available. Build the launcher through the "
+            "workspace superbuild (see scripts/setup-workspace.sh).")
+endif()
 
-target_link_libraries(liara_launcher PRIVATE Liara::Interfaces)
+if(NOT TARGET Liara::Core)
+    message(FATAL_ERROR
+            "Liara::Core is not available. Build the launcher through the "
+            "workspace superbuild (see scripts/setup-workspace.sh).")
+endif()
+
+add_executable(liara_launcher "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+
+target_include_directories(liara_launcher PRIVATE
+        "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+target_link_libraries(liara_launcher PRIVATE Liara::Interfaces Liara::Renderer Liara::Core)
 
 set_target_properties(liara_launcher PROPERTIES
         CXX_STANDARD          20

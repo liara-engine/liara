@@ -16,20 +16,20 @@ configure_file(
 
 if(NOT TARGET Liara::Interfaces)
     message(FATAL_ERROR
-            "Liara::Interfaces is not available. Build the launcher through the "
-            "workspace superbuild (see scripts/setup-workspace.sh).")
+            "Liara::Interfaces is not available. Build the launcher through the workspace superbuild "
+            " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP)")
 endif()
 
 if(NOT TARGET Liara::Renderer)
     message(FATAL_ERROR
-            "Liara::Renderer is not available. Build the launcher through the "
-            "workspace superbuild (see scripts/setup-workspace.sh).")
+            "Liara::Renderer is not available. Build the launcher through the workspace superbuild "
+            " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP)")
 endif()
 
 if(NOT TARGET Liara::Core)
     message(FATAL_ERROR
-            "Liara::Core is not available. Build the launcher through the "
-            "workspace superbuild (see scripts/setup-workspace.sh).")
+            "Liara::Core is not available. Build the launcher through the workspace superbuild "
+            " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP)")
 endif()
 
 add_executable(liara_launcher "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")

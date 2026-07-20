@@ -181,7 +181,7 @@ at each repository's root.~~
 
 ### ~~Workspace Bootstrap Working~~
 
-~~The meta repository contains a `scripts/setup-workspace.sh` script
+~~The meta repository contains a `scripts/liara.py` script
 that:~~
 
 - ~~Clones each module repository into a `workspace/` directory.~~
@@ -192,7 +192,7 @@ that:~~
 
 The script's success criterion: starting from a fresh clone of the
 meta repository on a system with the required dependencies (Vulkan
-SDK, CMake, vcpkg, compilers), running `./scripts/setup-workspace.sh`
+SDK, CMake, vcpkg, compilers), running `./scripts/liara.py`
 produces a buildable workspace in under five minutes.
 
 ### ~~Documentation Hub Live~~

@@ -157,7 +157,7 @@ Each one becomes its own branch, opened in a coordinated sequence.
 ### Stage 3: Open a Branch and Code
 
 The contributor creates a branch from `main`, makes the changes,
-and runs `./scripts/check.sh` locally before pushing. The script
+and runs `./scripts/liara.py check` locally before pushing. The script
 runs the same checks the CI runs (clang-format, clang-tidy, tests,
 build) and fails fast on the same issues.
 
@@ -394,20 +394,46 @@ the in-progress history.
 
 ## 10. Testing Your Changes
 
-### The Local Check Script
+### The Local CLI
 
-`./scripts/check.sh` is the canonical pre-push check. It runs:
+The project provides a unified command-line interface through the platform wrappers:
 
-- `clang-format --dry-run` on all source files.
-- `clang-tidy` on changed files.
-- The `[unit]` test suite.
-- A debug build of all modules.
+- `./liara.sh <command>` on Linux/macOS
+- `./liara.ps1 <command>` on Windows
 
-The script's exit code is the source of truth: zero means the CI
-will probably pass; non-zero means the CI will probably fail.
+These wrappers invoke the common Python orchestration tool and provide a consistent developer workflow across platforms.
 
-Running this script before pushing is recommended but not enforced.
-The CI is the actual gatekeeper.
+For pre-push validation, use:
+
+```bash
+# On Linux
+./liara.sh check
+
+# On Windows
+./liara.ps1 check
+```
+
+By default, the `check` command performs the following steps:
+
+- Runs `clang-format` in verification mode on all tracked C/C++ source files.
+- Runs `clang-tidy` using the workspace compilation database.
+- Builds the workspace using the selected CMake preset.
+- Executes the complete CTest test suite.
+
+The command supports several options to customize its behavior:
+
+- `--fix` automatically applies clang-format changes instead of only reporting them.
+- `--no-format` skips the formatting check.
+- `--no-tidy` skips the clang-tidy analysis.
+- `--no-build` skips the build step.
+- `--no-tests` skips the test suite.
+- `--preset <name>` overrides the default CMake preset.
+
+The command exits with status code `0` only if every enabled step succeeds. A non-zero exit code indicates that at least
+one check failed.
+
+Running `liara.sh` check before pushing is recommended but not enforced. The CI remains the authoritative gatekeeper
+for validating contributions.
 
 ### What to Test
 

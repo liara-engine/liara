@@ -203,7 +203,6 @@ The hub:
 - ~~Includes the shared navbar (consumed from `docs-shared`).~~
 - ~~Provides a version dropdown (initially listing only `dev`).~~
 - ~~Provides a module dropdown (listing the four initial modules).~~
-- ~~Links to each module's documentation on its respective `gh-pages`.~~
 
 In Phase 0, the linked module documentation pages may be empty
 placeholders. The point is that the navigation infrastructure works.
@@ -211,8 +210,7 @@ placeholders. The point is that the navigation infrastructure works.
 ### Compatibility Matrix Initialized
 
 The meta repository contains `compatibility.toml` listing the
-expected versions of each module. In Phase 0, all modules are at
-0.0.0 and the matrix entry is a single combination.
+expected versions of each module.
 
 ### Definition of Done for Phase 0
 
@@ -230,9 +228,6 @@ Phase 0 is complete when:
       Windows 11 machine with Visual Studio 2022.
 - [ ] An ADR exists for each major decision: multi-repo layout, C
       ABI interfaces, ECS-from-scratch, Vulkan-Hpp, etc.
-
-When all boxes are checked, the meta repository is tagged `v0.0.0`
-and Phase 0 ends.
 
 ---
 

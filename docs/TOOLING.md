@@ -36,6 +36,7 @@ The tools used by the project, at a glance:
 | Conventional commits  | commitlint (Husky-free, in CI)               |
 | CI                    | GitHub Actions                               |
 | Container registry    | GitHub Container Registry (for build images) |
+| Scripts               | Bash, Python                                 |
 
 Each tool is justified in its respective section below. Tools listed
 here are the only ones used; introducing a new tool requires an ADR.
@@ -258,8 +259,8 @@ repository name, source directories to scan. Fails if formatting is
 incorrect or if clang-tidy reports new warnings.
 
 **`reusable-docs.yml`**: Doxygen generation, integration with
-`docs-shared` navbar, and gh-pages deployment. Inputs: repository
-name, target directory in gh-pages (`dev`, `vX.Y.Z`).
+`docs-shared` navbar, and cloudflare-pages deployment. Inputs: repository
+name, target directory in cloudflare-pages (`dev`, `vX.Y.Z`).
 
 **`reusable-release.yml`**: release-please integration. Inputs:
 repository name, release-type (one of `cmake-cpp`, `simple`).

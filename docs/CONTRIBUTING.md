@@ -63,8 +63,7 @@ in [`BOOTSTRAP.md`](BOOTSTRAP.md). The summary:
 1. Install the system dependencies (Vulkan SDK, CMake 3.29+,
    compilers, vcpkg).
 2. Clone the meta repository.
-3. Run `./scripts/setup-workspace.sh`.
-4. Configure CMake with a preset.
+3. Run `./scripts/liara.sh setup` (Linux) or `./scripts/liara.ps1 setup` (Windows) to bootstrap the workspace.
 
 A successful setup ends with a built engine and passing tests. If
 any step fails, the contribution starts there: fix the setup, then
@@ -256,10 +255,8 @@ solo maintenance.
 Issues are triaged with labels:
 
 - `priority:critical` — blocks the current milestone.
-- `priority:high` — should be addressed in the current minor
-  version.
-- `priority:medium` — should be addressed in the current major
-  version line.
+- `priority:high` — should be addressed in the current milestone.
+- `priority:medium` — should be addressed eventually.
 - `priority:low` — nice to have.
 - `status:needs-info` — waiting for the reporter to provide more
   details.

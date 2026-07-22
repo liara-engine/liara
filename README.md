@@ -76,16 +76,14 @@ ship a small 3D game without feeling cheated.
 ## Quick Start
 
 Build the engine and run the demo (assuming you have Arch Linux
-with Vulkan SDK and CMake 3.29+):
+with all required dependencies installed):
 
 ```bash
 git clone https://github.com/liara-engine/liara.git
 cd liara
-./scripts/setup-workspace.sh
-cd workspace
-cmake --preset=linux-release-clang
-cmake --build --preset=linux-release-clang
-./build/linux-release-clang/launcher/liara_launcher
+./scripts/liara.sh setup --preset linux-release-clang
+./scripts/liara.sh build --preset linux-release-clang
+./scripts/liara.sh launch --preset linux-release-clang
 ```
 
 For Windows, or for the full setup procedure, see

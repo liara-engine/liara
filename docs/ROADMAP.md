@@ -113,6 +113,29 @@ environment in which engine code can be productively written.
 Phase 0 is treated as a single, atomic unit. It is "complete" only
 when **every** item below is in place.
 
+### The Phase 0 Exemption
+
+The processes described in [CONTRIBUTING.md](CONTRIBUTING.md), [TOOLING.md](TOOLING.md)
+and [INTERFACES.md](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/book/INTERFACES)
+are the target processes: they describe how the project operates once its infrastructure exists. During Phase 0, that
+infrastructure is the work, and subjecting its own construction to it would be circular and needlessly heavy.
+
+Concretely, until Phase 0 is closed:
+
+- Replacing a planned tool or mechanism with a better one discovered during implementation, or dropping one that turned
+    out to be unrealistic, does not require an ADR. It requires updating the document that described it.
+- The documents written before implementation are drafts, not contracts. Where implementation and document disagree,
+    the implementation is presumed right and the document is corrected — unless review concludes the opposite.
+- Interfaces, workflows, scripts and schemas may change shape without the version ceremony described in INTERFACES.md.
+- The ADRs written at the end of Phase 0 record the decisions as they ended up, not the sequence of intermediate
+    positions that produced them.
+
+This is what the zero in "Phase 0" means: nothing is fixed yet. Phase 0 is where the plan meets the tools, and the tools
+sometimes win.
+
+What the exemption does not cover is the Definition of Done. Its items may be reworded as understanding improves, but
+they are not waived. The permissiveness is about how an item is reached, not whether it is.
+
 ### ~~Repositories Created~~
 
 ~~The following repositories exist on the `liara-engine` GitHub

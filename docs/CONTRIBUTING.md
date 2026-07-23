@@ -490,6 +490,9 @@ An ADR is **not** required for:
 When in doubt, write the ADR. ADRs are cheap to produce; missing
 context is expensive to recover later.
 
+The only exception to these rules is the bootstrapping phase (v0), where the project is still forming its architecture.
+See section 4 of `ROADMAP.md` for the bootstrapping phase's ADR policy.
+
 ### ADR Format
 
 ADRs follow the Michael Nygard format:

@@ -41,6 +41,9 @@ The tools used by the project, at a glance:
 Each tool is justified in its respective section below. Tools listed
 here are the only ones used; introducing a new tool requires an ADR.
 
+The only exception to the ADR rule is for the bootstrapping phase (v0).
+See section 4 of `ROADMAP.md` for the bootstrapping phase's ADR policy.
+
 ---
 
 ## 2. Build System

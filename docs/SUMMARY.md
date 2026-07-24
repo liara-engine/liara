@@ -6,4 +6,5 @@
 - [Contributing](CONTRIBUTING.md)
 - [Code Style](CODE_STYLE.md)
 - [Tooling](TOOLING.md)
+- [Documentation Pipeline](DOCUMENTATION_PIPELINE.md)
 - [License](LICENSE.md)

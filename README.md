@@ -96,22 +96,26 @@ For Windows, or for the full setup procedure, see
 The project documentation is structured as separate documents, each
 focused on one aspect:
 
-| Document                                                                                                        | Purpose                                       |
-|-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
-| [`ARCHITECTURE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ARCHITECTURE) | Foundational design, philosophy, principles   |
-| [`MODULES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/MODULES)           | Concrete module decomposition and boundaries  |
-| [`ROADMAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ROADMAP)           | Phase 0 → v2.0 milestones with exit criteria  |
-| [`CONTRIBUTING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CONTRIBUTING) | Daily workflow: branches, PRs, reviews        |
-| [`CODE_STYLE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CODE_STYLE)     | C++ conventions, clang-format, clang-tidy     |
-| [`TOOLING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/TOOLING)           | CI/CD, build, vcpkg, releases, docs           |
-| [`BOOTSTRAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP)       | Setting up Arch and Windows for development   |
+| Document                                                                                                                            | Purpose                                      |
+|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| [`ARCHITECTURE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ARCHITECTURE)                     | Foundational design, philosophy, principles  |
+| [`MODULES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/MODULES)                               | Concrete module decomposition and boundaries |
+| [`ROADMAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ROADMAP)                               | Phase 0 → v2.0 milestones with exit criteria |
+| [`CONTRIBUTING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CONTRIBUTING)                     | Daily workflow: branches, PRs, reviews       |
+| [`CODE_STYLE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CODE_STYLE)                         | C++ conventions, clang-format, clang-tidy    |
+| [`TOOLING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/TOOLING)                               | CI/CD, build, vcpkg, releases, docs          |
+| [`BOOTSTRAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP)                           | Setting up Arch and Windows for development  |
+| [`DOCUMENTATION_PIPELINE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/DOCUMENTATION_PIPELINE) | How the docs are built and deployed          |
 
 Interface design rules live in their own document, in the
 `liara-interfaces` repository:
 [`INTERFACES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/book/INTERFACES).
 
-User-facing documentation (tutorials, guides) is hosted at
+Documentation of the whole project can be found at
 [liara-engine.liara-engine-documentation.workers.dev](https://liara-engine.liara-engine-documentation.workers.dev/).
+
+User-facing documentation (tutorials, guides) is hosted at
+TODO: add link when section is ready.
 
 For newcomers, the recommended reading order is the sequence above,
 top to bottom.
@@ -132,6 +136,7 @@ liara-engine/
 ├── liara-editor           # Editor application (post-v1.0).
 ├── liara-physics          # Physics module (post-v1.0).
 ├── docs-shared            # Shared documentation templates.
+├── liara-docs             # Documentation for the engine.
 └── .github                # Organization-level workflows and templates.
 ```
 

@@ -564,6 +564,8 @@ break), the recommended reading order is:
 6. **[`INTERFACES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/book/INTERFACES)** (in the
    `liara-interfaces` repo) — required reading before modifying anything
    that crosses a module boundary.
+7. **[`DOCUMENTATION_PIPELINE.md`](DOCUMENTATION_PIPELINE.md)** — required reading before modifying any
+   documentation.
 
 Reading the entire codebase before contributing is not necessary. Reading
 this document, however, is.

@@ -76,7 +76,7 @@ The repository contains, at minimum:
   packaging script, and any other distribution artifacts.
 - A `schemas/` directory containing JSON schemas for any file formats defined
   at the meta level.
-- A `docker/` directory containing any Dockerfiles for development or CI.
+- A `docker/` directory containing any Dockerfiles (and associated scripts) used for development or CI.
 
 ### What It Does Not Contain
 
@@ -115,7 +115,9 @@ must wrap them at their public surface to expose only the C interface.
 
 ### Contents
 
-The repository contains exclusively C headers, organized by module:
+The repository contains exclusively C headers, organized by module.
+
+A possible layout of the headers is (the real layout may differ):
 
 ```
 include/liara/
@@ -245,7 +247,9 @@ gameplay code. No tools.
 
 ### Internal Organization
 
-The core's internal directory layout follows the categories above:
+The core's internal directory layout follows the categories above.
+
+A possible layout is (the real layout may differ):
 
 ```
 src/
@@ -335,6 +339,8 @@ handle). No asset loading from disk (the renderer receives prepared
 asset data from the core's asset manager). No input handling.
 
 ### Internal Organization
+
+A possible layout of the renderer's internal source tree is (the real layout may differ):
 
 ```
 src/

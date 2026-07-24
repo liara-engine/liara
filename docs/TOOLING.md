@@ -531,7 +531,9 @@ The accepted types are:
 ### Scopes
 
 Scopes identify the area of the project a commit affects. In a
-multi-repo layout, scopes correspond to subsystems within a module:
+multi-repo layout, scopes correspond to subsystems within a module.
+
+Some examples of possible scopes (not exhaustive):
 
 In `liara-core`:
 - `ecs`, `math`, `assets`, `logger`, `settings`, `events`, `loop`,

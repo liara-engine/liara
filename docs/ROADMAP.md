@@ -230,11 +230,6 @@ The hub:
 In Phase 0, the linked module documentation pages may be empty
 placeholders. The point is that the navigation infrastructure works.
 
-### Compatibility Matrix Initialized
-
-The meta repository contains `compatibility.toml` listing the
-expected versions of each module.
-
 ### Definition of Done for Phase 0
 
 Phase 0 is complete when:
@@ -245,7 +240,7 @@ Phase 0 is complete when:
 - [x] Documentation is generated and deployed to cloudflare pages.
 - [x] The hub at `liara-engine.liara-engine-documentation.workers.dev`
       is accessible and renders with the navbar.
-- [ ] The workspace bootstrap script runs successfully on a clean
+- [x] The workspace bootstrap script runs successfully on a clean
       Arch Linux machine.
 - [ ] The workspace bootstrap script runs successfully on a clean
       Windows 11 machine with Visual Studio 2022.
@@ -307,6 +302,55 @@ management.
 - [ ] User-facing documentation includes a "Build Hello Triangle"
       page.
 - [ ] Compatibility matrix updated.
+
+---
+
+## v0.1.x — The Composition Tool (Experimental)
+
+This is not a numbered milestone of its own; it is a developer tool that
+becomes useful the moment more than one module has independently moving
+versions, which is as soon as v0.1 ships. It is introduced here, early,
+in a deliberately minimal form.
+
+### Rationale
+
+Modules version independently. Very quickly, the question "does core 0.2
+still work against renderer 0.1?" stops being answerable by reading and
+starts needing to be run. Rebuilding every combination from source to
+answer it is slow; the whole point of publishing shared-library artifacts
+(`TOOLING.md` §9) is that a combination can instead be assembled from
+precompiled binaries in seconds.
+
+### Scope (experimental form)
+
+A script — living in the meta repository's `scripts/` — that, given a
+set of module versions, downloads the matching released artifacts,
+validates the combination against each module's `manifest.json`
+(`abi_compatibility`), assembles them into a runnable layout next
+to the launcher, and reports whether the combination is ABI-consistent
+before anything is run.
+
+This form is for the developer. It is allowed to be rough: a command-line
+tool, minimal error prettiness, Linux-first. It reads the same manifests
+the documentation navbar already consumes, which makes those manifests
+the single machine-readable source of truth for compatibility — and is
+the reason the project does not maintain a separate `compatibility.toml`.
+
+### Out of Scope (deferred to the complete form)
+
+- Any user-facing polish: interactive selection, friendly diagnostics, a
+curated "known-good" catalog.
+
+- Producing a distributable package from a composed set (that is packaging, v0.6).
+
+- Windows parity beyond "it runs".
+
+### Definition of Done (experimental)
+- [ ] Given explicit module versions, the tool fetches the matching release artifacts
+      and their manifests.
+- [ ] It rejects an ABI-incompatible combination with a clear message, before assembly.
+- [ ] It assembles a compatible combination into a layout the launcher can run against.
+- [ ] It works on Linux for the developer's own workflow.
 
 ---
 
@@ -646,6 +690,17 @@ A simple sample game is written for the demo: a small interactive
 the first end-to-end test of "user can build and ship a game with
 Liara".
 
+The composition tool introduced experimentally after v0.1 reaches its
+complete, user-facing form here. Building on the experimental script,
+it gains: interactive selection of module versions from what is actually
+published, human-readable diagnostics when a combination is rejected,
+a curated set of known-good combinations, and Windows parity. This is
+what lets a user with a specific need — an older renderer for a specific
+GPU, a pinned core for reproducibility — assemble a working engine without
+building from source. It reuses the release artifacts (`TOOLING.md` §9)
+and the same manifest-based validation as the experimental form; the
+difference is polish and reach, not mechanism.
+
 ### Internal Developer Tools
 
 This version is where the developer tools' release-build behavior is
@@ -688,6 +743,8 @@ the only developer-facing tool that ships with the runtime.
 - [ ] Release diagnostics panel works and is reachable through the
       documented key combination.
 - [ ] User documentation includes "Distributing Your Game".
+- [ ] The composition tool assembles a user-selected combination
+      on both Linux and Windows, with clear diagnostics for rejected combinations.
 
 ---
 

@@ -249,33 +249,65 @@ The alternatives are:
 ### Workflow Catalog
 
 The `.github` repo contains workflows under
-`.github/workflows/reusable-*.yml`. The current catalog:
+`.github/workflows/reusable-*.yml`. The current catalog, grouped by concern:
 
-**`reusable-build-and-test.yml`**: the canonical build-and-test
-matrix. Inputs: which repository to build (the caller passes its
-own name), CMake preset to use, whether to run tests, whether to
-collect coverage. Outputs: build artifacts, test results, coverage
-files.
+#### Build and quality
 
-**`reusable-lint.yml`**: clang-format and clang-tidy checks. Inputs:
-repository name, source directories to scan. Fails if formatting is
-incorrect or if clang-tidy reports new warnings.
+- `reusable-build-and-test.yml` — the canonical build-and-test
+matrix. Inputs: the calling repository's name, the CMake preset,
+whether to run tests, whether to collect coverage. Builds each module
+and the workspace, runs the test suite, uploads artifacts.
 
-**`reusable-docs.yml`**: Doxygen generation, integration with
-`docs-shared` navbar, and cloudflare-pages deployment. Inputs: repository
-name, target directory in cloudflare-pages (`dev`, `vX.Y.Z`).
+- `reusable-lint.yml` — clang-format (diff check) and clang-tidy.
+Inputs: repository name, source directories. Fails on any formatting
+diff or new clang-tidy warning.
 
-**`reusable-release.yml`**: release-please integration. Inputs:
-repository name, release-type (one of `cmake-cpp`, `simple`).
-Produces release PRs and, when merged, tags releases.
+- `reusable-shared-dynamic.yml` — builds the modules as shared
+libraries and links the launcher against them, proving the "designed
+for dynamic, implemented as static" property is not silently violated.
 
-**`reusable-sonarcloud.yml`**: SonarCloud analysis. Inputs:
-repository name, SonarCloud project key. Requires a token configured
-as an organization secret.
+#### Interface integrity (`liara-interfaces` only)
 
-Each consuming repository has a small workflow file
-(`.github/workflows/ci.yml`) that calls these reusable workflows.
-The consuming workflows are short, typically under 30 lines.
+- `reusable-abi-header-portability.yml` — every public header compiles standalone,
+warning-free, as C and C++ across several language standards.
+
+- `reusable-abi-interface-rules.yml` — enforces the naming and shape rules from INTERFACES.md.
+
+- `reusable-abi-layout-freeze.yml` — freezes struct layouts against a generated golden
+header, catching accidental ABI-breaking layout changes.
+
+- `reusable-abi-snapshot.yml` — snapshots the ABI surface and diffs it against the PR base
+to compute the required version bump.
+
+- `reusable-abi-report.yml` — aggregates the four ABI checks into a single sticky PR comment.
+
+#### Documentation
+
+- `reusable-build-docs.yml` / `reusable-deploy-docs.yml` — build the docs in
+the builder image and publish them to `liara-docs`. Composed by `reusable-docs.yml.`
+
+- `reusable-docs-preview.yml` — builds a per-PR documentation preview and
+posts its URL as a sticky comment.
+
+#### Release and housekeeping
+
+- `reusable-commitlint.yml` — validates conventional-commit format on every PR.
+
+- `reusable-validate-manifest.yml` — validates each module's `manifest.json` against
+its schema and checks that the release-please target version exists in it.
+
+- `reusable-generate-docker.yml` — builds and pushes a Docker image (used for the
+documentation builder).
+
+- `clean-ghcr` / preview-tag workflows — prune untagged container images and stale preview tags.
+
+Release automation itself (release-please) is invoked directly from each repository
+rather than through a reusable workflow; see §9.
+
+[Planned additions, general-purpose, targeted for Phase 0 completion: an automated
+dependency-update workflow (Renovate or Dependabot) to keep GitHub Action pins and
+the vcpkg baseline current, and a CodeQL security scan. A SonarCloud analysis workflow
+is also planned but deferred; see §7.]
 
 ### Versioning the Reusable Workflows
 
@@ -291,9 +323,9 @@ silently breaks every module's CI on every push.
 
 ## 5. CI Pipelines
 
-Each module repository has its own CI pipeline in
-`.github/workflows/ci.yml`. The pipeline calls the reusable workflows
-for the actual work; the per-module file just configures the inputs.
+Each module repository has its own CI in `.github/workflows/`, split into
+small workflow files (build, lint, docs, commitlint, release) that call
+the reusable workflows. The per-module files just configure inputs.
 
 ### Triggers
 
@@ -355,8 +387,9 @@ The following checks are required to merge a PR:
 - clang-format produces no diff.
 - clang-tidy produces no new warnings.
 - doctest tests all pass.
+- The ABI checks pass (`liara-interfaces` only)
 - Coverage does not decrease (with a configurable tolerance).
-- SonarCloud quality gate passes.
+- SonarCloud quality gate passes. [When `reusable-sonarcloud.yml` is implemented.]
 
 Documentation generation is not a required check (a doc-only failure
 should not block code merges); it runs but only reports.
@@ -600,17 +633,53 @@ merging. Manual edits are possible but rare; the discipline of
 writing good commit messages produces good changelog entries
 automatically.
 
-### Compatibility Matrix Updates
+### Release Artifacts
 
-When a release happens in any module, the meta repository's
-`compatibility.toml` may need updating. This is **not** automated;
-the developer manually adds an entry when promoting a combination of
-module versions to "tested together".
+When release-please merges a release PR and creates a GitHub Release
+for a module, a follow-up workflow builds that module's binaries and
+attaches them to the release. This turns every module release into a
+set of consumable, precompiled artifacts rather than a source-only tag.
 
-This explicit step exists because not every release is meant to be
-rolled into a meta repository release. A patch release of
-`liara-renderer` may or may not warrant a new entry in the matrix,
-and the human is the right judge of that.
+#### What is published, per module release:
+
+- The compiled library, for each supported platform and toolchain: Linux/GCC,
+Linux/Clang, Windows/MSVC.
+
+- Both the static and the shared build of the library, so that a consumer can
+choose to link statically or to compose a runtime from shared modules.
+
+- The module's public headers.
+
+- The module's `manifest.json` for the released version, which records its ABI
+compatibility. This is the machine-readable record a composition step reads
+to validate a combination (see below and ROADMAP.md).
+
+- A checksum file (SHA-256) covering every artifact in the release.
+
+#### What triggers it:
+
+The workflow runs on the release published event, keyed to the tag
+release-please created. It does not run on every push: only tagged
+releases produce artifacts, which keeps storage bounded and makes
+"a released version" and "a set of downloadable binaries" the same thing.
+
+#### Naming:
+
+Artifacts follow a stable, parseable convention:
+`liara-<module>-<version>-<platform>-<toolchain>-<linkage>.<ext>`
+(for example `liara-core-0.3.1-linux-clang-shared.tar.zst`,
+`liara-renderer-0.3.0-windows-msvc-static.zip`). The convention
+is stable because the composition tooling parses it; a change to
+it is a breaking change to that tooling.
+
+#### What is deliberately not here:
+
+These are per-module artifacts, not a bundled engine. Assembling a
+specific set of module versions into a runnable engine — for compatibility
+testing, or for a user with a specific need — is the job of the composition
+script, which consumes these artifacts rather than producing them. It is
+described in `ROADMAP.md`, not here, because it is a developer/user tool
+rather than CI infrastructure.
 
 ---
 

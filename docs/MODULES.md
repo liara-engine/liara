@@ -70,8 +70,6 @@ The repository contains, at minimum:
 - A `scripts/` directory containing the workspace bootstrap script,
   release coordination scripts, and any other tooling that operates
   across repositories.
-- A `compatibility.toml` file that lists, for each release of the
-  meta repository, which versions of which modules are bundled together.
 - A `packaging/` directory containing the Linux `PKGBUILD`, the Windows
   packaging script, and any other distribution artifacts.
 - A `schemas/` directory containing JSON schemas for any file formats defined
@@ -90,9 +88,8 @@ in the `liara-docs` repository.
 
 The meta repository uses its own version number, distinct from the
 versions of the modules it bundles. A release of `liara` 1.0.0 corresponds
-to a specific combination of `liara-core`, `liara-renderer`, etc.,
-specified in `compatibility.toml`. The user-visible "Liara Engine 1.0.0"
-refers to a release of this repository.
+to a specific combination of `liara-core`, `liara-renderer`, etc.
+The user-visible "Liara Engine 1.0.0" refers to a release of this repository.
 
 The meta repository's versioning follows the engine's milestone roadmap.
 Module repositories version independently, on their own cadence.
@@ -683,10 +680,7 @@ The process for introducing a new module to the project is:
    map (section 1), the dependency graph (section 9), and the
    cross-reference (section 11).
 
-6. **Update the compatibility matrix.** The meta repository's
-   `compatibility.toml` learns about the new module.
-
-7. **Update the launcher (if applicable).** If the new module is part
+6. **Update the launcher (if applicable).** If the new module is part
    of the standalone runtime, the launcher composes it into the loop.
 
 The cost of adding a module is intentionally non-trivial. Modules

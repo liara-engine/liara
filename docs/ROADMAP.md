@@ -264,10 +264,14 @@ Every subsequent version is "just" adding features.
 ### Scope
 
 The launcher (in the `liara` meta repository) initializes the core
-module, which in turn initializes the renderer module via the C
-interface, which renders a single hardcoded triangle to a window and
-presents it. The window has a standard close button that triggers a
-graceful shutdown propagated through the core to the renderer.
+and the renderer independently through the C interface, checks their
+interface versions for compatibility, and composes them: it drives
+the core's per-tick step and mediates the render packets the core
+produces to the renderer, which renders a single hardcoded triangle
+to a window and presents it. The window has a standard close button
+that triggers a graceful shutdown propagated through the core to the 
+
+enderer.
 
 The triangle is hardcoded in the launcher: three vertices, a vertex
 shader, a fragment shader. There is no ECS yet, no asset loader, no

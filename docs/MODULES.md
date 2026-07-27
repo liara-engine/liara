@@ -230,10 +230,17 @@ that advances the simulation by one tick, along with the helper
 functions that the launcher (or the editor, in editor mode) uses to
 build a complete loop.
 
-**The module loader.** The code that, at static-link time, registers
-each compiled-in module's entry points and verifies their interface
-versions. This is the seed for what will become a runtime dynamic
-loader if the project ever moves to DSO modules.
+**Module lifecycle primitives.** The core exposes, through the C interface,
+the entry points a host needs to drive it: creation, destruction, and the
+per-tick step. It does not load, register, or hold references to other
+modules. Composition — deciding which renderer (or other module) to pair
+with the core, checking their interface versions against each other, and
+wiring them together — is the host's responsibility (the launcher today,
+the editor post-v1.0). The core is handed whatever it needs through its
+interface; it never reaches for a sibling module by name. The
+version-negotiation logic the host uses at composition time is the seed
+for what becomes a runtime dynamic loader if the project moves to DSO
+modules — but that loader lives in the host, not in the core.
 
 ### What It Does Not Contain
 
@@ -258,7 +265,6 @@ src/
 ├── signal/
 ├── events/
 ├── loop/
-├── modules/
 └── platform/
     ├── linux/
     └── windows/
@@ -584,28 +590,27 @@ this frame. The packet contains, at minimum:
 This data is plain-old-data and does not retain ownership: once the
 renderer has consumed the packet, it may discard it.
 
-### Core → Renderer (lifecycle)
+### Renderer lifecycle (host-driven)
 
-At startup, the core hands the renderer a native window handle (HWND,
-Wayland surface, X11 window) and configuration parameters (preferred
-GPU, validation layer enable, etc.). The renderer initializes itself
-and reports success or failure.
+The host creates and destroys the renderer, and the core, independently,
+through their respective C interfaces. At startup the host supplies the
+renderer with the native window handle and GPU configuration; at
+shutdown it requests the renderer to flush and release resources. The
+core never creates, owns, or directly calls the renderer.
 
-At shutdown, the core requests the renderer to flush in-flight work and
-release resources.
+### Resource upload (host-mediated)
 
-### Core → Renderer (resources)
+When the core loads an asset, it exposes the CPU-side data and a stable
+handle through its interface. The host passes that data to the renderer
+for GPU upload and associates the handle with the resulting GPU resource.
+Subsequent render packets reference the asset by handle. The data path
+is core → host → renderer; there is no direct core → renderer call.
 
-When an asset is loaded by the core, it is uploaded to the GPU via a
-renderer call. The core hands the renderer the CPU-side data and a
-stable handle; the renderer associates the GPU-side resource with the
-handle. Subsequent draw calls reference the asset by handle.
+### Renderer → host (callbacks)
 
-### Renderer → Core (callbacks)
-
-The renderer reports events back to the core: surface lost, swapchain
-resized, GPU error. These are reported through callback functions
-registered by the core at renderer init.
+The renderer reports events — surface lost, swapchain resized, GPU
+error — through callbacks the host registers at renderer init. The
+host decides how to propagate these to the core.
 
 ### Core → Editor (post-v1)
 

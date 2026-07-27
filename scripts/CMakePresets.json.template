@@ -20,8 +20,8 @@
     { "name": "linux-release-gcc", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" } },
     { "name": "linux-debug-clang", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" } },
     { "name": "linux-release-clang", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" } },
-    { "name": "windows-debug", "inherits": "windows-base" },
-    { "name": "windows-release", "inherits": "windows-base" }
+    { "name": "windows-debug", "inherits": "windows-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" } },
+    { "name": "windows-release", "inherits": "windows-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" } }
   ],
 
   "buildPresets": [

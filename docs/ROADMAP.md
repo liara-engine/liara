@@ -246,6 +246,9 @@ Phase 0 is complete when:
       Windows 11 machine with Visual Studio 2022.
 - [ ] An ADR exists for each major decision: multi-repo layout, C
       ABI interfaces, ECS-from-scratch, Vulkan-Hpp, etc.
+- [ ] Every module builds as a shared library (`BUILD_SHARED_LIBS=ON`)
+      with hidden default visibility and an explicit export macro,
+      and the launcher links and runs against the shared build.
 
 ---
 
@@ -254,9 +257,9 @@ Phase 0 is complete when:
 The first real version of the engine. The goal is not to render
 something impressive; the goal is to **prove that the modular pipeline
 works end to end**. Every architectural decision is exercised: the C
-interfaces, the module loader, the renderer module's Vulkan
-initialization, the launcher's composition of core and renderer, the
-cross-platform build.
+interfaces, the host's composition and version negotiation of the
+modules, the renderer module's Vulkan initialization, the launcher's
+composition of core and renderer, the cross-platform build.
 
 If v0.1 ships, the project's hardest architectural risk is behind it.
 Every subsequent version is "just" adding features.
@@ -298,9 +301,10 @@ management.
 - [ ] A window appears with a triangle rendered in it.
 - [ ] The window is closable and the application shuts down cleanly.
 - [ ] No Vulkan validation errors are reported in debug builds.
-- [ ] The interface version negotiation between core and renderer
-      is exercised: a contrived major-version mismatch produces a
-      clear error and refuses to load.
+- [ ] The interface version negotiation between core and renderer is
+      exercised through the runtime-loading path: a contrived major-version
+      mismatch is detected at load time, produces a clear error, and
+      refuses to load — no crash, no silent mismatch.
 - [ ] Tests pass on all platforms.
 - [ ] User-facing documentation includes a "Build Hello Triangle"
       page.

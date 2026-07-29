@@ -4,8 +4,10 @@
  */
 
 #include <liara/abi_version.h>
+#include <liara/modules.h>
 
 #include <cstdint>
+#include <dlfcn.h>
 #include <format>
 #include <iostream>
 
@@ -15,103 +17,137 @@
 
 #include "config.h"
 
+/*
+ * @brief Minimum ABI version required for this launcher.
+ *
+ * This constant defines the minimum ABI version required for this launcher to function correctly.
+ * It is used to check if the current Liara installation meets the minimum requirements for compatibility.
+ *
+ * @note This constant needs to be updated to constantly reflect the minimum ABI version required for this launcher.
+ */
+constexpr uint32_t MIN_ABI_VERSION = LIARA_MAKE_VERSION_UNSAFE(0, 1, 1);
+static_assert(LIARA_ABI_VERSION >= MIN_ABI_VERSION, "Liara ABI version is too old for this launcher. Please update your Liara installation.");
+
+constexpr float DEMO_DURATION_SECONDS = 8.0F;
 
 int main() {
-    bool rendererAvailable = false;
-    bool coreAvailable = false;
-
     std::cout << "Hello from the Liara launcher!\n\n";
-    std::cout << std::format("Launcher version: {}.{}.{} (0x{:08x})\n",
-                             LIARA_VERSION_MAJOR(LIARA_LAUNCHER_VERSION),
-                             LIARA_VERSION_MINOR(LIARA_LAUNCHER_VERSION),
-                             LIARA_VERSION_PATCH(LIARA_LAUNCHER_VERSION),
+    std::cout << std::format("Launcher version: {} (0x{:08x})\n",
+                             LIARA_LAUNCHER_VERSION_STRING,
                              LIARA_LAUNCHER_VERSION);
 
-    std::cout << std::format("ABI version:      {}.{}.{} (0x{:08x})\n\n",
-                             static_cast<uint32_t>(LIARA_ABI_VERSION_MAJOR),
-                             static_cast<uint32_t>(LIARA_ABI_VERSION_MINOR),
-                             static_cast<uint32_t>(LIARA_ABI_VERSION_PATCH),
+    std::cout << std::format("ABI version:      {} (0x{:08x})\n\n",
+                             LIARA_ABI_VERSION_STR,
                              LIARA_ABI_VERSION);
 
-    if (liara_abi_version_satisfies(LIARA_MAKE_VERSION_UNSAFE(0, 0, 1))) {
-        std::cout << "Warning: ABI 0.0.1 is supported, but not recommended. Please consider updating to a newer version.\n";
-        std::cout << "         You may experience limited functionality.\n";
-    } else if (liara_abi_version_satisfies(LIARA_MAKE_VERSION_UNSAFE(0, 1, 0))) {
-        std::cout << "You use the recommended ABI version 0.1.0. All features are supported.\n";
-
-        if (liara_version_satisfies(liara_renderer_abi_version(), LIARA_MAKE_VERSION_UNSAFE(0, 1, 0))) {
-            rendererAvailable = true;
-            std::cout << std::format("Renderer {}.{}.{} is available and compatible with ABI 0.1.0.\n",
-                                     static_cast<uint32_t>(LIARA_VERSION_MAJOR(liara_renderer_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_MINOR(liara_renderer_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_PATCH(liara_renderer_version())));
-        } else {
-            std::cout << std::format("Error: Renderer {}.{}.{} is not compatible with ABI 0.1.0. Please update your Liara installation to a compatible version.\n",
-                                     static_cast<uint32_t>(LIARA_VERSION_MAJOR(liara_renderer_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_MINOR(liara_renderer_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_PATCH(liara_renderer_version())));
-            return 1;
-        }
-
-        if (liara_version_satisfies(liara_core_abi_version(), LIARA_MAKE_VERSION_UNSAFE(0, 1, 0))) {
-            coreAvailable = true;
-            std::cout << std::format("Core {}.{}.{} is available and compatible with ABI 0.1.0.\n",
-                                     static_cast<uint32_t>(LIARA_VERSION_MAJOR(liara_core_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_MINOR(liara_core_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_PATCH(liara_core_version())));
-        } else {
-            std::cout << std::format("Error: Core {}.{}.{} is not compatible with ABI 0.1.0. Please update your Liara installation to a compatible version.\n",
-                                     static_cast<uint32_t>(LIARA_VERSION_MAJOR(liara_core_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_MINOR(liara_core_version())),
-                                     static_cast<uint32_t>(LIARA_VERSION_PATCH(liara_core_version())));
-            return 1;
-        }
-
-    } else {
-        std::cout << std::format("Error: ABI version {}.{}.{} is not supported. Please update your Liara installation to a compatible version.\n",
-                                 static_cast<uint32_t>(LIARA_VERSION_MAJOR(LIARA_ABI_VERSION)),
-                                 static_cast<uint32_t>(LIARA_VERSION_MINOR(LIARA_ABI_VERSION)),
-                                 static_cast<uint32_t>(LIARA_VERSION_PATCH(LIARA_ABI_VERSION)));
+#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+    void* coreHandle = dlopen("libliara_core.so", RTLD_LAZY);
+    if (coreHandle == nullptr) {
+        std::cout << std::format("Error: Failed to load Liara core library ({}).\n", dlerror());
         return 1;
     }
 
-    if (coreAvailable && rendererAvailable)
-    {
-        std::cout << "\nLaunching core...\n";
-
-        liara_renderer_handle_t* renderer = nullptr;
-        liara_renderer_create(&renderer);
-        if (renderer == nullptr) {
-            std::cout << "Error: Failed to create renderer instance.\n";
-            return 1;
-        }
-
-        liara_core_handle_t* core = nullptr;
-        liara_core_create(renderer, &core);
-        if (core == nullptr) {
-            std::cout << "Error: Failed to create core instance.\n";
-            liara_renderer_destroy(renderer);
-            return 1;
-        }
-
-        // Set a late update callback to stop the core after 5 seconds
-        liara_core_set_late_update_callback(core, [](liara_core_handle_t* lambdaCore, float deltaTime) {
-            static float elapsedTime = 0.0F;
-            elapsedTime += deltaTime;
-            if (elapsedTime >= 5.0F) {
-                std::cout << "5 seconds elapsed. Stopping core...\n";
-                liara_core_stop(lambdaCore);
-            }
-        });
-
-        liara_core_set_run_mode(core, LIARA_CORE_RUN_MODE_FIXED, 0.016F);
-        liara_core_run(core);
-
-        liara_core_destroy(core);
-        liara_renderer_destroy(renderer);
-
-        std::cout << "Core finished. Exiting launcher.\n";
+    void* rendererHandle = dlopen("libliara_renderer.so", RTLD_LAZY);
+    if (rendererHandle == nullptr) {
+        std::cout << std::format("Error: Failed to load Liara renderer library ({}).\n", dlerror());
+        dlclose(coreHandle);
+        return 1;
     }
 
+    typedef const liara_module_info_t* (*ModuleInfoFunc)();
+    const auto liara_core_info = reinterpret_cast<ModuleInfoFunc>(dlsym(coreHandle, "liara_core_info"));
+    const auto liara_renderer_info = reinterpret_cast<ModuleInfoFunc>(dlsym(rendererHandle, "liara_renderer_info"));
+
+    if (liara_core_info == nullptr || liara_renderer_info == nullptr) {
+        std::cout << std::format("Error: Failed to retrieve module information ({}).\n", dlerror());
+        dlclose(coreHandle);
+        dlclose(rendererHandle);
+        return 1;
+    }
+
+    std::cout << "Liara core and renderer libraries loaded successfully.\n";
+#endif
+
+    bool error = false;
+    for (const auto& module : {liara_renderer_info(), liara_core_info()}) {
+        if (module != nullptr) {
+            if (liara_version_compat_t const COMPAT = liara_abi_is_compatible(module->abi_version); COMPAT == LIARA_VERSION_COMPAT_EXACT || COMPAT == LIARA_VERSION_COMPAT_COMPATIBLE) {
+                std::cout << std::format("{} {} is available and compatible (ABI {}).\n",
+                                         module->module_name,
+                                         module->module_version_str,
+                                         module->abi_version_str);
+            } else if (COMPAT == LIARA_VERSION_COMPAT_DEGRADED) {
+                std::cout << std::format("Warning: {} {} is degraded with ABI {}. Some features may not work as expected. We highly recommend updating your Liara installation to a compatible version.\n",
+                                         module->module_name,
+                                         module->module_version_str,
+                                         module->abi_version_str);
+            } else {
+                std::cout << std::format("Error: {} {} is not compatible with ABI {}. Please update your Liara installation to a compatible version.\n",
+                                         module->module_name,
+                                         module->module_version_str,
+                                         module->abi_version_str);
+                error = true;
+            }
+        } else {
+            std::cout << "Error: Failed to retrieve module information.\n";
+            error = true;
+        }
+    }
+
+    if (error) {
+        std::cout << "\nError: Required modules are not available or compatible. Exiting launcher.\n";
+#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+        dlclose(coreHandle);
+        dlclose(rendererHandle);
+#endif
+        return 1;
+    }
+
+#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+    std::cout << "\nDynamic module loading: ABI compatibility smoke test passed.\n";
+    dlclose(coreHandle);
+    dlclose(rendererHandle);
     return 0;
+#else
+
+    liara_renderer_handle_t* renderer = nullptr;
+    if (liara_renderer_create(&renderer) != LIARA_RESULT_SUCCESS || renderer == nullptr) {
+        std::cout << "Error: Failed to create renderer instance.\n";
+        return 1;
+    }
+
+    liara_core_handle_t* core = nullptr;
+    if (liara_core_create(renderer, &core) != LIARA_RESULT_SUCCESS || core == nullptr) {
+        std::cout << "Error: Failed to create core instance.\n";
+        liara_renderer_destroy(renderer);
+        return 1;
+    }
+
+    static liara_renderer_handle_t* s_activeRenderer = renderer;
+
+    liara_core_set_late_update_callback(core, [](liara_core_handle_t* lambdaCore, float deltaTime) {
+        static float elapsedSeconds = 0.0F;
+        elapsedSeconds += deltaTime;
+
+        liara_render_packet_t packet{};
+        if (liara_core_get_render_packet(lambdaCore, &packet) == LIARA_RESULT_SUCCESS) {
+            liara_renderer_submit_frame(s_activeRenderer, &packet);
+        }
+
+        if (elapsedSeconds >= DEMO_DURATION_SECONDS) {
+            std::cout << "\033[2J\033[H";
+            std::cout << std::format("\n{} seconds elapsed. Stopping core...\n", DEMO_DURATION_SECONDS);
+            liara_core_stop(lambdaCore);
+        }
+    });
+
+    liara_core_set_run_mode(core, LIARA_CORE_RUN_MODE_FIXED, 1.0F / 60.0F);
+    liara_core_run(core);
+
+    liara_core_destroy(core);
+    liara_renderer_destroy(renderer);
+
+    std::cout << "Core finished. Exiting launcher.\n";
+    return 0;
+#endif
 }

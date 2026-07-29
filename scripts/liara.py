@@ -298,6 +298,9 @@ def do_setup(args):
         "        message(STATUS \"Using ccache as the compiler cache: ${CCACHE_EXECUTABLE}\")\n"
         "    endif()\n"
         "endif()\n"
+        "if(DEFINED LIARA_LAUNCHER_MODULE_LOADING AND LIARA_LAUNCHER_MODULE_LOADING STREQUAL \"runtime\")\n"
+        "    message(WARNING \"Experimental feature: LIARA_LAUNCHER_MODULE_LOADING=runtime is enabled. The launcher will load the modules at runtime. This feature is experimental and may not work as expected.\")\n"
+        "endif()\n"
     )
     (workspace / "CMakeLists.txt").write_text(cmake_content, encoding="utf-8")
 

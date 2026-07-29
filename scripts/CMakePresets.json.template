@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 10,
   "cmakeMinimumRequired": { "major": 3, "minor": 29, "patch": 0 },
 
   "configurePresets": [
@@ -11,41 +11,73 @@
         "LIARA_INTERFACES_BUILD_TESTS": "ON",
         "LIARA_CORE_BUILD_TESTS": "ON",
         "LIARA_RENDERER_BUILD_TESTS": "ON",
+        "LIARA_INTERFACES_INSTALL": "ON",
+        "LIARA_CORE_INSTALL": "ON",
+        "LIARA_RENDERER_INSTALL": "ON",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
     { "name": "linux-base", "hidden": true, "inherits": "common", "generator": "Ninja", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" } },
     { "name": "windows-base", "hidden": true, "inherits": "common", "generator": "Visual Studio 17 2022", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" } },
-    { "name": "linux-debug-gcc", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" } },
-    { "name": "linux-release-gcc", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" } },
-    { "name": "linux-debug-clang", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" } },
-    { "name": "linux-release-clang", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release", "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" } },
-    { "name": "linux-debug-gcc-dynamic", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++", "BUILD_SHARED_LIBS": "ON", "LIARA_LAUNCHER_MODULE_LOADING": "runtime" } },
-    { "name": "linux-debug-clang-dynamic", "inherits": "linux-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++", "BUILD_SHARED_LIBS": "ON", "LIARA_LAUNCHER_MODULE_LOADING": "runtime" } },
-    { "name": "windows-debug", "inherits": "windows-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" } },
-    { "name": "windows-release", "inherits": "windows-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" } },
-    { "name": "windows-debug-dynamic", "inherits": "windows-base", "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug", "BUILD_SHARED_LIBS": "ON", "LIARA_LAUNCHER_MODULE_LOADING": "runtime" } }
+
+    { "name": "gcc", "hidden": true, "cacheVariables": { "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" } },
+    { "name": "clang", "hidden": true, "cacheVariables": { "CMAKE_C_COMPILER": "clang", "CMAKE_CXX_COMPILER": "clang++" } },
+
+    { "name": "debug", "hidden": true, "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }, "warnings": { "deprecated": true } },
+    { "name": "release", "hidden": true, "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }, "errors": { "deprecated": true } },
+
+    { "name": "static", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "OFF", "LIARA_LAUNCHER_MODULE_LOADING": "link" } },
+    { "name": "link", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "ON", "LIARA_LAUNCHER_MODULE_LOADING": "link" } },
+    { "name": "runtime", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "ON", "LIARA_LAUNCHER_MODULE_LOADING": "runtime" } },
+
+    { "name": "linux-debug-gcc", "hidden": false, "inherits": [ "linux-base", "debug", "gcc", "static" ] },
+    { "name": "linux-debug-gcc-link", "hidden": false, "inherits": [ "linux-base", "debug", "gcc", "link" ] },
+    { "name": "linux-debug-gcc-dynamic", "hidden": false, "inherits": [ "linux-base", "debug", "gcc", "runtime" ] },
+
+    { "name": "linux-debug-clang", "hidden": false, "inherits": [ "linux-base", "debug", "clang", "static" ] },
+    { "name": "linux-debug-clang-link", "hidden": false, "inherits": [ "linux-base", "debug", "clang", "link" ] },
+    { "name": "linux-debug-clang-dynamic", "hidden": false, "inherits": [ "linux-base", "debug", "clang", "runtime" ] },
+
+    { "name": "linux-release-gcc", "hidden": false, "inherits": [ "linux-base", "release", "gcc", "static" ] },
+    { "name": "linux-release-gcc-link", "hidden": false, "inherits": [ "linux-base", "release", "gcc", "link" ] },
+
+    { "name": "linux-release-clang", "hidden": false, "inherits": [ "linux-base", "release", "clang", "static" ] },
+    { "name": "linux-release-clang-link", "hidden": false, "inherits": [ "linux-base", "release", "clang", "link" ] },
+
+    { "name": "windows-debug", "hidden": false, "inherits": [ "windows-base", "debug" ] },
+    { "name": "windows-debug-link", "hidden": false, "inherits": [ "windows-base", "debug", "link" ] },
+    { "name": "windows-debug-dynamic", "hidden": false, "inherits": [ "windows-base", "debug", "runtime" ] },
+    { "name": "windows-release", "hidden": false, "inherits": [ "windows-base", "release" ] },
+    { "name": "windows-release-link", "hidden": false, "inherits": [ "windows-base", "release", "link" ] }
   ],
 
   "buildPresets": [
-    { "name": "linux-debug-gcc", "configurePreset": "linux-debug-gcc" },
-    { "name": "linux-release-gcc", "configurePreset": "linux-release-gcc" },
-    { "name": "linux-debug-clang", "configurePreset": "linux-debug-clang" },
-    { "name": "linux-release-clang", "configurePreset": "linux-release-clang" },
-    { "name": "linux-debug-gcc-dynamic", "configurePreset": "linux-debug-gcc-dynamic" },
-    { "name": "linux-debug-clang-dynamic", "configurePreset": "linux-debug-clang-dynamic" },
-    { "name": "windows-debug", "configurePreset": "windows-debug", "configuration": "Debug" },
-    { "name": "windows-release", "configurePreset": "windows-release", "configuration": "Release" },
-    { "name": "windows-debug-dynamic", "configurePreset": "windows-debug-dynamic", "configuration": "Debug" }
+    { "name": "common-build", "hidden": true, "configurePreset": "common" },
+
+    { "name": "linux-debug-gcc", "configurePreset": "linux-debug-gcc-link", "inherits": "common-build" },
+    { "name": "linux-debug-clang", "configurePreset": "linux-debug-clang-link", "inherits": "common-build" },
+    { "name": "linux-release-gcc", "configurePreset": "linux-release-gcc-link", "inherits": "common-build" },
+    { "name": "linux-release-clang", "configurePreset": "linux-release-clang-link", "inherits": "common-build" },
+    { "name": "windows-debug", "configurePreset": "windows-debug", "inherits": "common-build" },
+    { "name": "windows-release", "configurePreset": "windows-release", "inherits": "common-build" },
+
+    { "name": "linux-debug-gcc-dynamic", "configurePreset": "linux-debug-gcc-dynamic", "inherits": "common-build" },
+    { "name": "linux-debug-clang-dynamic", "configurePreset": "linux-debug-clang-dynamic", "inherits": "common-build" },
+    { "name": "windows-debug-dynamic", "configurePreset": "windows-debug-dynamic", "inherits": "common-build" }
   ],
 
   "testPresets": [
-    { "name": "common-test", "hidden": true, "output": { "outputOnFailure": true }, "execution": { "noTestsAction": "error", "stopOnFailure": false } },
-    { "name": "linux-debug-gcc", "configurePreset": "linux-debug-gcc", "inherits": "common-test" },
-    { "name": "linux-release-gcc", "configurePreset": "linux-release-gcc", "inherits": "common-test" },
-    { "name": "linux-debug-clang", "configurePreset": "linux-debug-clang", "inherits": "common-test" },
-    { "name": "linux-release-clang", "configurePreset": "linux-release-clang", "inherits": "common-test" },
-    { "name": "windows-debug", "configurePreset": "windows-debug", "inherits": "common-test", "configuration": "Debug" },
-    { "name": "windows-release", "configurePreset": "windows-release", "inherits": "common-test", "configuration": "Release" }
-  ]
+    { "name": "common-test", "hidden": true, "configurePreset": "common", "output": { "outputOnFailure": true}, "execution": { "jobs": 0, "stopOnFailure": false }},
+
+    { "name": "linux-debug-gcc", "configurePreset": "linux-debug-gcc-link", "inherits": "common-test" },
+    { "name": "linux-debug-clang", "configurePreset": "linux-debug-clang-link", "inherits": "common-test" },
+    { "name": "linux-release-gcc", "configurePreset": "linux-release-gcc-link", "inherits": "common-test" },
+    { "name": "linux-release-clang", "configurePreset": "linux-release-clang-link", "inherits": "common-test" },
+    { "name": "windows-debug", "configurePreset": "windows-debug", "inherits": "common-test" },
+    { "name": "windows-release", "configurePreset": "windows-release", "inherits": "common-test" }
+  ],
+
+  "packagePresets": [],
+
+  "workflowPresets": []
 }

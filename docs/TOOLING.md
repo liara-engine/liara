@@ -112,24 +112,6 @@ This file is also the foundation for clang-tidy, code coverage tools,
 and SonarCloud's analysis. It is never committed to the repository
 but must always be available locally.
 
-### Modules-Optional Build
-
-The previous engine experimented with C++20 modules. This experiment
-showed that GCC's module support remains unstable in 2026, while
-MSVC and Clang are usable. To avoid having a build that fails on
-some compilers, the new project follows a different strategy:
-
-- The reference build uses traditional headers, on all platforms.
-- A separate experimental preset (`linux-release-clang-modules`,
-  `windows-release-modules`) builds with modules where supported.
-- The CI runs the reference build on all platforms but runs the
-  modules-experimental build only on the platforms where it is known
-  to work.
-
-This avoids the situation where every contributor needs to debug
-GCC's module bugs to land a small fix. Modules can be re-evaluated
-when toolchain support is uniform.
-
 ---
 
 ## 3. Dependency Management
@@ -194,7 +176,7 @@ introduction of a dedicated ADR.
 ### Dependency List by Module
 
 Each module's `vcpkg.json` declares only that module's direct
-dependencies. The current expected list:
+dependencies. The current list (progressively built up in v0.x) is:
 
 **`liara-interfaces`**: no dependencies.
 

@@ -16,6 +16,7 @@
 #include <liara/version.h>
 
 #include "config.h"
+#include "liara/renderer/packet.h"
 
 /*
  * @brief Minimum ABI version required for this launcher.
@@ -25,7 +26,7 @@
  *
  * @note This constant needs to be updated to constantly reflect the minimum ABI version required for this launcher.
  */
-constexpr uint32_t MIN_ABI_VERSION = LIARA_MAKE_VERSION_UNSAFE(0, 1, 1);
+constexpr uint32_t MIN_ABI_VERSION = LIARA_MAKE_VERSION_UNSAFE(0, 2, 0);
 static_assert(LIARA_ABI_VERSION >= MIN_ABI_VERSION, "Liara ABI version is too old for this launcher. Please update your Liara installation.");
 
 constexpr float DEMO_DURATION_SECONDS = 8.0F;
@@ -117,7 +118,7 @@ int main() {
     }
 
     liara_core_handle_t* core = nullptr;
-    if (liara_core_create(renderer, &core) != LIARA_RESULT_SUCCESS || core == nullptr) {
+    if (liara_core_create(&core) != LIARA_RESULT_SUCCESS || core == nullptr) {
         std::cout << "Error: Failed to create core instance.\n";
         liara_renderer_destroy(renderer);
         return 1;

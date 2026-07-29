@@ -716,20 +716,6 @@ yay -S tracy
 Liara's profiling integration with Tracy is planned for v1.x and is
 not yet active.
 
-### Git Hooks (Optional)
-
-The project does not enforce client-side git hooks (see `TOOLING.md`
-section 8 for the rationale), but a contributor who wants
-client-side checks can install the optional hooks shipped in
-`scripts/hooks/`:
-
-```bash
-./scripts/install-hooks.sh
-```
-
-This installs hooks that run `clang-format` and `commitlint` before
-commits. The CI does the same checks server-side regardless.
-
 ---
 
 ## 7. Updating the Setup

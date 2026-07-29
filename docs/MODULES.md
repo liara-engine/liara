@@ -71,7 +71,7 @@ The repository contains, at minimum:
   release coordination scripts, and any other tooling that operates
   across repositories.
 - A `packaging/` directory containing the Linux `PKGBUILD`, the Windows
-  packaging script, and any other distribution artifacts.
+  packaging script, and any other distribution artifacts [in 0.6].
 - A `schemas/` directory containing JSON schemas for any file formats defined
   at the meta level.
 - A `docker/` directory containing any Dockerfiles (and associated scripts) used for development or CI.

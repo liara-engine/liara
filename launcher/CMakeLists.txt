@@ -66,3 +66,4 @@ set_target_properties(liara_launcher PROPERTIES
         CXX_EXTENSIONS        OFF)
 
 add_test(NAME launcher_smoke COMMAND liara_launcher)
+set_tests_properties(launcher_smoke PROPERTIES LABELS "integration;slow")

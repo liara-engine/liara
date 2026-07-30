@@ -29,7 +29,6 @@
     "versions": {
       "type": "array",
       "description": "Ordered list of versions. The order is preserved in the version selector dropdown. The first entry is expected to be the current development version.",
-      "additionalProperties": false,
 
       "items": {
         "type": "object",

@@ -34,7 +34,6 @@
       "items": {
         "type": "object",
         "required": ["label", "note"],
-        "additionalProperties": false,
 
         "properties": {
           "label": {
@@ -52,6 +51,7 @@
           "modules": {
             "type": "object",
             "description": "Mapping of module keys to their documentation URLs for this version. The module keys should match those defined in the modules registry. This is used to populate the 'Documentation' dropdown in the navbar for each version.",
+            "additionalProperties": false,
             "properties": {
               "user": {
                 "type": "string",

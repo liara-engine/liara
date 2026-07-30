@@ -266,10 +266,6 @@ arguments don't fit on one line, each goes on its own line. This is
 slightly more verbose but produces clean, readable diffs when an
 argument is added or removed.
 
-**`AllowShortFunctionsOnASingleLine: Empty`** — only empty functions
-collapse to one line. Single-statement functions get their own
-lines, for consistency.
-
 ---
 
 ## 4. clang-tidy Configuration

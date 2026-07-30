@@ -54,25 +54,21 @@
             "properties": {
               "user": {
                 "type": "string",
-                "format": "uri-reference",
                 "description": "Example: 'liara-core/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
               },
 
               "renderer": {
                 "type": "string",
-                "format": "uri-reference",
                 "description": "Example: 'liara-renderer/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
               },
 
               "abi": {
                 "type": "string",
-                "format": "uri-reference",
                 "description": "Example: 'liara-interfaces/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
               },
 
               "core": {
                 "type": "string",
-                "format": "uri-reference",
                 "description": "Example: 'liara-core/dev/book/'. This is a URI reference that will be resolved against the base URL of the documentation site to find the module's documentation for this version."
               }
             }

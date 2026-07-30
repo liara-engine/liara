@@ -286,10 +286,9 @@ documentation builder).
 Release automation itself (release-please) is invoked directly from each repository
 rather than through a reusable workflow; see §9.
 
-[Planned additions, general-purpose, targeted for Phase 0 completion: an automated
-dependency-update workflow (Renovate or Dependabot) to keep GitHub Action pins and
-the vcpkg baseline current, and a CodeQL security scan. A SonarCloud analysis workflow
-is also planned but deferred; see §7.]
+Renovate has been added to the organization, and each repository has a `renovate.json`.
+
+[A SonarCloud analysis workflow is also planned but deferred; see §7.]
 
 ### Versioning the Reusable Workflows
 
@@ -417,6 +416,9 @@ Tests are tagged by category, allowing selective execution:
   with results recorded but not gating.
 - `[slow]`: tests that take more than a few hundred milliseconds.
   Excluded by default to keep the fast feedback loop fast.
+- `[cross-lang]`: tests that exercise the C API from a non
+  C/C++ language (Python, Rust, etc.). Run only in CI configurations
+  that have the language's toolchain installed.
 
 A developer running tests locally typically runs `[unit]` only; CI
 runs everything except `[gpu]`.
@@ -460,8 +462,8 @@ percentage shown is the average across all modules.
 
 Code formatting is enforced by clang-format 18+. The configuration
 lives in `.clang-format` at the root of each repository. The
-configuration is identical across repositories and is reviewed for
-changes via the org-level `.github` repo's templates.
+configuration is identical across repositories (except for `liara-interfaces`,
+which has a C-only configuration for its C headers).
 
 The CI runs `clang-format --dry-run --Werror` on every C++ source
 file. Any deviation fails the build. There is no "format on save and

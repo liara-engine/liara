@@ -47,7 +47,7 @@ skimmed:
 4. This document — the workflow.
 5. [`CODE_STYLE.md`](CODE_STYLE.md) — only when actually writing
    code.
-6. [`INTERFACES.md`](https://github.com/liara-engine/liara-interfaces/blob/main/INTERFACES.md)
+6. [`INTERFACES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/book/INTERFACES)
    — only when modifying anything in `liara-interfaces`.
 
 Reading the entire codebase is not necessary. Reading the documents
@@ -156,7 +156,7 @@ Each one becomes its own branch, opened in a coordinated sequence.
 ### Stage 3: Open a Branch and Code
 
 The contributor creates a branch from `main`, makes the changes,
-and runs `./scripts/liara.py check` locally before pushing. The script
+and runs `./scripts/liara.sh check` locally before pushing. The script
 runs the same checks the CI runs (clang-format, clang-tidy, tests,
 build) and fails fast on the same issues.
 
@@ -395,8 +395,8 @@ the in-progress history.
 
 The project provides a unified command-line interface through the platform wrappers:
 
-- `./liara.sh <command>` on Linux/macOS
-- `./liara.ps1 <command>` on Windows
+- `./scripts/liara.sh <command>` on Linux/macOS
+- `./scripts/liara.ps1 <command>` on Windows
 
 These wrappers invoke the common Python orchestration tool and provide a consistent developer workflow across platforms.
 
@@ -404,10 +404,10 @@ For pre-push validation, use:
 
 ```bash
 # On Linux
-./liara.sh check
+./scripts/liara.sh check
 
 # On Windows
-./liara.ps1 check
+./scripts/liara.ps1 check
 ```
 
 By default, the `check` command performs the following steps:

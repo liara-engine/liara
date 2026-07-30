@@ -223,12 +223,20 @@ To build and test the project using the orchestrator:
 ```
 
 The `linux-release-clang` preset is the recommended default for
-development. The other available presets:
+most users. The available presets:
 
 - `linux-debug-gcc` — debug build with GCC.
-- `linux-debug-clang` — debug build with Clang.
+- `linux-debug-clang` — debug build with Clang. Script default.
 - `linux-release-gcc` — release build with GCC.
-- `linux-release-clang` — release build with Clang. Default.
+- `linux-release-clang` — release build with Clang.
+- `windows-debug` — debug build with MSVC (Windows only).
+- `windows-release` — release build with MSVC (Windows only).
+
+There is also some experimental presets. Not recommended for general use:
+
+- `linux-debug-gcc-dynamic` — debug build with GCC, runtime dynamic linking of dependencies.
+- `linux-debug-clang-dynamic` — debug build with Clang, runtime dynamic linking of dependencies.
+- `windows-debug-dynamic` — debug build with MSVC, runtime dynamic linking of dependencies.
 
 After a successful build, run the test suite.
 If all tests pass, the setup is complete.

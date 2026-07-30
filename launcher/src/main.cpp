@@ -7,9 +7,27 @@
 #include <liara/modules.h>
 
 #include <cstdint>
-#include <dlfcn.h>
 #include <format>
 #include <iostream>
+
+#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+    #ifdef _WIN32
+        #include <windows.h>
+        typedef HMODULE LibHandle;
+        #define LIB_LOAD(path) LoadLibraryA(path)
+        #define LIB_GET_SYMBOL(handle, name) GetProcAddress(handle, name)
+        #define LIB_FREE(handle) FreeLibrary(handle)
+        #define LIB_ERROR() std::to_string(GetLastError())
+    #else
+        #include <dlfcn.h>
+        #include <string>
+        using LibHandle = void *;
+        #define LIB_LOAD(path) dlopen(path, RTLD_LAZY)
+        #define LIB_GET_SYMBOL(handle, name) dlsym(handle, name)
+        #define LIB_FREE(handle) dlclose(handle)
+        #define LIB_ERROR() std::string(dlerror())
+    #endif
+#endif
 
 #include <liara/core/core.h>
 #include <liara/renderer/renderer.h>
@@ -42,27 +60,27 @@ int main() {
                              LIARA_ABI_VERSION);
 
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
-    void* coreHandle = dlopen("libliara_core.so", RTLD_LAZY);
+    LibHandle coreHandle = LIB_LOAD("libliara_core.so");
     if (coreHandle == nullptr) {
-        std::cout << std::format("Error: Failed to load Liara core library ({}).\n", dlerror());
+        std::cout << std::format("Error: Failed to load Liara core library ({}).\n", LIB_ERROR());
         return 1;
     }
 
-    void* rendererHandle = dlopen("libliara_renderer.so", RTLD_LAZY);
+    LibHandle rendererHandle = LIB_LOAD("libliara_renderer.so");
     if (rendererHandle == nullptr) {
-        std::cout << std::format("Error: Failed to load Liara renderer library ({}).\n", dlerror());
-        dlclose(coreHandle);
+        std::cout << std::format("Error: Failed to load Liara renderer library ({}).\n", LIB_ERROR());
+        LIB_FREE(coreHandle);
         return 1;
     }
 
     typedef const liara_module_info_t* (*ModuleInfoFunc)();
-    const auto liara_core_info = reinterpret_cast<ModuleInfoFunc>(dlsym(coreHandle, "liara_core_info"));
-    const auto liara_renderer_info = reinterpret_cast<ModuleInfoFunc>(dlsym(rendererHandle, "liara_renderer_info"));
+    const auto liara_core_info = reinterpret_cast<ModuleInfoFunc>(LIB_GET_SYMBOL(coreHandle, "liara_core_info"));
+    const auto liara_renderer_info = reinterpret_cast<ModuleInfoFunc>(LIB_GET_SYMBOL(rendererHandle, "liara_renderer_info"));
 
     if (liara_core_info == nullptr || liara_renderer_info == nullptr) {
-        std::cout << std::format("Error: Failed to retrieve module information ({}).\n", dlerror());
-        dlclose(coreHandle);
-        dlclose(rendererHandle);
+        std::cout << std::format("Error: Failed to retrieve module information ({}).\n", LIB_ERROR());
+        LIB_FREE(coreHandle);
+        LIB_FREE(rendererHandle);
         return 1;
     }
 
@@ -72,12 +90,12 @@ int main() {
     bool error = false;
     for (const auto& module : {liara_renderer_info(), liara_core_info()}) {
         if (module != nullptr) {
-            if (liara_version_compat_t const COMPAT = liara_abi_is_compatible(module->abi_version); COMPAT == LIARA_VERSION_COMPAT_EXACT || COMPAT == LIARA_VERSION_COMPAT_COMPATIBLE) {
+            if (liara_version_compat_t const compat = liara_abi_is_compatible(module->abi_version); compat == LIARA_VERSION_COMPAT_EXACT || compat == LIARA_VERSION_COMPAT_COMPATIBLE) {
                 std::cout << std::format("{} {} is available and compatible (ABI {}).\n",
                                          module->module_name,
                                          module->module_version_str,
                                          module->abi_version_str);
-            } else if (COMPAT == LIARA_VERSION_COMPAT_DEGRADED) {
+            } else if (compat == LIARA_VERSION_COMPAT_DEGRADED) {
                 std::cout << std::format("Warning: {} {} is degraded with ABI {}. Some features may not work as expected. We highly recommend updating your Liara installation to a compatible version.\n",
                                          module->module_name,
                                          module->module_version_str,
@@ -98,16 +116,16 @@ int main() {
     if (error) {
         std::cout << "\nError: Required modules are not available or compatible. Exiting launcher.\n";
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
-        dlclose(coreHandle);
-        dlclose(rendererHandle);
+        LIB_FREE(coreHandle);
+        LIB_FREE(rendererHandle);
 #endif
         return 1;
     }
 
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
     std::cout << "\nDynamic module loading: ABI compatibility smoke test passed.\n";
-    dlclose(coreHandle);
-    dlclose(rendererHandle);
+    LIB_FREE(coreHandle);
+    LIB_FREE(rendererHandle);
     return 0;
 #else
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.1](https://github.com/liara-engine/liara/compare/schemas-v0.1.0...schemas-v0.1.1) (2026-07-30)
+
+
+### Bug Fixes
+
+* **schema:** enforce additionalProperties constraint for modules in version schema ([a9b621b](https://github.com/liara-engine/liara/commit/a9b621b8dadcf52db8954af3ac94ca03c2e12042))
+* **schema:** remove additionalProperties constraint for versions in version schema ([872733b](https://github.com/liara-engine/liara/commit/872733ba0c91c9c4f2db5ecad98045585cc16927))
+* **schema:** remove format constraint for URI references in version schema ([9919b9b](https://github.com/liara-engine/liara/commit/9919b9bc2cbd48a70be136a3099bb14c00f0cec7))
+
 ## 0.1.0 (2026-07-13)
 
 

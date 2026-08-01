@@ -1,5 +1,44 @@
 # Changelog
 
+## [0.1.0](https://github.com/liara-engine/liara/compare/v0.0.3...v0.1.0) (2026-08-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **launcher:** drop support of ABI v0.1.x
+
+### Features
+
+* **build:** add CMake template and enhance build layout resolution ([c7a461b](https://github.com/liara-engine/liara/commit/c7a461b443302cb50a42f03b477d1b1668d0f766))
+* **cmake:** add CMakePresets.json template for build configurations ([b11c05e](https://github.com/liara-engine/liara/commit/b11c05e5d408706ae7bcdc199e9835178dc8ef3a))
+* **cmake:** add support for mold and lld linkers, and sccache and ccache compiler caches ([3d93ade](https://github.com/liara-engine/liara/commit/3d93ade6334ea2c948b725bb31a0f1ea8b5758fd))
+* **config:** add experimental dynamic module loading presets for GCC, Clang and msvc ([5de3e37](https://github.com/liara-engine/liara/commit/5de3e3744c09995efb9260be891e5655223e8381))
+* **config:** add module loading options for Liara Launcher ([da36070](https://github.com/liara-engine/liara/commit/da36070dd00203f6c35ac9632107f6baf37ff591))
+* **config:** define additional version macros for Liara Launcher ([b38b14d](https://github.com/liara-engine/liara/commit/b38b14de06f49a5308441c867208ab695a7a8f53))
+* **config:** update CMake presets for improved module loading and versioning ([e42070e](https://github.com/liara-engine/liara/commit/e42070eab02eb1e2e8441b4d25ab224b42925b4c))
+* **editorconfig:** add EditorConfig file for consistent coding styles ([f8dab25](https://github.com/liara-engine/liara/commit/f8dab25b92af11448b3214e4f42d7ae74063b6b1))
+* **launcher:** add configuration header and update CMakeLists for launcher build ([4bc2729](https://github.com/liara-engine/liara/commit/4bc27296c0483d78cf9288be3362dcaf690458da))
+* **launcher:** implement a core and renderer initialization with compatibility checks ([2b8843a](https://github.com/liara-engine/liara/commit/2b8843a95db8eb1383482278cefde84e0bd276a2))
+* **main:** implement dynamic module loading, ABI compatibility checks, and move to ABI v0.1.1 ([5fc51ff](https://github.com/liara-engine/liara/commit/5fc51ff13d1f87727aa1cb416f4e03c3788b544a))
+* **manifest:** add new version entry for 0.1.0 with ABI compatibility ([3131317](https://github.com/liara-engine/liara/commit/31313178bfc46da79e8be5c9dab618a31dc983e8))
+* **module-loading:** implement cross-platform dynamic library loading and error handling ([989e724](https://github.com/liara-engine/liara/commit/989e724898e233330398d98844a98082cc18f1cc))
+
+
+### Bug Fixes
+
+* **clang-tidy:** update checks and formatting for improved readability ([afb7e82](https://github.com/liara-engine/liara/commit/afb7e82f275660294fd17d693ed2d5f3fe3e3593))
+* **cmake:** update error messages to include documentation links for missing targets ([3d81f97](https://github.com/liara-engine/liara/commit/3d81f973e92d5a28fa142aa30334ae4aabec92cc))
+* **docs:** remove markdown links from git clone commands in BOOTSTRAP.md ([d374a2d](https://github.com/liara-engine/liara/commit/d374a2ded7d71a62116a49f322c1c925988af23d))
+* **schema:** enforce additionalProperties constraint for modules in version schema ([a9b621b](https://github.com/liara-engine/liara/commit/a9b621b8dadcf52db8954af3ac94ca03c2e12042))
+* **schema:** remove additionalProperties constraint for versions in version schema ([872733b](https://github.com/liara-engine/liara/commit/872733ba0c91c9c4f2db5ecad98045585cc16927))
+* **schema:** remove format constraint for URI references in version schema ([9919b9b](https://github.com/liara-engine/liara/commit/9919b9bc2cbd48a70be136a3099bb14c00f0cec7))
+* **scripts:** add cache variables for Windows debug and release presets in CMakePresets.json.template ([be5a22f](https://github.com/liara-engine/liara/commit/be5a22fd2fa2cf7206d7ee69d41154d18e0656f4))
+
+
+### Code Refactoring
+
+* **launcher:** drop support of ABI v0.1.x ([b4321d0](https://github.com/liara-engine/liara/commit/b4321d0c7f6475618d8b4c68a52b462a7fb0943c))
+
 ## [0.0.3](https://github.com/liara-engine/liara/compare/v0.0.2...v0.0.3) (2026-07-16)
 
 

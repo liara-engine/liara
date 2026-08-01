@@ -6,30 +6,82 @@
 
 ## Table of Contents
 
-- [Repository Map](#repository-map)
-- [The Meta Repository: `liara`](#the-meta-repository-liara)
-- [The Interface Repository: `liara-interfaces`](#the-interface-repository-liara-interfaces)
-- [The Core Repository: `liara-core`](#the-core-repository-liara-core)
-- [The Platform Repository: `liara-platform`](#the-platform-repository-liara-platform)
-- [The Assets Repository: `liara-assets`](#the-assets-repository-liara-assets)
-- [The Audio Repository: `liara-audio`](#the-audio-repository-liara-audio)
-- [The Renderer Repository: `liara-renderer`](#the-renderer-repository-liara-renderer)
-- [The Editor Repository: `liara-editor`](#the-editor-repository-liara-editor)
-- [The Physics Repository: `liara-physics`](#the-physics-repository-liara-physics)
-- [Auxiliary Repositories](#auxiliary-repositories)
-- [Dependency Graph](#dependency-graph)
-- [Module Boundaries: What Crosses, What Doesn't](#module-boundaries-what-crosses-what-doesnt)
-- [Where Things Live: A Cross-Reference](#where-things-live-a-cross-reference)
-- [Adding a New Module](#adding-a-new-module)
-- [Removing or Renaming a Module](#removing-or-renaming-a-module)
+- [1. Repository Map](#1-repository-map)
+  - [1.1 The contract](#11-the-contract)
+  - [1.2 The modules](#12-the-modules)
+  - [1.3 The hosts](#13-the-hosts)
+  - [1.4 The infrastructure](#14-the-infrastructure)
+  - [1.5 The rule that defines a module](#15-the-rule-that-defines-a-module)
+  - [1.6 Introduction schedule](#16-introduction-schedule)
+- [2. The Meta Repository: `liara`](#2-the-meta-repository-liara)
+  - [2.1 Purpose](#21-purpose)
+  - [2.2 Contents](#22-contents)
+  - [2.3 What It Does Not Contain](#23-what-it-does-not-contain)
+  - [2.4 Versioning Policy](#24-versioning-policy)
+- [3. The Interface Repository: `liara-interfaces`](#3-the-interface-repository-liara-interfaces)
+  - [3.1 Purpose](#31-purpose)
+  - [3.2 Contents](#32-contents)
+  - [3.3 What It Does Not Contain](#33-what-it-does-not-contain)
+  - [3.4 Versioning Policy](#34-versioning-policy)
+- [4. The Core Repository: `liara-core`](#4-the-core-repository-liara-core)
+  - [4.1 Purpose](#41-purpose)
+  - [4.2 Contents](#42-contents)
+  - [4.3 What It Does Not Contain](#43-what-it-does-not-contain)
+  - [4.4 Internal Organization](#44-internal-organization)
+- [5. The Platform Repository: `liara-platform`](#5-the-platform-repository-liara-platform)
+  - [5.1 Purpose](#51-purpose)
+  - [5.2 Contents](#52-contents)
+  - [5.3 What It Does Not Contain](#53-what-it-does-not-contain)
+  - [5.4 Shutdown requests are poll-only](#54-shutdown-requests-are-poll-only)
+  - [5.5 Replaceability](#55-replaceability)
+- [6. The Assets Repository: `liara-assets`](#6-the-assets-repository-liara-assets)
+  - [6.1 Purpose](#61-purpose)
+  - [6.2 Contents](#62-contents)
+  - [6.3 What It Does Not Contain](#63-what-it-does-not-contain)
+  - [6.4 The boundary that is easiest to get wrong](#64-the-boundary-that-is-easiest-to-get-wrong)
+- [7. The Audio Repository: `liara-audio`](#7-the-audio-repository-liara-audio)
+  - [7.1 Purpose](#71-purpose)
+  - [7.2 Contents](#72-contents)
+  - [7.3 What It Does Not Contain](#73-what-it-does-not-contain)
+- [8. The Renderer Repository: `liara-renderer`](#8-the-renderer-repository-liara-renderer)
+  - [8.1 Purpose](#81-purpose)
+  - [8.2 Contents](#82-contents)
+  - [8.3 What It Does Not Contain](#83-what-it-does-not-contain)
+  - [8.4 Internal Organization](#84-internal-organization)
+- [9. The Editor Repository: `liara-editor`](#9-the-editor-repository-liara-editor)
+  - [9.1 Purpose](#91-purpose)
+  - [9.2 Status in v0.x](#92-status-in-v0x)
+  - [9.3 Contents (Anticipated)](#93-contents-anticipated)
+- [10. The Physics Repository: `liara-physics`](#10-the-physics-repository-liara-physics)
+  - [10.1 Status in v0.x](#101-status-in-v0x)
+  - [10.2 Contents (Anticipated)](#102-contents-anticipated)
+- [11. Auxiliary Repositories](#11-auxiliary-repositories)
+  - [11.1 `docs-shared`](#111-docs-shared)
+  - [11.2 `liara-docs`](#112-liara-docs)
+  - [11.3 `.github` (Organization-Level)](#113-github-organization-level)
+- [12. Dependency Graph](#12-dependency-graph)
+- [13. Module Boundaries: What Crosses, What Doesn't](#13-module-boundaries-what-crosses-what-doesnt)
+  - [13.1 Core → Renderer (per frame)](#131-core--renderer-per-frame)
+  - [13.2 Renderer lifecycle (host-driven)](#132-renderer-lifecycle-host-driven)
+  - [13.3 Resource upload (host-mediated)](#133-resource-upload-host-mediated)
+  - [13.4 Renderer → host (callbacks)](#134-renderer--host-callbacks)
+  - [13.5 Core → Editor (post-v1.0)](#135-core--editor-post-v1)
+  - [13.6 Editor → Renderer (post-v1.0)](#136-editor--renderer-post-v1)
+  - [13.7 Platform → Host (per frame)](#137-platform--host-per-frame)
+  - [13.8 Host → Platform (at startup)](#138-host--platform-at-startup)
+  - [13.9 Assets → host → renderer / audio](#139-assets--host--renderer--audio)
+  - [13.10 Core → host → audio (per frame)](#1310-core--host--audio-per-frame)
+- [14. Where Things Live: A Cross-Reference](#14-where-things-live-a-cross-reference)
+- [15. Adding a New Module](#15-adding-a-new-module)
+- [16. Removing or Renaming a Module](#16-removing-or-renaming-a-module)
 
 ---
 
-## Repository Map
+## 1. Repository Map
 
 The project is composed of the following repositories, all hosted under the `liara-engine` GitHub organization. They fall into four kinds, and the kind matters more than the list.
 
-### The contract
+### 1.1 The contract
 
 | Repository         | Role                                                  | Status  |
 |--------------------|-------------------------------------------------------|---------|
@@ -37,7 +89,7 @@ The project is composed of the following repositories, all hosted under the `lia
 
 The contract is not a module: it contains no implementation and exports no symbol. Everything else in the project either implements a part of it or consumes it.
 
-### The modules
+### 1.2 The modules
 
 A module implements one namespace of the contract, is versioned on its own cadence, and is replaceable in principle by an alternative implementation — including one written in another language.
 
@@ -52,7 +104,7 @@ A module implements one namespace of the contract, is versioned on its own caden
 
 `liara-core` is the one module that is not replaceable: it owns the data model everything else agrees on. It is a module rather than a privileged runtime because it obeys the same rules — one ABI namespace, one `info()` entry point, its own version — and because a subsystem that cannot be described through the contract does not belong in it.
 
-### The hosts
+### 1.3 The hosts
 
 A host composes modules: it creates them, checks their ABI versions against each other, owns the application loop, and moves data between them. A host is not a module — it exports nothing and nobody links against it.
 
@@ -61,7 +113,7 @@ A host composes modules: it creates them, checks their ABI versions against each
 | `liara` (meta) | The launcher, plus everything that must know about all modules at once | Phase 0    |
 | `liara-editor` | The editor application                                                 | v1.x       |
 
-### The infrastructure
+### 1.4 The infrastructure
 
 Consumed by CI and by the documentation pipeline, never by CMake.
 
@@ -71,7 +123,7 @@ Consumed by CI and by the documentation pipeline, never by CMake.
 | `docs-shared` | Design system, documentation templates, builder image      | Phase 0 |
 | `liara-docs`  | Generated documentation hosting and edge worker            | Phase 0 |
 
-### The rule that defines a module
+### 1.5 The rule that defines a module
 
 One module is one ABI namespace, and the three spellings never diverge:
 
@@ -81,21 +133,21 @@ One module is one ABI namespace, and the three spellings never diverge:
 
 A subsystem gets its own namespace from its first line of code, before anyone knows whether it will ever move into its own repository. Moving an implementation between repositories is cheap; renaming a symbol that consumers already call is a MAJOR bump of `liara-interfaces` and breaks every one of them. The repository layout is a delivery decision and is revisable; the namespace is a contract and is not.
 
-### Introduction schedule
+### 1.6 Introduction schedule
 
 A repository is created when its first line of code is written, not before. `liara-platform` therefore appears with v0.1, `liara-assets` with v0.3, `liara-audio` with v0.5, `liara-physics` and `liara-editor` with v1.x. Until then they exist in this document and nowhere else.
 
 ---
 
-## The Meta Repository: `liara`
+## 2. The Meta Repository: `liara`
 
 The `liara` repository is the public face of the project and the orchestrator of everything else. It does not contain engine code; it contains the things that need to know about all modules at once.
 
-### Purpose
+### 2.1 Purpose
 
 The meta repository serves four functions. It is the **landing page** for the project on GitHub: the README that a visitor reads first, the issue tracker that catches general questions, the discussions board for project-wide topics. It is the **launcher and distribution** point: the small executable that composes the modules and owns the application loop, the AUR `PKGBUILD`, the Windows installer or portable archive script. It is the **workspace orchestrator**: the bootstrap script that clones and configures all other repositories for local development. And it is the **compatibility matrix**: the authoritative record of which versions of which modules work together.
 
-### Contents
+### 2.2 Contents
 
 The repository contains, at minimum:
 
@@ -107,27 +159,25 @@ The repository contains, at minimum:
 - A `schemas/` directory containing JSON schemas for any file formats defined at the meta level.
 - A `docker/` directory containing any Dockerfiles (and associated scripts) used for development or CI.
 
-### What It Does Not Contain
+### 2.3 What It Does Not Contain
 
 The meta repository does not contain engine logic, rendering code, ECS implementation, or any other functionality that belongs in a module. It also does not contain documentation generated from source code (Doxygen output) — that documentation is generated by each module's and published in the `liara-docs` repository.
 
-### Versioning Policy
-
-The meta repository uses its own version number, distinct from the versions of the modules it bundles. A release of `liara` 1.0.0 corresponds to a specific combination of `liara-core`, `liara-renderer`, etc. The user-visible "Liara Engine 1.0.0" refers to a release of this repository.
+### 2.4 Versioning Policy
 
 The meta repository's versioning follows the engine's milestone roadmap. Module repositories version independently, on their own cadence.
 
 ---
 
-## The Interface Repository: `liara-interfaces`
+## 3. The Interface Repository: `liara-interfaces`
 
 The `liara-interfaces` repository is the most version-sensitive piece of the project. Every other module declares which version of `liara-interfaces` it requires, and a breaking change to interfaces ripples through every consumer.
 
-### Purpose
+### 3.1 Purpose
 
 This repository defines the C ABI contracts between modules. Nothing in the project may communicate across a module boundary without going through a header defined here. Modules that internally use richer C++ types must wrap them at their public surface to expose only the C interface.
 
-### Contents
+### 3.2 Contents
 
 The repository contains exclusively C headers, organized by module.
 
@@ -160,11 +210,11 @@ In addition to headers, the repository contains:
 - Tests that verify each header compiles standalone and is C-callable, compiled with both a C and a C++ compiler in CI, plus cross-language tests that consume the headers from Zig and Rust. The cross-language tests are registered only when the corresponding toolchain is present.
 - The `INTERFACES.md` document specifying the rules for designing, evolving, and versioning interfaces.
 
-### What It Does Not Contain
+### 3.3 What It Does Not Contain
 
 No implementation. No `.c` or `.cpp` files (other than the test files, which are minimal and verify properties of the headers themselves). No external dependencies (the headers may use only fixed-width integer types from `<stdint.h>` and `<stddef.h>`).
 
-### Versioning Policy
+### 3.4 Versioning Policy
 
 This repository follows **strict semantic versioning**, with the rules spelled out in `INTERFACES.md`. The headline:
 
@@ -176,15 +226,15 @@ The version is encoded in `version.h` as preprocessor macros and is checked at m
 
 ---
 
-## The Core Repository: `liara-core`
+## 4. The Core Repository: `liara-core`
 
 The core is the foundation that every other module depends on. It owns the data and the schedule; modules transform data on a schedule the core dictates.
 
-### Purpose
+### 4.1 Purpose
 
 The core implements everything that is shared, mandatory, and not replaceable. It is the answer to "what is always there, no matter what modules are loaded?".
 
-### Contents
+### 4.2 Contents
 
 The core repository implements:
 
@@ -202,13 +252,13 @@ The core repository implements:
 
 **Module lifecycle primitives.** The core exposes, through the C interface, the entry points a host needs to drive it: creation, destruction, and the per-tick step. It does not load, register, or hold references to other modules. Composition — deciding which renderer (or other module) to pair with the core, checking their interface versions against each other, and wiring them together — is the host's responsibility (the launcher today, the editor post-v1.0). The core is handed whatever it needs through its interface; it never reaches for a sibling module by name. The version-negotiation logic the host uses at composition time is the seed for what becomes a runtime dynamic loader if the project moves to DSO modules — but that loader lives in the host, not in the core.
 
-### What It Does Not Contain
+### 4.3 What It Does Not Contain
 
 No rendering. No window, no input device, no OS signal handling — those are `liara-platform`. No file loading or decoding — that is `liara-assets`. No audio device or mixing — that is `liara-audio`. No editor code, no gameplay code, no tools.
 
 The core does not open a file, does not talk to a device, and does not call an OS API beyond threading and time. That is the practical test for whether something belongs here: if it needs the outside world, it is not core.
 
-### Internal Organization
+### 4.4 Internal Organization
 
 The core's internal directory layout follows the categories above.
 
@@ -226,21 +276,15 @@ src/
 
 This layout is internal to the core and may evolve. It is not part of any contract.
 
-### Versioning Policy
-
-The core follows semantic versioning, but its compatibility constraints are looser than `liara-interfaces`. A patch or minor change to the core that does not affect any interface is invisible to other modules. A major version bump of the core is rare and significant.
-
-The core's version is independent of the meta repository's version.
-
 ---
 
-## The Platform Repository: `liara-platform`
+## 5. The Platform Repository: `liara-platform`
 
-### Purpose
+### 5.1 Purpose
 
 Everything the engine needs from the operating system, behind one interface. The platform module is what makes "Linux and Windows are both first-class" a property of one repository rather than a `#ifdef` scattered across all of them.
 
-### Contents
+### 5.2 Contents
 
 **Window management.** Window creation, resizing, fullscreen, and exposure of the native handle that the renderer needs to create its surface. SDL3 is the backend; no SDL type ever crosses the module boundary.
 
@@ -250,11 +294,11 @@ Everything the engine needs from the operating system, behind one interface. The
 
 **Timing.** Monotonic clock and high-resolution counters, so that the loop's notion of time does not depend on which standard library the host was built against.
 
-### What It Does Not Contain
+### 5.3 What It Does Not Contain
 
 No ECS, no rendering, no audio device (that is `liara-audio`, even though both talk to the OS — the boundary is the concern, not the fact of being OS-specific). No file I/O beyond resolving standard paths; reading files is `liara-assets`. No logical input mapping.
 
-### Shutdown requests are poll-only
+### 5.4 Shutdown requests are poll-only
 
 The interface exposes shutdown as a flag the host polls, never as a callback:
 
@@ -269,19 +313,19 @@ Three constraints follow, and all three are easy to violate later:
 - **Signal handlers are process-global, not per-instance.** `liara_platform_install_signal_handlers` is documented as idempotent and installed at most once per process, whatever the number of platform handles.
 - **It works without a window.** Installing the handlers does not require the windowing backend to be initialized, so a headless tool — a test harness, a future asset cooker — can use the module for shutdown handling alone.
 
-### Replaceability
+### 5.5 Replaceability
 
 Replaceable. A platform module built on GLFW, on winit, or directly on Wayland and Win32 is a legitimate substitute, and the SDL3 dependency is confined here precisely so that this remains true.
 
 ---
 
-## The Assets Repository: `liara-assets`
+## 6. The Assets Repository: `liara-assets`
 
-### Purpose
+### 6.1 Purpose
 
 Turning bytes on disk into data the engine can use, and owning that data's lifetime. It is the only module that reads the file system.
 
-### Contents
+### 6.2 Contents
 
 **Loading and decoding.** glTF 2.0 for models, common image formats through stb_image for textures, SPIR-V for shaders, common audio formats for sounds. Each loader produces a plain description plus a CPU-side buffer.
 
@@ -289,51 +333,43 @@ Turning bytes on disk into data the engine can use, and owning that data's lifet
 
 **The residency model.** What is loaded, what is resident, what can be evicted, and what is reference-counted by whom.
 
-### What It Does Not Contain
+### 6.3 What It Does Not Contain
 
 No GPU upload — the renderer does that, given CPU-side data and a handle. No playback — `liara-audio` does that, given decoded PCM. No asset *pipeline* (offline compilation, packaging, optimization): raw loading only in v0.x, per `ARCHITECTURE.md`. No ECS: an asset is not an entity.
 
-### The boundary that is easiest to get wrong
+### 6.4 The boundary that is easiest to get wrong
 
 `liara-assets` decodes; it does not consume. It hands a mesh's vertex data to whoever asks and never learns that the renderer uploaded it; it hands decoded PCM to whoever asks and never learns that the audio module played it. Every transfer is mediated by the host, exactly as the render packet is. The moment the assets module calls into the renderer, the module boundary is gone.
 
-### Replaceability
-
-Replaceable. A project shipping a custom pack format rather than loose glTF files replaces this module and nothing else.
-
 ---
 
-## The Audio Repository: `liara-audio`
+## 7. The Audio Repository: `liara-audio`
 
-### Purpose
+### 7.1 Purpose
 
 Playing sound. Audio is the clearest replaceability case in the project: the gap between a hobby project's needs and a shipped game's needs is filled, in practice, by swapping the audio backend for FMOD or Wwise. The engine's job is to make that a module swap and not a rewrite.
 
-### Contents
+### 7.2 Contents
 
 **Device and mixing.** Device selection, the mixing graph, voice allocation and lifetime. miniaudio is the backend; no miniaudio type crosses the boundary.
 
 **Playback.** Playing a decoded sound, looping, stopping, volume, and basic bus routing. Spatialization is deferred per `ARCHITECTURE.md`; v0.x is 2D audio.
 
-### What It Does Not Contain
+### 7.3 What It Does Not Contain
 
 No decoding: the module is handed PCM by the host, which got it from `liara-assets`. No file access. No ECS: an emitter component lives in the core, and the host turns it into playback calls, in exactly the way it turns renderable components into a render packet.
 
-### Replaceability
-
-Replaceable, and the most likely to actually be replaced.
-
 ---
 
-## The Renderer Repository: `liara-renderer`
+## 8. The Renderer Repository: `liara-renderer`
 
 The renderer is the reference implementation of the renderer interface. It is the most complex module and the one whose replaceability matters most.
 
-### Purpose
+### 8.1 Purpose
 
 The renderer takes render packets produced by the core and produces pixels. It manages the GPU, the swapchain, render targets, pipelines, and shaders. It does not know about the ECS, about gameplay, or about the editor; it only knows about the data the core hands it each frame.
 
-### Contents
+### 8.2 Contents
 
 The renderer repository implements:
 
@@ -351,11 +387,11 @@ The renderer repository implements:
 
 **The ImGui integration.** ImGui is rendered by the renderer because it is fundamentally a rendering operation. The integration is designed so that the editor (post-v1.0) submits its UI through the editor interface, and the renderer draws it. In v0.x, ImGui is used only for the developer console and stats overlays.
 
-### What It Does Not Contain
+### 8.3 What It Does Not Contain
 
 No ECS code. No gameplay logic. No window creation — the window belongs to `liara-platform`, and the renderer receives only a native handle from the host. No asset loading from disk (the renderer receives prepared asset data from the core's asset manager). No input handling.
 
-### Internal Organization
+### 8.4 Internal Organization
 
 A possible layout of the renderer's internal source tree is (the real layout may differ):
 
@@ -374,27 +410,21 @@ shaders/
 
 The `shaders/` directory contains GLSL source for the engine's built-in shaders, compiled to SPIR-V at build time and either embedded in the binary or shipped alongside it (controlled by a CMake option).
 
-### Versioning Policy
-
-The renderer follows semantic versioning. Its public contract is defined entirely by `liara-interfaces`, so most changes (bug fixes, performance improvements, internal refactoring) are invisible to consumers and result in patch or minor bumps. Major bumps are rare and correspond to changes in resource consumption, behavior in edge cases, or removal of optional features.
-
-The renderer's version is independent of both the core's version and the meta repository's version. The compatibility matrix in the meta repository tracks which combinations are tested.
-
 ---
 
-## The Editor Repository: `liara-editor`
+## 9. The Editor Repository: `liara-editor`
 
 The editor is the in-engine authoring tool that, post-v1.0, allows scenes to be built without writing code. It is **not introduced until the v1.x cycle**; the repository is created when the first editor code is written.
 
-### Purpose
+### 9.1 Purpose
 
 The editor is the application a developer launches to build a game. It hosts the engine, lets the developer place entities in the scene visually, edit their components through an inspector, and save and load scenes. It is the analog of the Unity Editor or the Unreal Editor.
 
-### Status in v0.x
+### 9.2 Status in v0.x
 
 The editor does not exist in v0.x. Scenes are constructed in code or loaded from JSON files written by hand. This is acknowledged as a limitation; it is not a permanent state of affairs. The interfaces in v0.x are designed so that introducing the editor in v1.x does not require interface changes — see [Architecture.md Render Targets](ARCHITECTURE.md#render-targets-and-multi-view-rendering) and [Architecture.md Forward-Looking Decisions](ARCHITECTURE.md#forward-looking-decisions) for the specific design choices that enable this.
 
-### Contents (Anticipated)
+### 9.3 Contents (Anticipated)
 
 When the editor is built, the repository will contain:
 
@@ -404,25 +434,19 @@ When the editor is built, the repository will contain:
 - Scene serialization (load/save scenes as JSON or a custom format).
 - Project management (create new project, set up directory structure, manage assets).
 
-### Replaceability
-
-Although the editor is, in principle, a swappable module like the renderer, the practical question of someone writing an alternative editor is unlikely. Editors are large pieces of software with complex UI requirements, and the value of having an alternative editor is questionable for a project of this scale. The editor therefore is **not designed for replaceability**; it consumes the engine through richer C++ APIs where convenient.
-
-This is a deliberate exception to the modularity principle, made because the cost of treating the editor as replaceable would be high and the benefit nil.
-
 ---
 
-## The Physics Repository: `liara-physics`
+## 10. The Physics Repository: `liara-physics`
 
 The physics module provides collision detection and rigid body dynamics. It is **not introduced until the v1.x cycle**.
 
-### Status in v0.x
+### 10.1 Status in v0.x
 
 Physics does not exist in v0.x. Entities have transforms, but nothing moves except by direct ECS manipulation. This is acknowledged as a limitation.
 
 When the physics module is introduced, its design will be informed by experience using the engine to build a game without it. The interface for physics is **not** designed in v0.x precisely because that design would be premature.
 
-### Contents (Anticipated)
+### 10.2 Contents (Anticipated)
 
 When introduced, the physics module will likely include:
 
@@ -432,15 +456,11 @@ When introduced, the physics module will likely include:
 - Raycasts and queries.
 - Debug visualization integrated with the renderer's debug rendering subsystem.
 
-### Replaceability
-
-Physics is designed as a replaceable module. The interface in `liara-interfaces/physics.h` will be the contract.
-
 ---
 
-## Auxiliary Repositories
+## 11. Auxiliary Repositories
 
-### `docs-shared`
+### 11.1 `docs-shared`
 
 The visual identity and the templates shared by every documentation site in the project. Its content is split in two:
 
@@ -451,11 +471,11 @@ The repository also contains `hub/`, the project's landing page and custom 404, 
 
 The full mechanism is described in [DOCUMENTATION_PIPELINE.md](DOCUMENTATION_PIPELINE.md).
 
-### `liara-docs`
+### 11.2 `liara-docs`
 
 The repository that hosts the project's generated documentation. It contains no authored prose: everything under `site/` on its `cloudflare-pages` branch is produced by the documentation builder from the other repositories' sources, one directory per module and per version. It also holds the Cloudflare Worker that resolves `latest`, falls back between views and serves the custom 404, and the scheduled sweep that prunes stale pull request previews.
 
-### `.github` (Organization-Level)
+### 11.3 `.github` (Organization-Level)
 
 A special repository that GitHub recognizes as the source of organization-wide defaults. It contains:
 
@@ -469,7 +489,7 @@ Each module's CI consumes the reusable workflows from this repository, so that u
 
 ---
 
-## Dependency Graph
+## 12. Dependency Graph
 
 The static dependency graph between repositories is:
 
@@ -518,11 +538,11 @@ The infrastructure repositories (`.github`, `docs-shared`, `liara-docs`) do not 
 
 ---
 
-## Module Boundaries: What Crosses, What Doesn't
+## 13. Module Boundaries: What Crosses, What Doesn't
 
 This section enumerates the data flows that cross module boundaries. Anything not listed here should not cross.
 
-### Core → Renderer (per frame)
+### 13.1 Core → Renderer (per frame)
 
 The core sends the renderer a render packet describing what to draw this frame. The packet contains, at minimum:
 
@@ -534,49 +554,49 @@ The core sends the renderer a render packet describing what to draw this frame. 
 
 This data is plain-old-data and does not retain ownership: once the renderer has consumed the packet, it may discard it.
 
-### Renderer lifecycle (host-driven)
+### 13.2 Renderer lifecycle (host-driven)
 
 The host creates and destroys the renderer, and the core, independently, through their respective C interfaces. At startup the host supplies the renderer with the native window handle and GPU configuration; at shutdown it requests the renderer to flush and release resources. The core never creates, owns, or directly calls the renderer.
 
-### Resource upload (host-mediated)
+### 13.3 Resource upload (host-mediated)
 
 When the core loads an asset, it exposes the CPU-side data and a stable handle through its interface. The host passes that data to the renderer for GPU upload and associates the handle with the resulting GPU resource. Subsequent render packets reference the asset by handle. The data path is core → host → renderer; there is no direct core → renderer call.
 
-### Renderer → host (callbacks)
+### 13.4 Renderer → host (callbacks)
 
 The renderer reports events — surface lost, swapchain resized, GPU error — through callbacks the host registers at renderer init. The host decides how to propagate these to the core.
 
-### Core → Editor (post-v1)
+### 13.5 Core → Editor (post-v1)
 
 The editor reads ECS state to populate the scene hierarchy and inspector. The interface for this is **read-mostly**: the editor can inspect any entity but mutates entities only through specific edit commands that the core executes (so that undo/redo is possible).
 
-### Editor → Renderer (post-v1)
+### 13.6 Editor → Renderer (post-v1)
 
 The editor submits gizmo geometry through the debug rendering interface, on top of the scene render. The editor also requests render targets for its scene viewport panels.
 
-### Platform → host (per frame)
+### 13.7 Platform → host (per frame)
 
 The platform module reports, on demand: the physical input events accumulated since the last poll, the window's current size and state, whether a shutdown has been requested (close button or OS signal — see [The Platform Repository](#the-platform-repository-liara-platform)), and the monotonic time. All of it is plain data, valid until the next poll.
 
 The host decides what to do with it: which events to forward to the core's event bus, how to map physical inputs to logical actions, and whether a shutdown request is honoured immediately or deferred. The platform module never terminates the process itself.
 
-### Host → platform (at startup)
+### 13.8 Host → platform (at startup)
 
 The host creates the window and asks for its native handle, which it then passes to the renderer at initialization. This is the one piece of data that travels from one module to another, and it travels through the host, as an opaque pointer or a fixed-width integer whose interpretation is documented.
 
-### Assets → host → renderer / audio
+### 13.9 Assets → host → renderer / audio
 
 When the host loads an asset, it receives a stable handle and, on request, the CPU-side data behind it. It hands mesh and texture data to the renderer for GPU upload, and decoded PCM to the audio module for playback. Neither consumer retains a pointer into asset storage: they keep the handle, and the data is theirs to copy or upload during the call.
 
 That constraint is what makes asset hot-reload implementable later without touching a single consumer.
 
- ### Core → host → audio (per frame)
+ ### 13.10 Core → host → audio (per frame)
 
 The core produces, alongside the render packet, the list of audio events for this tick — start, stop, parameter change, each referencing an asset handle. The host submits it to the audio module. It is the render packet pattern applied to sound, and for the same reasons: plain data, no retained ownership, no coupling between the simulation and the backend.
 
 ---
 
-## Where Things Live: A Cross-Reference
+## 14. Where Things Live: A Cross-Reference
 
 For specific topics, the canonical location is:
 
@@ -615,7 +635,7 @@ When a topic is added to the project, this table is updated.
 
 ---
 
-## Adding a New Module
+## 15. Adding a New Module
 
 The process for introducing a new module to the project is:
 
@@ -635,8 +655,12 @@ Splitting an existing module follows steps 1 to 3 only, then moves files. That i
 
 ---
 
-## Removing or Renaming a Module
+## 16. Removing or Renaming a Module
 
 Modules are not removed or renamed lightly. When a module's responsibilities shrink to nothing, or when its name becomes misleading, the change is treated as a major version event for the meta repository. The old repository is archived (not deleted), the new repository is created, and the migration path is documented in an ADR.
 
 This conservatism reflects the reality that external links to repositories accumulate over time and that breaking them is a real cost, even for a project at this scale.
+
+---
+
+[Back to top](#modules)

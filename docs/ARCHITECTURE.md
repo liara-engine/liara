@@ -6,24 +6,43 @@
 
 ## Table of Contents
 
-- [Project Identity](#project-identity)
-- [Goals and Non-Goals](#goals-and-non-goals)
-- [Core Principles](#core-principles)
-- [Modularity Model](#modularity-model)
-- [The Interface Boundary](#the-interface-boundary)
-- [Entity-Component-System Model](#entity-component-system-model)
-- [Render Targets and Multi-View Rendering](#render-targets-and-multi-view-rendering)
-- [Tick Model and Application Loop](#tick-model-and-application-loop)
-- [Cross-Platform Strategy](#cross-platform-strategy)
-- [Performance Philosophy](#performance-philosophy)
-- [Forward-Looking Decisions](#forward-looking-decisions)
-- [What Is Explicitly Deferred](#what-is-explicitly-deferred)
-- [Decision Records](#decision-records)
-- [Reading Order for Newcomers](#reading-order-for-newcomers)
+- [1. Project Identity](#1-project-identity)
+- [2. Goals and Non-Goals](#2-goals-and-non-goals)
+  - [2.1 Goals](#21-goals)
+  - [2.2 Non-Goals](#22-non-goals)
+- [3. Core Principles](#3-core-principles)
+  - [3.1 KISS as a Cognitive Discipline](#31-kiss-as-a-cognitive-discipline)
+  - [3.2 Modular by Construction, Not by Convention](#32-modular-by-construction-not-by-convention)
+  - [3.3 Interfaces Before Implementation](#33-interfaces-before-implementation)
+  - [3.4 Performance is a Design Choice, Not an Optimization Pass](#34-performance-is-a-design-choice-not-an-optimization-pass)
+  - [3.5 Visible Progress at Every Step](#35-visible-progress-at-every-step)
+  - [3.6 The Future Reader is the Author](#36-the-future-reader-is-the-author)
+- [4. Modularity Model](#4-modularity-model)
+  - [4.1 Why Build-Time Selection](#41-why-build-time-selection)
+  - [4.2 Designed for Dynamic, Implemented as Static](#42-designed-for-dynamic-implemented-as-static)
+  - [4.3 One Namespace Per Subsystem, From the First Line](#43-one-namespace-per-subsystem-from-the-first-line)
+  - [4.4 Multi-Repository Layout](#44-multi-repository-layout)
+- [5. The Interface Boundary](#5-the-interface-boundary)
+  - [5.1 Why C and Not C++](#51-why-c-and-not-c)
+  - [5.2 Versioning the Interface](#52-versioning-the-interface)
+  - [5.3 What Lives in `liara-interfaces`](#53-what-lives-in-liara-interfaces)
+- [6. Entity-Component-System Model](#6-entity-component-system-model)
+  - [6.1 Why ECS](#61-why-ecs)
+  - [6.2 A Hand-Written ECS](#62-a-hand-written-ecs)
+  - [6.3 The Render Packet Pattern](#63-the-render-packet-pattern)
+- [7. Render Targets and Multi-View Rendering](#7-render-targets-and-multi-view-rendering)
+- [8. Tick Model and Application Loop](#8-tick-model-and-application-loop)
+- [9. Cross-Platform Strategy](#9-cross-platform-strategy)
+  - [9.1 Floating Point Precision and Coordinate Spaces](#91-floating-point-precision-and-coordinate-spaces)
+- [10. Performance Philosophy](#10-performance-philosophy)
+- [11. Forward-Looking Decisions](#11-forward-looking-decisions)
+- [12. What Is Explicitly Deferred](#12-what-is-explicitly-deferred)
+- [13. Decision Records](#13-decision-records)
+- [14. Reading Order for Newcomers](#14-reading-order-for-newcomers)
 
 ---
 
-## Project Identity
+## 1. Project Identity
 
 Liara is a 3D game engine written primarily in modern C++ with Vulkan as the reference renderer. It is a personal project whose primary purpose is to learn graphics programming, modern C++, and large-scale software architecture by building something non-trivial. Producing an engine that is actually usable for small games is a secondary, but real, objective.
 
@@ -33,11 +52,11 @@ This document is the contract that the project makes with its future self. Every
 
 ---
 
-## Goals and Non-Goals
+## 2. Goals and Non-Goals
 
 The architecture is shaped by what the project tries to be, and equally by what it explicitly refuses to be.
 
-### Goals
+### 2.1 Goals
 
 The engine aims to be **modular at the build level**, meaning that each major subsystem (rendering, platform, assets, audio, physics, the editor) is a separately versioned library that can in principle be replaced by an alternative implementation, including one written in another language. This is not a flexibility feature for end users; it is a discipline mechanism that forces clean separation of concerns from day one.
 
@@ -49,7 +68,7 @@ The engine aims to be **shippable**. By version 1.0, a developer should be able 
 
 The engine aims to be **forward-compatible** with use cases beyond v1.0, specifically with editor tooling (Unity/Unreal-style) and large-scale simulation (KSP-style). These use cases are not supported in v1.0, but the core interfaces are designed so that supporting them later does not require breaking changes.
 
-### Non-Goals
+### 2.2 Non-Goals
 
 The engine does **not** aim to be a general-purpose engine that competes with Unity, Unreal, or Godot on feature breadth. It does not aim to support every rendering technique, every input device, every audio format, or every asset type. Features are added when they are needed for a defined milestone, and not before.
 
@@ -61,47 +80,47 @@ The engine does **not** aim to be feature-complete before being usable. The proj
 
 ---
 
-## Core Principles
+## 3. Core Principles
 
 The principles below are the lens through which every architectural decision is evaluated. When a tradeoff arises, the principle wins by default; when a principle is overridden, the override is documented.
 
-### KISS as a Cognitive Discipline
+### 3.1 KISS as a Cognitive Discipline
 
 The simplest design that meets the stated requirements is preferred. This is not an aesthetic preference; it is a survival mechanism for a solo developer who cannot afford to drown in accidental complexity. Whenever a design decision can be made smaller, less coupled, or more local, it should be.
 
-### Modular by Construction, Not by Convention
+### 3.2 Modular by Construction, Not by Convention
 
 A module is not "modular" because it lives in a separate folder. A module is modular when removing it, replacing it, or recompiling it independently is mechanically possible. Every claim of modularity is tested by asking: could someone reimplement this in another language and link it in instead? If the answer is no, the module is not modular.
 
-### Interfaces Before Implementation
+### 3.3 Interfaces Before Implementation
 
 The boundary between modules is more important than the inside of any module. Interfaces are designed first, frozen carefully, and changed reluctantly. Implementation can iterate freely; interfaces cannot.
 
-### Performance is a Design Choice, Not an Optimization Pass
+### 3.4 Performance is a Design Choice, Not an Optimization Pass
 
 Memory layout, allocation patterns, cache behavior, and threading model are considered at design time. The engine does not write naive code with the intent of profiling later; it writes code that has thought about performance upfront, and profiles to validate.
 
-### Visible Progress at Every Step
+### 3.5 Visible Progress at Every Step
 
 No version of the engine is allowed to be "internal refactoring with nothing to show". Every release produces a demonstrable artifact: a binary that runs, a test that passes, a piece of documentation that explains something new. This protects motivation and makes regressions obvious.
 
-### The Future Reader is the Author
+### 3.6 The Future Reader is the Author
 
 The author six months from now is a different person than the author today, and the project must be navigable by that future person without context held only in memory. This means decisions are documented at the time they are made, not reconstructed later. It also means consistency across the project matters more than local cleverness.
 
 ---
 
-## Modularity Model
+## 4. Modularity Model
 
 The engine is structured as a **collection of separately versioned libraries linked together at build time**. Module selection is made by the build system: the shipped engine is a single executable with its modules linked in, with no plugin discovery mechanism to debug. An experimental runtime-loading path exists (see "Designed for Dynamic" below), used to validate the interface boundary — but it is a development and testing facility, not how a Liara game is (currently) distributed.
 
-### Why Build-Time Selection
+### 4.1 Why Build-Time Selection
 
 Three models were considered for module composition. The first, used by projects like Bevy, selects modules at build time via build system options; substituting a module requires recompilation. The second, used by projects like Unreal, loads dynamic libraries at runtime according to a manifest; substitution does not require recompilation but introduces an ABI versioning problem at runtime. The third, used by projects like Hyprland, runs each component as a separate process communicating over IPC; this is excellent for desktop tooling but unworkable for the latency requirements of a game loop.
 
 The first model was selected because it provides the modularity benefits the project actually cares about (clean interfaces, replaceability in principle, forced discipline) without the operational complexity of runtime plugin loading. Distribution is also drastically simpler: a Liara-based game ships as a single executable plus its assets, with no plugin discovery mechanism to debug.
 
-### Designed for Dynamic, Implemented as Static
+### 4.2 Designed for Dynamic, Implemented as Static
 
 Although modules are linked statically today, the **interfaces between them are designed as if they were dynamic**. This means the boundary between any two modules uses C linkage, plain-old-data types, opaque handles, and explicit version negotiation. The cost of this discipline is small at the interface boundary; the benefit is that switching to runtime loading later becomes a runtime concern (writing a loader) and not an architectural rewrite.
 
@@ -109,13 +128,13 @@ This decision also has an immediate benefit independent of any future dynamic lo
 
 A CI leg builds every module as a shared library and links the launcher against them ([Tooling](TOOLING.md#reusable-workflows), `reusable-shared-dynamic.yml`); if a module silently acquired a link-time dependency on another module's symbols, or leaked C++ across its boundary, that build fails. The static/dynamic choice is thus a build-time flag (`BUILD_SHARED_LIBS`), not an architectural fork. A further, optional step exercises actual runtime loading (`dlopen`/`LoadLibrary` + symbol resolution through each module's `liara_<module>_info` entry point), giving the version-negotiation machinery its first real workout instead of leaving it a design that nothing runs.
 
-### One Namespace Per Subsystem, From the First Line
+### 4.3 One Namespace Per Subsystem, From the First Line
 
 A subsystem that could plausibly become a separate module is given its own ABI namespace immediately, whatever repository implements it today. The cost is nil at the time; the cost of retrofitting is a MAJOR bump of `liara-interfaces` and a forced migration of every consumer.
 
 This is the same trade as the previous section, one level up: there, the interfaces are designed as if modules were dynamic although they are linked statically; here, they are designed as if every subsystem were its own repository although several may share one. Both keep a future reorganization a matter of moving files rather than rewriting contracts.
 
-### Multi-Repository Layout
+### 4.4 Multi-Repository Layout
 
 The codebase is split across multiple Git repositories, one per module, all hosted under the `liara-engine` GitHub organization. This is a deliberate choice that prioritizes clean separation over operational convenience.
 
@@ -127,11 +146,11 @@ The full list of repositories and their roles is documented in [`MODULES.md`](MO
 
 ---
 
-## The Interface Boundary
+## 5. The Interface Boundary
 
 Every replaceable module exposes its functionality through a C-linkage interface defined in the `liara-interfaces` repository. This interface is the **only contract** that other modules may rely on; the C++ implementation behind it is private to that module.
 
-### Why C and Not C++
+### 5.1 Why C and Not C++
 
 C++ has no stable ABI. Two C++ libraries compiled with different compilers, different standard library versions, different optimization levels, or different exception handling strategies cannot reliably exchange C++ types across their boundary. Templates, exceptions, RTTI, and standard library containers all complicate this further.
 
@@ -146,7 +165,7 @@ A C interface across module boundaries means:
 
 The C interface is verbose. It is also stable, language-agnostic, and debuggable. The verbosity is paid once, in the interface design; the stability is collected forever, in every module that consumes the interface.
 
-### Versioning the Interface
+### 5.2 Versioning the Interface
 
 Each interface header declares its version using preprocessor macros. The versioning scheme follows Vulkan's pattern: a single 32-bit integer encodes major, minor, and patch components, and each module exports a function that reports the interface version it implements.
 
@@ -157,9 +176,9 @@ The semantics of the version components are:
 - A **minor** bump is required for additive changes: new functions, new enum values added at the end, new optional fields in versioned structs.
 - A **patch** bump is for documentation, comments, and other changes that cannot affect compiled code.
 
-The detailed rules and the precise list of what counts as a breaking change are documented in [`INTERFACES.md`](../liara-interfaces/INTERFACES.md) within the `liara-interfaces` repository.
+The detailed rules and the precise list of what counts as a breaking change are documented in [INTERFACES.md](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/book/INTERFACES#87-what-counts-as-a-breaking-change) within the `liara-interfaces` repository.
 
-### What Lives in `liara-interfaces`
+### 5.3 What Lives in `liara-interfaces`
 
 The `liara-interfaces` repository contains nothing but C headers. It does not contain implementation, tests, or platform-specific code. It is consumed as a header-only library by every other module.
 
@@ -167,17 +186,17 @@ This separation matters because `liara-interfaces` is the most version-sensitive
 
 ---
 
-## Entity-Component-System Model
+## 6. Entity-Component-System Model
 
 The engine uses an Entity-Component-System (ECS) approach for managing game state. Entities are opaque identifiers, components are plain data attached to entities, and systems are functions that operate on entities matching specific component patterns.
 
-### Why ECS
+### 6.1 Why ECS
 
 ECS suits the engine's goals for several reasons. It separates data from behavior, which makes the data layout independent of the systems that consume it. It enables data-oriented memory layouts, which suit modern hardware. It allows systems to be authored independently of each other, which suits the modular architecture: a renderer system and a physics system can both operate on the same entity through different components, without coupling.
 
 ECS is not the only approach that could work, and it is not chosen for ideological reasons. It is chosen because it composes naturally with the rest of the architecture.
 
-### A Hand-Written ECS
+### 6.2 A Hand-Written ECS
 
 The engine uses a hand-written ECS implementation rather than an existing library (EnTT, flecs, etc.). This is a deliberate choice grounded in the project's primary goal: learning. Implementing an ECS from scratch teaches template metaprogramming, memory layout design, and API design in a way that adopting a library does not.
 
@@ -191,7 +210,7 @@ The initial implementation uses a sparse-set storage strategy: each component ty
 
 The ECS is benchmarked in CI from v0.2 onward, so that performance changes are visible and intentional.
 
-### The Render Packet Pattern
+### 6.3 The Render Packet Pattern
 
 The renderer does **not** access the ECS directly. The boundary between core (which owns the ECS) and renderer (which is a swappable module) is too important to expose ECS internals across.
 
@@ -207,7 +226,7 @@ The cost of this pattern is that the core must build the render packet each fram
 
 ---
 
-## Render Targets and Multi-View Rendering
+## 7. Render Targets and Multi-View Rendering
 
 A naive renderer "draws a frame" by rendering the scene into the swapchain and presenting it. This works for a standalone game but breaks down for editor tooling, where the scene is one of many UI panels and must be rendered into a texture that the UI can sample.
 
@@ -219,7 +238,7 @@ This decision is the single most important piece of forward-compatibility work i
 
 ---
 
-## Tick Model and Application Loop
+## 8. Tick Model and Application Loop
 
 The core does not own the application loop. Instead, it exposes a **manual tick** function that advances the simulation by a given delta time. The caller of the core is responsible for the loop itself.
 
@@ -229,7 +248,7 @@ The host owns the loop because the host is the only participant that knows every
 
 ---
 
-## Cross-Platform Strategy
+## 9. Cross-Platform Strategy
 
 The engine targets Linux and Windows. Platform-specific code is isolated in specific subsystems (windowing, file I/O, threading primitives where the standard library is insufficient) and is hidden behind portable interfaces. The bulk of the codebase is platform-agnostic.
 
@@ -237,7 +256,7 @@ Development happens on Linux. The Windows build is validated continuously in CI 
 
 The engine does not abstract over platforms via a runtime selector. Each build produces a binary for one platform, with platform-specific code selected at compile time via preprocessor flags driven by CMake.
 
-### Floating Point Precision and Coordinate Spaces
+### 9.1 Floating Point Precision and Coordinate Spaces
 
 A specific cross-platform and cross-version concern is **floating point precision for world coordinates**. Single-precision floats become imprecise at distances above a few kilometers from the origin, which limits the engine to small-world games. Larger-scale games (open world, space, simulation) require either double precision or floating-origin techniques.
 
@@ -247,7 +266,7 @@ This decision is made now because changing the transform layout in the interface
 
 ---
 
-## Performance Philosophy
+## 10. Performance Philosophy
 
 The engine treats performance as a property of design, not as a property of optimization passes. The principle is not "make it work, then make it fast"; the principle is "design something whose data flow does not prohibit being fast, and verify that it is fast enough by measuring".
 
@@ -261,13 +280,13 @@ The engine does not pursue micro-optimizations that compromise readability. Cach
 
 ---
 
-## Forward-Looking Decisions
+## 11. Forward-Looking Decisions
 
 A small number of architectural decisions are made now in anticipation of later versions. Each has been validated as cheap-to-do-now and expensive-to-retrofit-later.
 
-**Editor readiness** — The renderer interface uses abstract render targets and supports multiple views per frame from v0.1. This makes a future editor (v1.x+) buildable without changes to the renderer interface. See [Render Targets and Multi-View Rendering](#render-targets-and-multi-view-rendering).
+**Editor readiness** — The renderer interface uses abstract render targets and supports multiple views per frame from v0.1. This makes a future editor (v1.x+) buildable without changes to the renderer interface. See [Render Targets and Multi-View Rendering](#7-render-targets-and-multi-view-rendering).
 
-**KSP-style readiness** — Transforms in the interface use double precision for translation, and the view structure includes a hint about scene scale. This makes a future large-scale simulation buildable without changes to the interface. See [Cross-Platform Strategy](#cross-platform-strategy).
+**KSP-style readiness** — Transforms in the interface use double precision for translation, and the view structure includes a hint about scene scale. This makes a future large-scale simulation buildable without changes to the interface. See [Cross-Platform Strategy](#9-cross-platform-strategy).
 
 **Editor-style picking** — The renderer interface optionally produces an "entity ID buffer" alongside the color buffer. This is dormant in v0.x (the buffer is not requested) but the interface accepts the option, so adding picking later does not break the interface.
 
@@ -279,7 +298,7 @@ These five decisions are the entirety of the forward-compatibility work in v0.x.
 
 ---
 
-## What Is Explicitly Deferred
+## 12. What Is Explicitly Deferred
 
 To prevent scope creep and the recurring temptation to over-design, the following concerns are explicitly **not** addressed in v0.x and will be revisited only when their respective milestone is reached.
 
@@ -297,7 +316,7 @@ Refusing to design for these now is not a claim that they don't matter; it is a 
 
 ---
 
-## Decision Records
+## 13. Decision Records
 
 Significant architectural decisions are recorded as Architecture Decision Records (ADRs) in the `docs/adr/` directory of the meta repository. Each ADR captures:
 - The context that prompted the decision
@@ -311,7 +330,7 @@ The decisions captured in this document are summarized in ADRs; the canonical st
 
 ---
 
-## Reading Order for Newcomers
+## 14. Reading Order for Newcomers
 
 For a person joining the project (including the author returning after a break), the recommended reading order is:
 
@@ -324,3 +343,7 @@ For a person joining the project (including the author returning after a break),
 7. **[`DOCUMENTATION_PIPELINE.md`](DOCUMENTATION_PIPELINE.md)** — required reading before modifying any documentation.
 
 Reading the entire codebase before contributing is not necessary. Reading this document, however, is.
+
+---
+
+[Back to top](#architecture)

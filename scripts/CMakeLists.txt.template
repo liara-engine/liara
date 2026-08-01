@@ -1,0 +1,49 @@
+# GENERATED FILE - DO NOT EDIT
+cmake_minimum_required(VERSION 3.29)
+project(LiaraWorkspace LANGUAGES C CXX)
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+enable_testing()
+
+# Linker selection
+if(NOT MSVC)
+    find_program(MOLD_EXECUTABLE mold)
+    if(MOLD_EXECUTABLE)
+        set(CMAKE_LINKER_TYPE MOLD)
+        message(STATUS "Using mold as the linker")
+    else()
+        find_program(LLD_EXECUTABLE ld.lld lld)
+        if(LLD_EXECUTABLE)
+            set(CMAKE_LINKER_TYPE LLD)
+            message(STATUS "Using lld as the linker")
+        endif()
+    endif()
+endif()
+
+# Compiler cache selection
+find_program(SCCACHE_EXECUTABLE sccache)
+find_program(CCACHE_EXECUTABLE ccache)
+if(SCCACHE_EXECUTABLE)
+    set(CMAKE_C_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${SCCACHE_EXECUTABLE}")
+    message(STATUS "Using sccache as the compiler cache")
+elseif(CCACHE_EXECUTABLE)
+    set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_EXECUTABLE}")
+    message(STATUS "Using ccache as the compiler cache")
+endif()
+
+if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
+    message(WARNING "Experimental: LIARA_LAUNCHER_MODULE_LOADING=runtime. "
+                    "The launcher loads modules at runtime.")
+endif()
+
+# MODULES_PLACEHOLDER
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../launcher/CMakeLists.txt")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../launcher" launcher)
+endif()

@@ -7,6 +7,7 @@ import shutil
 import json
 import argparse
 import tempfile
+import re
 from pathlib import Path
 
 # --- Configuration -----------------------------------------------------------
@@ -81,6 +82,26 @@ def collect_sources(workspace_path):
                     if line:
                         sources.append(str(item / line))
     return sources
+
+# --- Build Layout Resolution ----------------------------------
+def resolve_build_layout(workspace: Path, build_preset: str) -> tuple[Path, str | None]:
+    """Return (build directory, configuration subdirectory or None).
+
+    The configuration is read from the build preset rather than inferred from its name
+    """
+    presets_path = workspace / "CMakePresets.json"
+    configure_preset, configuration = build_preset, None
+    try:
+        presets = json.loads(presets_path.read_text(encoding="utf-8"))
+        for entry in presets.get("buildPresets", []):
+            if entry.get("name") == build_preset:
+                configure_preset = entry.get("configurePreset", build_preset)
+                configuration = entry.get("configuration")
+                break
+    except (OSError, json.JSONDecodeError) as exc:
+        warn(f"Could not read {presets_path}: {exc}. Falling back to preset name.")
+
+    return workspace / "build" / configure_preset, configuration
 
 # --- Verification Logic ------------------------------------------------------
 
@@ -174,12 +195,14 @@ def do_verify(args):
     check_req("glslc")
     if has_tool("vulkaninfo"):
         code, out = run_cmd(["vulkaninfo", "--summary"], capture=True)
-        if "apiVersion" in out or "Vulkan Instance Version" in out:
+        if code != 0:
+            warn("vulkaninfo failed to query the drivers. The toolchain is usable, but running the engine will not work until the GPU drivers are fixed.")
+        elif "apiVersion" in out or "Vulkan Instance Version" in out:
             ok("Vulkan 1.3+ support confirmed by vulkaninfo")
         else:
-            warn("vulkaninfo summary output format unexpected or failed to query drivers.")
+            warn("vulkaninfo summary output format unexpected.")
     else:
-        fatal("vulkaninfo: not found (Vulkan SDK missing or not in PATH)")
+        warn("vulkaninfo not found. Skipping the runtime Vulkan check: the toolchain can still build the project, but nothing verifies that this machine can run it. Install vulkan-tools to enable the check.")
 
     # 5. Optional tools
     if args.optional:
@@ -258,50 +281,14 @@ def do_setup(args):
     if not buildable:
         fatal("No buildable modules found.")
 
-    cmake_content = (
-        "# GENERATED FILE - DO NOT EDIT\n"
-        "cmake_minimum_required(VERSION 3.29)\n"
-        "project(LiaraWorkspace LANGUAGES C CXX)\n"
-        "set(CMAKE_C_STANDARD 11)\n"
-        "set(CMAKE_CXX_STANDARD 20)\n"
-        "enable_testing()\n\n"
-    )
-    for m in buildable:
-        cmake_content += f"add_subdirectory({m})\n"
-    cmake_content += (
-        "\nif(EXISTS \"${CMAKE_CURRENT_SOURCE_DIR}/../launcher/CMakeLists.txt\")\n"
-        "    add_subdirectory(\"${CMAKE_CURRENT_SOURCE_DIR}/../launcher\" launcher)\n"
-        "endif()\n"
-        "\n# Linker selection\n"
-        "find_program(MOLD_EXECUTABLE mold)\n"
-        "if(MOLD_EXECUTABLE)\n"
-        "    set(CMAKE_LINKER ${MOLD_EXECUTABLE})\n"
-        "    message(STATUS \"Using mold as the linker: ${MOLD_EXECUTABLE}\")\n"
-        "else()\n"
-        "    find_program(LLD_EXECUTABLE lld)\n"
-        "    if(LLD_EXECUTABLE)\n"
-        "        set(CMAKE_LINKER ${LLD_EXECUTABLE})\n"
-        "        message(STATUS \"Using lld as the linker: ${LLD_EXECUTABLE}\")\n"
-        "    endif()\n"
-        "endif()\n"
-        "\n# Compiler cache selection\n"
-        "find_program(SCCACHE_EXECUTABLE sccache)\n"
-        "if(SCCACHE_EXECUTABLE)\n"
-        "    set(CMAKE_C_COMPILER_LAUNCHER ${SCCACHE_EXECUTABLE})\n"
-        "    set(CMAKE_CXX_COMPILER_LAUNCHER ${SCCACHE_EXECUTABLE})\n"
-        "    message(STATUS \"Using sccache as the compiler cache: ${SCCACHE_EXECUTABLE}\")\n"
-        "else()\n"
-        "    find_program(CCACHE_EXECUTABLE ccache)\n"
-        "    if(CCACHE_EXECUTABLE)\n"
-        "        set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE})\n"
-        "        set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_EXECUTABLE})\n"
-        "        message(STATUS \"Using ccache as the compiler cache: ${CCACHE_EXECUTABLE}\")\n"
-        "    endif()\n"
-        "endif()\n"
-        "if(DEFINED LIARA_LAUNCHER_MODULE_LOADING AND LIARA_LAUNCHER_MODULE_LOADING STREQUAL \"runtime\")\n"
-        "    message(WARNING \"Experimental feature: LIARA_LAUNCHER_MODULE_LOADING=runtime is enabled. The launcher will load the modules at runtime. This feature is experimental and may not work as expected.\")\n"
-        "endif()\n"
-    )
+    # Load the template and replace the placeholder with the actual module list
+    cmake_template_path = script_dir / "CMakeLists.txt.template"
+    if not cmake_template_path.exists():
+        fatal(f"Missing CMakeLists.txt.template in {script_dir}")
+    cmake_content = cmake_template_path.read_text(encoding="utf-8")
+    module_lines = "\n".join(f"add_subdirectory({m})" for m in buildable)
+    cmake_content = cmake_content.replace("# MODULES_PLACEHOLDER", module_lines)
+
     (workspace / "CMakeLists.txt").write_text(cmake_content, encoding="utf-8")
 
     # 3. Merge Manifest vcpkg
@@ -356,17 +343,19 @@ def do_setup(args):
     preset_to_use = args.preset or DEFAULT_PRESETS[platform.system()]
     if not args.no_configure:
         info(f"Configuring CMake with preset '{preset_to_use}'...")
-        code, _ = run_cmd(["cmake", "-S", str(workspace), "--preset", preset_to_use])
+        build_dir, _ = resolve_build_layout(workspace, preset_to_use)
+        build_dir.mkdir(parents=True, exist_ok=True)
+        code, _ = run_cmd(["cmake", "-S", str(workspace), "-B", str(build_dir), "--preset", preset_to_use])
         if code != 0:
             fatal("CMake configuration failed.")
 
         if platform.system() != "Windows":
-            comp_db = workspace / "build" / preset_to_use / "compile_commands.json"
+            comp_db = build_dir / "compile_commands.json"
             if comp_db.exists():
                 symlink_path = workspace / "compile_commands.json"
                 if symlink_path.exists() or symlink_path.is_symlink():
                     symlink_path.unlink()
-                symlink_path.symlink_to(f"build/{preset_to_use}/compile_commands.json")
+                symlink_path.symlink_to(f"build/{build_dir.name}/compile_commands.json")
                 ok("Created compile_commands.json symlink.")
     else:
         info("Skipping CMake configure step.")
@@ -402,11 +391,13 @@ def do_launch(args):
     preset_to_use = args.preset or DEFAULT_PRESETS[platform.system()]
 
     info(f"Launching Liara Engine with preset '{preset_to_use}'...")
-    build_dir = workspace / "build" / preset_to_use
-    if platform.system() == "Windows":
-        exe_path = build_dir / "launcher" / "Debug" / "liara_launcher.exe" if preset_to_use.endswith("debug") else build_dir / "launcher" / "Release" / "liara_launcher.exe"
-    else:
-        exe_path = build_dir / "launcher" / "liara_launcher"
+    build_dir, configuration = resolve_build_layout(workspace, preset_to_use)
+
+    exe_name = "liara_launcher.exe" if platform.system() == "Windows" else "liara_launcher"
+    exe_dir = build_dir / "launcher"
+    if configuration:
+        exe_dir = exe_dir / configuration
+    exe_path = exe_dir / exe_name
 
     if not exe_path.exists():
         fatal(f"Executable not found: {exe_path}. Please build the project first.")
@@ -477,7 +468,7 @@ def do_check(args):
     # 2. CMake Build
     if not args.no_build:
         def step_build():
-            build_dir = workspace / "build" / preset_to_use
+            build_dir, _ = resolve_build_layout(workspace, preset_to_use)
             if not build_dir.exists():
                 info(f"Build directory missing; configuring preset '{preset_to_use}' first")
                 code, _ = run_cmd(["cmake", "-S", str(workspace), "--preset", preset_to_use])
@@ -495,12 +486,10 @@ def do_check(args):
                 print("  clang-tidy not found.", file=sys.stderr)
                 return False
 
-            build_dir = workspace / "build" / preset_to_use
+            build_dir, _ = resolve_build_layout(workspace, preset_to_use)
             compile_commands = build_dir / "compile_commands.json"
             if not compile_commands.exists():
                 print(f"  No compile_commands.json in {build_dir}; configure first.", file=sys.stderr)
-                # On Windows with VS Generators, compile_commands.json isn't generated natively by default.
-                # Highlight that this requires a ninja or compatible generator setup.
                 return False
 
             tu_sources = [s for s in sources if s.endswith(('.c', '.cc', '.cpp', '.cxx'))]
@@ -509,7 +498,8 @@ def do_check(args):
                 return True
 
             if has_tool("run-clang-tidy"):
-                code, _ = run_cmd(["run-clang-tidy", "-quiet", "-p", str(build_dir)] + tu_sources)
+                patterns = [re.escape(s) for s in tu_sources]
+                code, _ = run_cmd(["run-clang-tidy", "-quiet", "-p", str(build_dir)] + patterns)
             else:
                 code, _ = run_cmd(["clang-tidy", "-p", str(build_dir)] + tu_sources)
             return code == 0

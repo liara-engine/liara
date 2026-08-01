@@ -8,7 +8,26 @@
 
 ---
 
-## 1. Project Identity
+## Table of Contents
+
+- [Project Identity](#project-identity)
+- [Goals and Non-Goals](#goals-and-non-goals)
+- [Core Principles](#core-principles)
+- [Modularity Model](#modularity-model)
+- [The Interface Boundary](#the-interface-boundary)
+- [Entity-Component-System Model](#entity-component-system-model)
+- [Render Targets and Multi-View Rendering](#render-targets-and-multi-view-rendering)
+- [Tick Model and Application Loop](#tick-model-and-application-loop)
+- [Cross-Platform Strategy](#cross-platform-strategy)
+- [Performance Philosophy](#performance-philosophy)
+- [Forward-Looking Decisions](#forward-looking-decisions)
+- [What Is Explicitly Deferred](#what-is-explicitly-deferred)
+- [Decision Records](#decision-records)
+- [Reading Order for Newcomers](#reading-order-for-newcomers)
+
+---
+
+## Project Identity
 
 Liara is a 3D game engine written primarily in modern C++ with Vulkan as the
 reference renderer. It is a personal project whose primary purpose is to learn
@@ -27,7 +46,7 @@ decision should require revisiting those reasons.
 
 ---
 
-## 2. Goals and Non-Goals
+## Goals and Non-Goals
 
 The architecture is shaped by what the project tries to be, and equally by
 what it explicitly refuses to be.
@@ -86,7 +105,7 @@ terms, and where an incomplete version is preferred to a complete vaporware.
 
 ---
 
-## 3. Core Principles
+## Core Principles
 
 The principles below are the lens through which every architectural decision
 is evaluated. When a tradeoff arises, the principle wins by default; when a
@@ -137,7 +156,7 @@ more than local cleverness.
 
 ---
 
-## 4. Modularity Model
+## Modularity Model
 
 The engine is structured as a **collection of separately versioned libraries
 linked together at build time**. Module selection is made by the build system:
@@ -184,7 +203,7 @@ in practice is a separate question; what matters is that nothing in the
 architecture forbids it.
 
 A CI leg builds every module as a shared library and links the launcher
-against them (`TOOLING.md` §4, `reusable-shared-dynamic.yml`); if a module
+against them ([Tooling](TOOLING.md#reusable-workflows), `reusable-shared-dynamic.yml`); if a module
 silently acquired a link-time dependency on another module's symbols, or
 leaked C++ across its boundary, that build fails. The static/dynamic choice
 is thus a build-time flag (`BUILD_SHARED_LIBS`), not an architectural fork.
@@ -216,7 +235,7 @@ The full list of repositories and their roles is documented in
 
 ---
 
-## 5. The Interface Boundary
+## The Interface Boundary
 
 Every replaceable module exposes its functionality through a C-linkage
 interface defined in the `liara-interfaces` repository. This interface is
@@ -289,7 +308,7 @@ the meta repository tracks which combinations are known to work.
 
 ---
 
-## 6. Entity-Component-System Model
+## Entity-Component-System Model
 
 The engine uses an Entity-Component-System (ECS) approach for managing game
 state. Entities are opaque identifiers, components are plain data attached
@@ -371,7 +390,7 @@ entity) and is dwarfed by the cost of actual rendering.
 
 ---
 
-## 7. Render Targets and Multi-View Rendering
+## Render Targets and Multi-View Rendering
 
 A naive renderer "draws a frame" by rendering the scene into the swapchain
 and presenting it. This works for a standalone game but breaks down for
@@ -397,7 +416,7 @@ without an interface break.
 
 ---
 
-## 8. Tick Model and Application Loop
+## Tick Model and Application Loop
 
 The core does not own the application loop. Instead, it exposes a **manual
 tick** function that advances the simulation by a given delta time. The
@@ -418,7 +437,7 @@ build the loop that suits it.
 
 ---
 
-## 9. Cross-Platform Strategy
+## Cross-Platform Strategy
 
 The engine targets Linux and Windows. Platform-specific code is isolated in
 specific subsystems (windowing, file I/O, threading primitives where the
@@ -454,13 +473,9 @@ interface later would be a major-version-breaking change to
 `liara-interfaces`. Making it now costs nothing; making it later would
 invalidate every existing module.
 
-This decision is one of two pieces of forward-compatibility work for the
-KSP-style use case (the other being the render target / multi-view design
-covered in section 7). No further KSP-specific work is done in v0.x.
-
 ---
 
-## 10. Performance Philosophy
+## Performance Philosophy
 
 The engine treats performance as a property of design, not as a property
 of optimization passes. The principle is not "make it work, then make it
@@ -481,7 +496,7 @@ hand-tuning do not appear in v0.x.
 
 ---
 
-## 11. Forward-Looking Decisions
+## Forward-Looking Decisions
 
 A small number of architectural decisions are made now in anticipation of
 later versions. Each has been validated as cheap-to-do-now and
@@ -490,12 +505,12 @@ expensive-to-retrofit-later.
 **Editor readiness** — The renderer interface uses abstract render targets
 and supports multiple views per frame from v0.1. This makes a future
 editor (v1.x+) buildable without changes to the renderer interface. See
-section 7.
+[Render Targets and Multi-View Rendering](#render-targets-and-multi-view-rendering).
 
 **KSP-style readiness** — Transforms in the interface use double precision
 for translation, and the view structure includes a hint about scene scale.
 This makes a future large-scale simulation buildable without changes to
-the interface. See section 9.
+the interface. See [Cross-Platform Strategy](#cross-platform-strategy).
 
 **Editor-style picking** — The renderer interface optionally produces an
 "entity ID buffer" alongside the color buffer. This is dormant in v0.x
@@ -512,7 +527,7 @@ is actually being built.
 
 ---
 
-## 12. What Is Explicitly Deferred
+## What Is Explicitly Deferred
 
 To prevent scope creep and the recurring temptation to over-design, the
 following concerns are explicitly **not** addressed in v0.x and will be
@@ -536,7 +551,7 @@ is more likely to be wrong than right.
 
 ---
 
-## 13. Decision Records
+## Decision Records
 
 Significant architectural decisions are recorded as Architecture Decision
 Records (ADRs) in the `docs/adr/` directory of the meta repository. Each
@@ -558,7 +573,7 @@ provide the historical context.
 
 ---
 
-## 14. Reading Order for Newcomers
+## Reading Order for Newcomers
 
 For a person joining the project (including the author returning after a
 break), the recommended reading order is:

@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0](https://github.com/liara-engine/liara/compare/launcher-v0.0.1...launcher-v0.1.0) (2026-08-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* **launcher:** drop support of ABI v0.1.x
+
+### Features
+
+* **module-loading:** implement cross-platform dynamic library loading and error handling ([989e724](https://github.com/liara-engine/liara/commit/989e724898e233330398d98844a98082cc18f1cc))
+
+
+### Code Refactoring
+
+* **launcher:** drop support of ABI v0.1.x ([b4321d0](https://github.com/liara-engine/liara/commit/b4321d0c7f6475618d8b4c68a52b462a7fb0943c))
+
 ## 0.0.1 (2026-07-29)
 
 

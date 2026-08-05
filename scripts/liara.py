@@ -169,11 +169,11 @@ def do_verify(args):
                 warn(f"g++: {ver} is older than 14")
         if has_tool("clang++"):
             ver = get_tool_version(["clang++", "--version"])
-            if ver and version_ge(ver, "18.0"):
-                ok(f"clang++: {ver} (>= 18)")
+            if ver and version_ge(ver, "20.0"):
+                ok(f"clang++: {ver} (>= 20)")
                 has_compiler = True
             else:
-                warn(f"clang++: {ver} is older than 18")
+                warn(f"clang++: {ver} is older than 20")
 
     if not has_compiler:
         fatal("No supported C++ compiler found!")
@@ -208,8 +208,8 @@ def do_verify(args):
     if args.optional:
         info("Optional Development Tools:")
 
-        check_optional("clang-format", "18.0", ["clang-format", "--version"])
-        check_optional("clang-tidy", "18.0", ["clang-tidy", "--version"])
+        check_optional("clang-format", "20.0", ["clang-format", "--version"])
+        check_optional("clang-tidy", "20.0", ["clang-tidy", "--version"])
 
         if not is_windows:
             check_optional("mold", None, ["mold", "--version"])
@@ -259,21 +259,38 @@ def do_setup(args):
         git_base = "git@github.com:liara-engine" if args.ssh else "https://github.com/liara-engine"
 
     # 1. Clone / Pull Modules
+    refs = dict(item.split("=", 1) for item in args.ref)
     for module in MODULES:
         module_dir = workspace / module
         if (module_dir / ".git").exists():
             if not args.no_pull:
-                info(f"Updating {module}...")
-                code, _ = run_cmd(["git", "-C", str(module_dir), "pull", "--ff-only"])
-                if code != 0:
-                    warn(f"Fast-forward pull failed for {module}. Left as-is.")
+                wanted = refs.get(module)
+                if wanted:
+                    info(f"Checking out {module} at {wanted}...")
+                    run_cmd(["git", "-C", str(module_dir), "fetch", "--tags", "origin", wanted])
+                    code, _ = run_cmd(["git", "-C", str(module_dir), "checkout", "--detach", "FETCH_HEAD"])
+                    if code != 0:
+                        fatal(f"Cannot check out {module} at {wanted}.")
+                else:
+                    info(f"Pulling latest for {module}...")
+                    code, _ = run_cmd(["git", "-C", str(module_dir), "pull", "--ff-only"])
+                    if code != 0:
+                        warn(f"Fast-forward pull failed for {module}. Left as-is.")
             else:
                 info(f"Skipping update for {module}")
         else:
-            info(f"Cloning {module}...")
-            code, _ = run_cmd(["git", "clone", f"{git_base}/{module}.git", str(module_dir)])
-            if code != 0:
-                fatal(f"Failed to clone {module}")
+            wanted = refs.get(module)
+            if wanted:
+                info(f"Checking out {module} at {wanted}...")
+                run_cmd(["git", "-C", str(module_dir), "fetch", "--tags", "origin", wanted])
+                code, _ = run_cmd(["git", "-C", str(module_dir), "checkout", "--detach", "FETCH_HEAD"])
+                if code != 0:
+                    fatal(f"Cannot check out {module} at {wanted}.")
+            else:
+                info(f"Cloning {module}...")
+                code, _ = run_cmd(["git", "clone", f"{git_base}/{module}.git", str(module_dir)])
+                if code != 0:
+                    fatal(f"Failed to clone {module}")
 
     # 2. CMake Superbuild Generation
     info("Generating workspace CMakeLists.txt...")
@@ -394,7 +411,7 @@ def do_launch(args):
     build_dir, configuration = resolve_build_layout(workspace, preset_to_use)
 
     exe_name = "liara_launcher.exe" if platform.system() == "Windows" else "liara_launcher"
-    exe_dir = build_dir / "launcher"
+    exe_dir = build_dir / "bin"
     if configuration:
         exe_dir = exe_dir / configuration
     exe_path = exe_dir / exe_name
@@ -402,7 +419,7 @@ def do_launch(args):
     if not exe_path.exists():
         fatal(f"Executable not found: {exe_path}. Please build the project first.")
 
-    code, _ = run_cmd([str(exe_path)], cwd=build_dir)
+    code, _ = run_cmd([str(exe_path)], cwd=exe_dir)
     if code != 0:
         fatal("Liara Engine exited with an error.")
     ok("Liara Engine exited successfully.")
@@ -442,6 +459,22 @@ def do_check(args):
     if not args.no_format or not args.no_tidy:
         sources = collect_sources(workspace)
 
+    def group_by_config(file_list, config_name):
+        groups = {} # path_config -> list[files]
+        for src in file_list:
+            src_path = Path(src)
+            config_file = None
+            for parent in [src_path.parent] + list(src_path.parents):
+                if parent == workspace:
+                    break
+                candidate = parent / config_name
+                if candidate.is_file():
+                    config_file = candidate
+                    break
+
+            groups.setdefault(config_file, []).append(src)
+        return groups
+
     # 1. clang-format
     if not args.no_format:
         def step_format():
@@ -452,16 +485,31 @@ def do_check(args):
                 print("  No C/C++ sources found; nothing to format.")
                 return True
 
-            if args.fix:
-                code, _ = run_cmd(["clang-format", "-i"] + sources)
-                if code == 0:
-                    print(f"  Formatted {len(sources)} file(s).")
-                return code == 0
-            else:
-                code, _ = run_cmd(["clang-format", "--dry-run", "--Werror"] + sources)
-                if code == 0:
-                    print(f"  Checked {len(sources)} file(s).")
-                return code == 0
+            success = True
+            grouped_sources = group_by_config(sources, ".clang-format")
+
+            for local_config, files in grouped_sources.items():
+                cmd = ["clang-format"]
+                if local_config:
+                    cmd.append(f"--style=file:{local_config}")
+                    print(f"  Using local .clang-format at {local_config}")
+
+                if args.fix:
+                    cmd.append("-i")
+                else:
+                    cmd.extend(["--dry-run", "--Werror"])
+
+                files = [f for f in files if "generated" not in f]
+
+                cmd.extend(files)
+                code, _ = run_cmd(cmd)
+                if code != 0:
+                    success = False
+
+            if success:
+                action = "Formatted" if args.fix else "Checked"
+                print(f"  {action} {len(sources)} file(s).")
+            return success
 
         run_step("clang-format", step_format)
 
@@ -497,12 +545,27 @@ def do_check(args):
                 print("  No translation units found; nothing for clang-tidy.")
                 return True
 
-            if has_tool("run-clang-tidy"):
-                patterns = [re.escape(s) for s in tu_sources]
-                code, _ = run_cmd(["run-clang-tidy", "-quiet", "-p", str(build_dir)] + patterns)
-            else:
-                code, _ = run_cmd(["clang-tidy", "-p", str(build_dir)] + tu_sources)
-            return code == 0
+            success = True
+            grouped_sources = group_by_config(tu_sources, ".clang-tidy")
+
+            for local_config, files in grouped_sources.items():
+                if has_tool("run-clang-tidy"):
+                    patterns = [re.escape(s) for s in files]
+                    cmd = ["run-clang-tidy", "-quiet", "-p", str(build_dir)]
+                    if local_config:
+                        cmd.extend(["-config-file", str(local_config)])
+                    cmd.extend(patterns)
+                else:
+                    cmd = ["clang-tidy", "-p", str(build_dir)]
+                    if local_config:
+                        cmd.append(f"--config-file={local_config}")
+                    cmd.extend(files)
+
+                code, _ = run_cmd(cmd)
+                if code != 0:
+                    success = False
+
+            return success
 
         run_step("clang-tidy", step_tidy)
 
@@ -536,6 +599,8 @@ def main():
     setup_parser.add_argument("--preset", help="Override the default CMake preset to configure")
     setup_parser.add_argument("--no-configure", action="store_true", help="Skip running cmake configure")
     setup_parser.add_argument("--no-pull", action="store_true", help="Skip pulling existing clones")
+    setup_parser.add_argument("--ref", action="append", default=[], metavar="MODULE=REF",
+        help="Check out MODULE at REF instead of its default branch. Repeatable. Example: --ref liara-interfaces=v0.1.1")
 
     # Sub-command: build
     build_parser = subparsers.add_parser("build", help="Build the workspace using CMake presets")

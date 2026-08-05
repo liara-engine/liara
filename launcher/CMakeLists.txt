@@ -58,12 +58,32 @@ target_include_directories(liara_launcher PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
-target_link_libraries(liara_launcher PRIVATE Liara::Interfaces Liara::Renderer Liara::Core)
+if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
+    target_link_libraries(liara_launcher PRIVATE
+            Liara::Interfaces
+            $<COMPILE_ONLY:Liara::Core>
+            $<COMPILE_ONLY:Liara::Renderer>)
+
+    foreach(module IN ITEMS liara_core liara_renderer)
+        if(TARGET ${module})
+            add_dependencies(liara_launcher ${module})
+        endif()
+    endforeach()
+
+    if(NOT BUILD_SHARED_LIBS)
+        message(FATAL_ERROR
+                "LIARA_LAUNCHER_MODULE_LOADING=runtime requires BUILD_SHARED_LIBS=ON: there is "
+                "nothing to load at runtime in a static build. Use a '-runtime' preset.")
+    endif()
+else()
+    target_link_libraries(liara_launcher PRIVATE
+            Liara::Interfaces Liara::Core Liara::Renderer)
+endif()
 
 set_target_properties(liara_launcher PROPERTIES
         CXX_STANDARD          20
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS        OFF)
 
-add_test(NAME launcher_smoke COMMAND liara_launcher)
-set_tests_properties(launcher_smoke PROPERTIES LABELS "integration;slow")
+add_test(NAME launcher_smoke COMMAND liara_launcher --smoke)
+set_tests_properties(launcher_smoke PROPERTIES LABELS "integration" TIMEOUT 30)

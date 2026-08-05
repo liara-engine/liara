@@ -13,11 +13,13 @@
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
     #ifdef _WIN32
         #include <windows.h>
+        #include <string>
         typedef HMODULE LibHandle;
         #define LIB_LOAD(path) LoadLibraryA(path)
         #define LIB_GET_SYMBOL(handle, name) GetProcAddress(handle, name)
         #define LIB_FREE(handle) FreeLibrary(handle)
         #define LIB_ERROR() std::to_string(GetLastError())
+        #define LIB_NAME(stem) stem ".dll"
     #else
         #include <dlfcn.h>
         #include <string>
@@ -26,6 +28,7 @@
         #define LIB_GET_SYMBOL(handle, name) dlsym(handle, name)
         #define LIB_FREE(handle) dlclose(handle)
         #define LIB_ERROR() std::string(dlerror())
+        #define LIB_NAME(stem) "lib" stem ".so"
     #endif
 #endif
 
@@ -45,11 +48,15 @@
  * @note This constant needs to be updated to constantly reflect the minimum ABI version required for this launcher.
  */
 constexpr uint32_t MIN_ABI_VERSION = LIARA_MAKE_VERSION_UNSAFE(0, 2, 0);
-static_assert(LIARA_ABI_VERSION >= MIN_ABI_VERSION, "Liara ABI version is too old for this launcher. Please update your Liara installation.");
+constexpr liara_version_compat_t ABI_COMPAT = liara_version_provides(LIARA_ABI_VERSION, MIN_ABI_VERSION);
+static_assert(ABI_COMPAT == LIARA_VERSION_COMPAT_EXACT || ABI_COMPAT == LIARA_VERSION_COMPAT_COMPATIBLE,
+              "Liara ABI version is too old for this launcher. Please update your Liara installation.");
 
 constexpr float DEMO_DURATION_SECONDS = 8.0F;
 
-int main() {
+int main(int argc, char** argv) {
+    const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
+
     std::cout << "Hello from the Liara launcher!\n\n";
     std::cout << std::format("Launcher version: {} (0x{:08x})\n",
                              LIARA_LAUNCHER_VERSION_STRING,
@@ -60,13 +67,13 @@ int main() {
                              LIARA_ABI_VERSION);
 
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
-    LibHandle coreHandle = LIB_LOAD("libliara_core.so");
+    LibHandle coreHandle = LIB_LOAD(LIB_NAME("liara_core"));
     if (coreHandle == nullptr) {
         std::cout << std::format("Error: Failed to load Liara core library ({}).\n", LIB_ERROR());
         return 1;
     }
 
-    LibHandle rendererHandle = LIB_LOAD("libliara_renderer.so");
+    LibHandle rendererHandle = LIB_LOAD(LIB_NAME("liara_renderer"));
     if (rendererHandle == nullptr) {
         std::cout << std::format("Error: Failed to load Liara renderer library ({}).\n", LIB_ERROR());
         LIB_FREE(coreHandle);
@@ -160,8 +167,10 @@ int main() {
         }
     });
 
-    liara_core_set_run_mode(core, LIARA_CORE_RUN_MODE_FIXED, 1.0F / 60.0F);
-    liara_core_run(core);
+    if (!smoke) {
+        liara_core_set_run_mode(core, LIARA_CORE_RUN_MODE_FIXED, 1.0F / 60.0F);
+        liara_core_run(core);
+    }
 
     liara_core_destroy(core);
     liara_renderer_destroy(renderer);

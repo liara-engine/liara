@@ -115,7 +115,7 @@ Documentation of the whole project can be found at
 [liara-engine.liara-engine-documentation.workers.dev](https://liara-engine.liara-engine-documentation.workers.dev/).
 
 User-facing documentation (tutorials, guides) is hosted at
-TODO: add link when section is ready.
+[TODO]: add link when section is ready.
 
 For newcomers, the recommended reading order is the sequence above,
 top to bottom.
@@ -124,21 +124,29 @@ top to bottom.
 
 ## Project Structure
 
+Liara is a set of independently versioned repositories rather than one tree. Each module owns one concern, exposes it through the shared C ABI, and knows nothing about its siblings.
+
 The repositories under [`liara-engine`](https://github.com/liara-engine):
 
 ```
 liara-engine/
 ├── liara                  # This repository: launcher, packaging,
 │                          # documentation, compatibility matrix.
-├── liara-interfaces       # C ABI headers shared by all modules.
-├── liara-core             # ECS, math, assets, logger, settings.
+├── liara-interfaces       # The C ABI contract. Header-only.
+│                          # Every module depends on it; it depends on nothing.
+├── liara-core             # ECS, math, logger, settings, event bus, loop primitives.
+├── liara-platform         # Window, input, OS signals, timing (v0.1).
 ├── liara-renderer         # Vulkan reference renderer.
+├── liara-assets           # Asset loading, decoding, lifetime (v0.3).
+├── liara-audio            # Playback and mixing (v0.5).
 ├── liara-editor           # Editor application (post-v1.0).
 ├── liara-physics          # Physics module (post-v1.0).
 ├── docs-shared            # Shared documentation templates.
 ├── liara-docs             # Documentation for the engine.
 └── .github                # Organization-level workflows and templates.
 ```
+
+Modules do not compose themselves. The launcher creates each one, negotiates ABI versions, and wires them together; `liara-core` neither loads nor references any of the others. The consequence worth stating up front is that there is no dependency order to learn between modules — there is only each module's dependency on the contract.
 
 The interfaces repository is the contract; everything else
 implements or consumes it. See [`MODULES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/MODULES)
@@ -175,28 +183,28 @@ A condensed summary of the choices documented in
 and
 [`TOOLING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/TOOLING):
 
-| Concern             | Choice                                             |
-|---------------------|----------------------------------------------------|
-| Language            | C++20 (interfaces in C ABI)                        |
-| Graphics API        | Vulkan 1.3 via Vulkan-Hpp + VMA                    |
-| Windowing           | SDL3                                               |
-| UI                  | Dear ImGui                                         |
-| Audio               | miniaudio                                          |
-| Math                | Engine-internal types; GLM as private dep          |
-| 3D format           | glTF 2.0                                           |
-| Image formats       | PNG, JPG via stb_image                             |
-| Configuration       | TOML (toml++)                                      |
-| Build system        | CMake 3.29+ with presets                           |
-| Dependency manager  | vcpkg in manifest mode                             |
-| Test framework      | doctest                                            |
-| ECS                 | Hand-written (sparse-set storage)                  |
-| Documentation       | Doxygen (API) + mdBook (user)                      |
-| CI/CD               | GitHub Actions with reusable workflows             |
-| Static analysis     | clang-tidy + SonarCloud                            |
-| Code formatting     | clang-format                                       |
-| Release automation  | release-please                                     |
-| Platforms           | Linux (Arch primary, Ubuntu CI), Windows 11        |
-| Compilers           | GCC 14+, Clang 18+, MSVC 2022 17.6+                |
+| Concern             | Choice                                      |
+|---------------------|---------------------------------------------|
+| Language            | C++20 (interfaces in C ABI)                 |
+| Graphics API        | Vulkan 1.3 via Vulkan-Hpp + VMA             |
+| Windowing           | SDL3                                        |
+| UI                  | Dear ImGui                                  |
+| Audio               | miniaudio                                   |
+| Math                | Engine-internal types; GLM as private dep   |
+| 3D format           | glTF 2.0                                    |
+| Image formats       | PNG, JPG via stb_image                      |
+| Configuration       | TOML (toml++)                               |
+| Build system        | CMake 3.29+ with presets                    |
+| Dependency manager  | vcpkg in manifest mode                      |
+| Test framework      | doctest                                     |
+| ECS                 | Hand-written (sparse-set storage)           |
+| Documentation       | Doxygen (API) + mdBook (user)               |
+| CI/CD               | GitHub Actions with reusable workflows      |
+| Static analysis     | clang-tidy + SonarCloud                     |
+| Code formatting     | clang-format                                |
+| Release automation  | release-please                              |
+| Platforms           | Linux (Arch primary, Ubuntu CI), Windows 11 |
+| Compilers           | GCC 14+, Clang 20+, MSVC 2022 17.6+         |
 
 ---
 
@@ -213,7 +221,7 @@ to contribute:
   be opened directly without prior discussion.
 
 The project follows the [Contributor Covenant](https://www.contributor-covenant.org/)
-code of conduct (a copy lives in `CODE_OF_CONDUCT.md`) [TODO].
+code of conduct (a copy lives in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)).
 
 ---
 

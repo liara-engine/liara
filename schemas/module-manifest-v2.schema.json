@@ -1,0 +1,197 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://liara-engine.github.io/liara/schemas/module-manifest-v2.schema.json",
+  "title": "Liara Engine Module Manifest v2",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": ["$schema", "manifest_version", "kind", "metadata", "versions"],
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://liara-engine.github.io/liara/schemas/module-manifest-v2.schema.json"
+    },
+    "manifest_version": {
+      "const": 2,
+      "description": "Schema generation. Absent means v1. Bumped only when the meaning of an existing field changes; adding an optional field does not require it."
+    },
+    "kind": {
+      "enum": [
+        "contract",
+        "module",
+        "host",
+        "infrastructure"
+      ],
+      "description": "What this repository is, per MODULES.md section 1. Determines which fields apply: a contract's versions are ABI versions and declare no target; a module or a host targets one or more; infrastructure has no ABI relation at all."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Metadata about the module.",
+      "required": [
+        "name",
+        "description",
+        "repo",
+        "latest"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "latest": {
+          "$ref": "#/$defs/version"
+        }
+      }
+    },
+    "versions": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "description": "Documentation versions of this repository, which for a module or a contract are also its release versions.",
+      "patternProperties": {
+        "^(dev|\\d+\\.\\d+\\.\\d+)$": {
+          "$ref": "#/$defs/versionEntry"
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Versioned things this repository publishes whose version line differs from the repository's own. A repository whose only artifact follows its own version line does not need this.",
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "name",
+            "versions"
+          ],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "description": {
+              "type": "string"
+            },
+            "release_please_package": {
+              "type": "string",
+              "description": "Key of this artifact in .release-please-manifest.json, when release-please manages it."
+            },
+            "versions": {
+              "type": "object",
+              "minProperties": 1,
+              "additionalProperties": false,
+              "patternProperties": {
+                "^(dev|\\d+\\.\\d+\\.\\d+)$": {
+                  "$ref": "#/$defs/versionEntry"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "allOf": [
+    {
+      "if": {
+        "properties": { "kind": { "enum": ["module", "host"] } },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "versions": {
+            "patternProperties": {
+              "^(dev|\\d+\\.\\d+\\.\\d+)$": { "$ref": "#/$defs/versionEntryWithAbi" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "kind": { "enum": ["contract", "infrastructure"] } },
+        "required": ["kind"]
+      },
+      "then": {
+        "properties": {
+          "versions": {
+            "patternProperties": {
+              "^(dev|\\d+\\.\\d+\\.\\d+)$": { "$ref": "#/$defs/versionEntryWithoutAbi" }
+            }
+          }
+        }
+      }
+    }
+  ],
+
+  "$defs": {
+    "version": {
+      "type": "string",
+      "pattern": "^(dev|\\d+\\.\\d+\\.\\d+)$"
+    },
+
+    "abiTarget": {
+      "description": "One or more ABI versions this version is built against. Each is an anchor, not a result: the set of ABI versions actually accepted is the union of the compatibility rule of INTERFACES.md section 8.5 applied to each anchor. Several anchors are only meaningful across major versions, since within one major the rule already covers the range; declaring two means the version is claimed to work under both, which is a claim CI is expected to exercise.",
+      "oneOf": [
+        { "$ref": "#/$defs/version" },
+        {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/version" }
+        }
+      ]
+    },
+
+    "versionEntryObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "abi": { "$ref": "#/$defs/abiTarget" },
+        "note": {
+          "type": "string",
+          "description": "Short human-readable remark shown next to the version where a consumer has room for it."
+        }
+      }
+    },
+
+    "versionEntry": {
+      "oneOf": [
+        { "$ref": "#/$defs/abiTarget" },
+        { "$ref": "#/$defs/versionEntryObject" }
+      ]
+    },
+
+    "versionEntryWithAbi": {
+      "oneOf": [
+        { "$ref": "#/$defs/abiTarget" },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/versionEntryObject" },
+            { "required": ["abi"] }
+          ]
+        }
+      ]
+    },
+
+    "versionEntryWithoutAbi": {
+      "allOf": [
+        { "$ref": "#/$defs/versionEntryObject" },
+        { "properties": { "abi": false } }
+      ]
+    }
+  }
+}

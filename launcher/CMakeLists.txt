@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.29)
 
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR
+            "In-source builds are not supported. Build into build/<preset-name>/ instead, which is "
+            "what the presets already do:\n"
+            "    cmake --preset linux-debug-clang\n"
+            "Remove the CMakeCache.txt and CMakeFiles/ this attempt just created before retrying.")
+endif()
+
 file(READ "${CMAKE_CURRENT_SOURCE_DIR}/../.release-please-manifest.json" RELEASE_PLEASE_MANIFEST)
 string(JSON PROJECT_VERSION GET ${RELEASE_PLEASE_MANIFEST} "launcher")
 message(STATUS "LiaraLauncher version: ${PROJECT_VERSION}")
@@ -53,6 +61,8 @@ endif()
 
 
 add_executable(liara_launcher "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+
+liara_configure_target(liara_launcher)
 
 target_include_directories(liara_launcher PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"

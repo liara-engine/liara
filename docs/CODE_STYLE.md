@@ -298,7 +298,7 @@ Checks: >
     readability-*,
     -readability-magic-numbers,
     -readability-identifier-length,
-    -security.insecureAPI.DeprecatedOrUnsafeBufferHandling
+    -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
 
 WarningsAsErrors: >
     *,
@@ -522,33 +522,36 @@ The order is: file-level docstring, `#pragma once`, includes (in the configured 
 
 ### Implementation Structure
 
-Every `.cpp` file starts with the corresponding header's include, followed by additional includes:
+The ABI shim is the only place in a module where C and C++ meet. It lives in a file named after the module — `src/renderer.cpp` for `liara-renderer` — and contains nothing but the translation between the two:
 
 ```cpp
-// In src/renderer.cpp — the shim exposing liara/renderer/renderer.h
+#include <liara/renderer/renderer.h>
 
-#include <liara/renderer/renderer.h>  // Corresponding header first.
+#include "renderer/Renderer.hpp"
 
-#include "Renderer.h"              // Module-internal header next.
+extern "C" {
 
-extern "C" liara_result_t liara_renderer_create(  // NOLINT(readability-identifier-naming)
-    const liara_renderer_create_info_t* create_info,
-    liara_renderer_handle_t** out_handle)
-{
-    if (create_info == nullptr || out_handle == nullptr) {
-        return LIARA_RESULT_INVALID_ARGUMENT;
-    }
+liara_result_t liara_renderer_create(const liara_renderer_create_info_t* createInfo,
+                                     liara_renderer_handle_t* outHandle) {
+    if (createInfo == nullptr || outHandle == nullptr) { return LIARA_RESULT_INVALID_ARGUMENT; }
+
+    // No exception crosses this boundary: the C caller has no way to catch one, and unwinding
+    // through a foreign frame is undefined. Everything becomes a result code here or nowhere.
     try {
-        // NOLINTNEXTLINE(cppcoreguidelines-owning-memory) — ownership crosses to C
-        *out_handle = reinterpret_cast<liara_renderer_handle_t*>(
-            new Liara::Renderer::LiaraRenderer(*create_info));
+        auto* renderer = new liara::renderer::Renderer(*createInfo);
+        *outHandle = reinterpret_cast<liara_renderer_handle_t>(renderer);
         return LIARA_RESULT_SUCCESS;
+    } catch (const std::bad_alloc&) {
+        return LIARA_RESULT_OUT_OF_MEMORY;
+    } catch (...) {
+        return LIARA_RESULT_UNKNOWN_ERROR;
     }
-    catch (const std::bad_alloc&)   { return LIARA_RESULT_OUT_OF_MEMORY; }
-    catch (const std::exception&)   { return LIARA_RESULT_INTERNAL_ERROR; }
-    catch (...)                     { return LIARA_RESULT_INTERNAL_ERROR; }
 }
+
+}  // extern "C"
 ```
+
+Every name that crosses the boundary carries the `_t` suffix its declaration gives it. The shim is thin by construction: if it starts containing logic, that logic belongs on the C++ side where it can be tested without going through the ABI.
 
 The `catch (...)` is not defensive padding: an exception escaping through a C boundary is undefined behaviour, so the shim catches everything, including what it cannot name.
 

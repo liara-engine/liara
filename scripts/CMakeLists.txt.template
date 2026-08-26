@@ -1,5 +1,14 @@
 # GENERATED FILE - DO NOT EDIT
 cmake_minimum_required(VERSION 3.29)
+
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
+    message(FATAL_ERROR
+            "In-source builds are not supported. Build into build/<preset-name>/ instead, which is "
+            "what the presets already do:\n"
+            "    cmake --preset linux-debug-clang\n"
+            "Remove the CMakeCache.txt and CMakeFiles/ this attempt just created before retrying.")
+endif()
+
 project(LiaraWorkspace LANGUAGES C CXX)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -52,6 +61,14 @@ endif()
 if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
     message(WARNING "Experimental: LIARA_LAUNCHER_MODULE_LOADING=runtime. "
                     "The launcher loads modules at runtime.")
+endif()
+
+if(LIARA_IPO)
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ipo_ok OUTPUT ipo_why)
+    if(NOT ipo_ok)
+        message(FATAL_ERROR "LIARA_IPO=ON but this toolchain cannot do it:\n${ipo_why}")
+    endif()
 endif()
 
 # MODULES_PLACEHOLDER

@@ -65,7 +65,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.detect.outputs.matrix) }}
 
-    uses: liara-engine/.github/.github/workflows/reusable-generate-docker.yml@v0
+    uses: liara-engine/.github/.github/workflows/reusable-generate-docker.yml@v1
 
     with:
       target: ${{ matrix.target }}

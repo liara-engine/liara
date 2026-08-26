@@ -146,7 +146,7 @@ Verify the toolchain versions meet the project's requirements:
 
 ```bash
 cmake --version    # Must be 3.29 or newer
-clang --version    # Must be 18 or newer
+clang --version    # Must be 20 or newer
 gcc --version      # Must be 14 or newer
 glslc --version    # Must report a Vulkan SDK version
 ```
@@ -438,22 +438,25 @@ Then re-run.
 ### 3.6 Build and Test
 
 ```powershell
-# Build the default development preset (windows-release)
-.\scripts\liara.ps1 build
+# Configure once. One configure preset serves both Debug and Release on Windows.
+.\scripts\liara.ps1 setup --preset windows
 
-# Or build with a specific preset
-.\scripts\liara.ps1 build --preset windows-debug
-
-# Run tests
-.\scripts\liara.ps1 test --preset windows-debug
+# Build and test, choosing the configuration at build time.
+.\scripts\liara.ps1 build --preset windows-release
+.\scripts\liara.ps1 test --preset windows-release
 ```
 
-Available Windows presets:
+The Windows presets are multi-configuration, which is why there are three configure presets and six build presets rather than a matching pair of each. The configure presets differ by linkage only:
 
-- `windows-debug` — debug build, single configuration.
-- `windows-release` — release build. Default for development.
+| Configure preset   | `BUILD_SHARED_LIBS` | `LIARA_LAUNCHER_MODULE_LOADING` |
+|--------------------|---------------------|---------------------------------|
+| `windows`          | `OFF`               | `link`                          |
+| `windows-link`     | `ON`                | `link`                          |
+| `windows-runtime`  | `ON`                | `runtime`                       |
 
-After a successful build, run the test suite. If all tests pass, the setup is complete.
+Each of those serves a `-debug` and a `-release` build preset (`windows-debug`, `windows-release`, `windows-debug-link`, and so on), and the build preset carries the configuration. Switching between Debug and Release therefore does not re-resolve dependencies, which is the practical reason the Windows side is arranged this way.
+
+A build preset's name does not always match its configure preset's name. `liara.ps1` resolves the build directory through the preset file rather than guessing it from the name; anything else that needs it should do the same.
 
 ### 3.7 Run the Demo
 
@@ -732,16 +735,13 @@ The orchestrator will automatically pull (`git pull`) each module repository and
 
 ### Updating the Vulkan SDK (Windows)
 
-Download the new SDK installer and run it. The installer cleanly upgrades over the existing installation. After upgrading, regenerate the build:
+Download the new SDK installer and run it. The installer cleanly upgrades over the existing installation. After updating the Vulkan SDK, re-run the configure step so that CMake picks up the new location:
 
 ```powershell
-cd workspace
-Remove-Item -Recurse -Force build
-cmake --preset=windows-release
-cmake --build --preset=windows-release
+.\scripts\liara.ps1 setup --preset windows
 ```
 
-A clean reconfigure is needed because shader compilation paths and SDK includes may have changed.
+`windows` is the configure preset; `windows-release` and its siblings are build presets and cannot be passed to a configure step.
 
 ---
 

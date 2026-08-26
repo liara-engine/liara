@@ -8,6 +8,7 @@ import json
 import argparse
 import tempfile
 import re
+import hashlib
 from pathlib import Path
 
 # --- Configuration -----------------------------------------------------------
@@ -345,11 +346,19 @@ def do_setup(args):
 
     (workspace / "vcpkg.json").write_text(json.dumps(merged_manifest, indent=2) + "\n", encoding="utf-8")
 
-    for m in buildable:
-        cfg = workspace / m / "vcpkg-configuration.json"
-        if cfg.exists():
-            shutil.copy(cfg, workspace / "vcpkg-configuration.json")
-            break
+    configs = sorted(p for p in (workspace / m / "vcpkg-configuration.json" for m in MODULES) if p.is_file())
+    if not configs:
+        fatal("No vcpkg-configuration.json found in any module.")
+
+    digests = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in configs}
+    if len(set(digests.values())) > 1:
+        # Picking one silently would mean some module builds against a baseline it never pinned,
+        # and the resulting version skew would surface as a link error three steps later.
+        detail = "\n".join(f"  {p.relative_to(workspace)}: {d[:12]}" for p, d in digests.items())
+        fatal("Module repositories pin different vcpkg baselines:\n" + detail +
+              "\nReconcile them before setting up the workspace.")
+
+    shutil.copy2(configs[0], workspace / "vcpkg-configuration.json")
 
     # 4. Generate CMakePresets.json
     info("Generating CMakePresets.json...")

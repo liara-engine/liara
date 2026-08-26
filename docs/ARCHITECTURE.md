@@ -126,7 +126,7 @@ Although modules are linked statically today, the **interfaces between them are 
 
 This decision also has an immediate benefit independent of any future dynamic loading: it makes it possible, in principle, to replace any module with an implementation written in another language. A user who wanted to write the renderer in Rust against OpenGL, or the physics module in Zig, could do so by implementing the same C interface. Whether this ever happens in practice is a separate question; what matters is that nothing in the architecture forbids it.
 
-A CI leg builds every module as a shared library and links the launcher against them ([Tooling](TOOLING.md#reusable-workflows), `reusable-shared-dynamic.yml`); if a module silently acquired a link-time dependency on another module's symbols, or leaked C++ across its boundary, that build fails. The static/dynamic choice is thus a build-time flag (`BUILD_SHARED_LIBS`), not an architectural fork. A further, optional step exercises actual runtime loading (`dlopen`/`LoadLibrary` + symbol resolution through each module's `liara_<module>_info` entry point), giving the version-negotiation machinery its first real workout instead of leaving it a design that nothing runs.
+A CI leg builds every module as a shared library and links the launcher against them, and a further leg makes the launcher resolve them at runtime instead ([Tooling](TOOLING.md#5-ci-pipelines), the `-link` and `-runtime` presets); if a module silently acquired a link-time dependency on another module's symbols, or leaked C++ across its boundary, one of the two fails. The static/dynamic choice is thus a pair of build-time flags, not an architectural fork.
 
 ### 4.3 One Namespace Per Subsystem, From the First Line
 

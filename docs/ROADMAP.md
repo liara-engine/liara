@@ -4,6 +4,26 @@
 
 ---
 
+## Table of Contents
+
+- [1. How to Read This Document](#1-how-to-read-this-document)
+- [2. Cadence Philosophy](#2-cadence-philosophy)
+- [3. Versioning Conventions](#3-versioning-conventions)
+- [4. Phase 0: Bootstrap](#4-phase-0-bootstrap)
+- [5. v0.1 — Hello Triangle](#5-v01--hello-triangle)
+- [6. v0.2 — ECS and Math](#6-v02--ecs-and-math)
+- [7. v0.3 — Assets](#7-v03--assets)
+- [8. v0.4 — Lighting and Materials v1](#8-v04--lighting-and-materials-v1)
+- [9. v0.5 — Input and Audio](#9-v05--input-and-audio)
+- [10. v0.6 — Packaging](#10-v06--packaging)
+- [11. v0.7 — v0.7 through v0.9 — Dogfooding](#11-v07-through-v09--dogfooding)
+- [12. v1.0 — The First Game](#12-v10--first-shippable-game)
+- [13. Post-v1.0 — Thematic Roadmap](#13-post-v10--themes-only)
+- [14. The Documentation Platform (Continuous Track)](#14-the-documentation-platform-continuous-track)
+- [15. Living Document](#15-living-document)
+
+---
+
 ## 1. How to Read This Document
 
 This roadmap is structured around **milestones**, not dates. Each milestone has a defined scope, a Definition of Done, and an explicit list of what is **not** in scope (the "non-goals" section is as important as the "goals" section).
@@ -87,7 +107,7 @@ What the exemption does not cover is the Definition of Done. Its items may be re
 
 The `liara-editor` and `liara-physics` repositories are **not** created in Phase 0. They will be created when their first code is written.
 
-### Documentation in Place
+### ~~Documentation in Place~~
 
 The meta repository contains, at minimum, the following documents, all written and reviewed:
 
@@ -100,24 +120,24 @@ The meta repository contains, at minimum, the following documents, all written a
 - ~~`docs/TOOLING.md`~~
 - ~~`docs/BOOTSTRAP.md`~~
 - ~~`docs/DOCUMENTATION_PIPELINE.md`~~
-- `docs/adr/0001-*.md` through whatever ADRs are needed to capture the major decisions taken so far.
+- ~~`docs/adr/0001-*.md` through whatever ADRs are needed to capture the major decisions taken so far.~~
 
 ~~The `liara-interfaces` repository contains its own `INTERFACES.md`.~~
 
 ~~The `docs-shared` repository contains the navbar HTML/CSS/JS and the Doxygen and mdBook templates that include it. It also contains its own developer guide describing the templates and the shared-content split.~~
 
-### CI Pipelines Operational
+### ~~CI Pipelines Operational~~
 
 Each module repository has GitHub Actions workflows that, on every push and pull request:
 
-- Build on Linux (GCC and Clang) and Windows (MSVC).
-- Run clang-format checks.
-- Run clang-tidy.
-- Run the test suite (even if it is just one placeholder test).
+- ~~Build on Linux (GCC and Clang) and Windows (MSVC).~~
+- ~~Run clang-format checks.~~
+- ~~Run clang-tidy.~~
+- ~~Run the test suite (even if it is just one placeholder test).~~
 - ~~Generate Doxygen and Mdbook documentation.~~
-- ~~On pushes to main, deploy the documentation to Cloudflare Pages.~~
+- ~~On pushes to main, deploy the documentation to Cloudflare Workers.~~
 
-The reusable workflows that implement these steps live in the `.github` organization-level repository and are invoked from each module's workflows.
+~~The reusable workflows that implement these steps live in the `.github` organization-level repository and are invoked from each module's workflows.~~
 
 ### ~~Release-Please Configured~~
 
@@ -150,14 +170,14 @@ In Phase 0, the linked module documentation pages may be empty placeholders. The
 Phase 0 is complete when:
 
 - [x] All listed repositories exist and are configured.
-- [ ] All listed documents are written.
-- [ ] CI is green on every repository (even if testing only stubs).
-- [x] Documentation is generated and deployed to cloudflare pages.
+- [x] All listed documents are written.
+- [x] CI is green on every repository (even if testing only stubs).
+- [x] Documentation is generated and deployed to cloudflare workers.
 - [x] The hub at `liara-engine.liara-engine-documentation.workers.dev` is accessible and renders with the navbar.
 - [x] The workspace bootstrap script runs successfully on a clean Arch Linux machine.
 - [ ] The workspace bootstrap script runs successfully on a clean Windows 11 machine with Visual Studio 2022.
-- [ ] An ADR exists for each major decision: multi-repo layout, C ABI interfaces, ECS-from-scratch, Vulkan-Hpp, etc.
-- [ ] Every module builds as a shared library (`BUILD_SHARED_LIBS=ON`) with hidden default visibility and an explicit export macro, and the launcher links and runs against the shared build.
+- [x] An ADR exists for each major decision: multi-repo layout, C ABI interfaces, ECS-from-scratch, Vulkan-Hpp, etc.
+- [x] Every module builds as a shared library (`BUILD_SHARED_LIBS=ON`) with hidden default visibility and an explicit export macro, and the launcher links and runs against the shared build.
 
 ---
 
@@ -193,7 +213,7 @@ The renderer initializes Vulkan with validation layers enabled in debug builds. 
 - [ ] A window appears with a triangle rendered in it.
 - [ ] The window is closable and the application shuts down cleanly.
 - [ ] No Vulkan validation errors are reported in debug builds.
-- [ ] The interface version negotiation between core and renderer is exercised through the runtime-loading path: a contrived major-version mismatch is detected at load time, produces a clear error, and refuses to load — no crash, no silent mismatch.
+- [ ] The interface version negotiation between core and renderer is exercised: an ABI mismatch is detected before anything is called, produces a clear error, and refuses to proceed — no crash, no silent mismatch. Under the `-runtime` presets, the same check runs after symbol resolution rather than before the first call; both paths reach the same verdict.
 - [ ] Tests pass on all platforms.
 - [ ] User-facing documentation includes a "Build Hello Triangle" page.
 - [ ] Compatibility matrix updated.
@@ -227,6 +247,37 @@ This form is for the developer. It is allowed to be rough: a command-line tool, 
 - [ ] It rejects an ABI-incompatible combination with a clear message, before assembly.
 - [ ] It assembles a compatible combination into a layout the launcher can run against.
 - [ ] It works on Linux for the developer's own workflow.
+
+---
+
+## v0.1.x — The Module Loader (Experimental)
+
+Like the composition tool, this is not a numbered milestone: it is the piece of the host that turns "the interfaces are designed as if modules were dynamic" into something a program actually runs.
+
+### Rationale
+
+`ARCHITECTURE.md` §4.2 makes a claim — that switching to runtime loading is a matter of writing a loader, not of rewriting contracts. A claim nothing exercises is a claim nobody has checked. The `-runtime` presets exist from Phase 0 precisely so the claim is testable early, before enough code has accumulated for a static coupling to be expensive to undo.
+
+### Scope (experimental form)
+
+The launcher gains a small loader: it resolves each module's shared library by a platform-correct name, opens it, resolves that module's `liara_<module>_info` entry point plus the handful of functions the host actually calls, runs the negotiation of `INTERFACES.md` §8.5 on the result, and refuses to proceed on `INCOMPATIBLE`. Library names live in one place, next to the platform macros, rather than being spelled at each call site.
+
+In this form the loader is deliberately naive: a fixed list of modules, no discovery, no plugin directory, no versioned filename resolution, no graceful degradation when a module is absent.
+
+### Out of Scope (deferred until a host actually needs it)
+
+- Module discovery: scanning a directory, reading a manifest, deciding what to load.
+- Loading a module the launcher was not compiled to know about.
+- Unload and reload at runtime (that is code hot-reload; deferred indefinitely, see `ARCHITECTURE.md` §12).
+- Any policy beyond "refuse INCOMPATIBLE, warn on DEGRADED".
+
+### Definition of Done (experimental)
+
+- [ ] Under the `-runtime` presets, the launcher links against `liara-interfaces` only; the module libraries are resolved at load time, not at link time.
+- [ ] Library names are correct on both Linux and Windows, and are defined in one place.
+- [ ] A contrived ABI mismatch is detected after symbol resolution and refuses to proceed, with a message naming the module and both versions.
+- [ ] A missing or unopenable library produces a clear error rather than a crash.
+- [ ] The `-runtime` presets are exercised by CI on both platforms.
 
 ---
 
@@ -288,9 +339,13 @@ This version introduces persistent assets: meshes loaded from glTF files, textur
 
 ### Scope
 
-The core implements the asset manager: handles for meshes, textures, and shaders, with reference counting and explicit lifetime management. Assets are loaded via dedicated functions (`liara_core_asset_load_mesh`, etc.) that return handles.
+This version creates `liara-assets`. Loading, decoding and lifetime management of assets are its concern from the outset rather than something extracted from the core later: an asset system that starts inside the core acquires a dozen callers before anyone notices, and the extraction stops being a move and becomes a rewrite.
 
-glTF support uses cgltf or tinygltf (TBD). The first supported features are static meshes (no skeletal animation), with embedded or external textures. Materials in glTF are read but only the `baseColorTexture` is honored at this stage.
+The module exposes `liara_assets_load_mesh`, `liara_assets_load_texture` and their release counterparts across the ABI, in its own `liara_assets_` namespace. The core does not call them and does not link against the module; the launcher composes the two, as it does for every other pair.
+
+glTF 2.0 is the mesh format and PNG the texture format, decoded through cgltf (or tinygltf, TBD) and stb. Neither library appears in any public header: they are implementation details of the module, and the ABI exposes handles.
+
+The first supported features are static meshes (no skeletal animation), with embedded or external textures. Materials in glTF are read but only the `baseColorTexture` is honored at this stage.
 
 Texture loading uses stb_image. Supported formats: PNG and JPG. Mipmaps are generated automatically.
 
@@ -573,7 +628,41 @@ The criteria for v2.0 will be defined when the v1.x line approaches maturity. Th
 
 ---
 
-## 14. Living Document
+## 14. The Documentation Platform (Continuous Track)
+
+The documentation pipeline is infrastructure, not a feature of the engine, and it does not fit the milestone model: it was born in Phase 0, it will keep evolving after v1.0, and none of its work gates an engine release. It is tracked here as a continuous track rather than being scattered across versions it has nothing to do with.
+
+Items are unordered and are picked up opportunistically, typically when a documentation change makes the friction concrete. The one rule: an item that changes a tool (rather than how an existing tool is used) needs an ADR, per `TOOLING.md` §1, once Phase 0 is closed.
+
+### Manifests and compatibility metadata
+
+`manifest.json` was designed when `liara-interfaces` was the only repository, and it shows: every module version declares an `abi_compatibility` list, including repositories for which the notion is meaningless (the meta repository, `docs-shared`) and repositories that ship a host rather than a module. The schema should distinguish the kinds of repository it actually has to describe — contract, module, host, infrastructure — and require of each only what applies to it.
+
+- [ ] The schema models repository kinds and validates each accordingly.
+- [ ] The meta repository's manifest describes the launcher's ABI requirement rather than declaring a compatibility it does not have.
+- [ ] The navbar's compatibility badges are derived from the new model without special cases.
+
+### Version lifecycle
+
+Nothing currently removes a published documentation version, and nothing can rebuild an old one. Both are needed: the 0.0.x series stops being worth hosting once 1.x ships (the last 0.0 is the only one with archival value), and a template change that improves every page should be applicable to pages already published.
+
+- [ ] A published version can be retired, with its URLs redirecting somewhere sensible rather than 404-ing.
+- [ ] Any tag can be re-rendered with the current pipeline, from its own sources, without a new release of the module.
+
+### Rendering and pipeline
+
+- [ ] The Doxygen renderer is replaced by a tool that accepts real customization, so that the API reference and the developer guide can share a visual language rather than approximate one. Tool to be determined; the choice requires an ADR.
+- [ ] The pipeline is simplified, starting with the static side: the baked/runtime split of `docs-shared` earns its complexity only where a runtime change genuinely has to go live without a rebuild, and the current split is wider than that.
+- [ ] The published site stops carrying dozens of byte-identical copies of the same asset across versions.
+
+### Definition of Done
+
+There is none. This track is complete when the project stops producing documentation, which is to
+say never. Individual items have their own checkboxes; the track does not gate anything.
+
+---
+
+## 15. Living Document
 
 This roadmap is a living document. Versions that have shipped are moved to a "Completed" section (or annotated as completed in place, TBD by the author). Versions that have not shipped may be revised in light of experience.
 

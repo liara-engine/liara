@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.2](https://github.com/liara-engine/liara/compare/schemas-v0.1.1...schemas-v0.1.2) (2026-08-27)
+
+
+### Features
+
+* **schema:** add module manifest v2 JSON schema definition ([9fe19c1](https://github.com/liara-engine/liara/commit/9fe19c1ac578fdf3fa624730c405a87eb59e0440))
+
+
+### Bug Fixes
+
+* **schema:** change required property type to object in module manifest v2 schema ([f4e7690](https://github.com/liara-engine/liara/commit/f4e76902ff78106789c1eb1aaef3dd2abc521136))
+* **schema:** update version entry object to enforce property structure in module manifest v2 schema ([931e03f](https://github.com/liara-engine/liara/commit/931e03f7bf3383effa43eab97fcb90dd871b82be))
+* **schema:** update versions property type to object in module manifest v2 schema ([e7350f3](https://github.com/liara-engine/liara/commit/e7350f33f9505d9c0f809ed4ef133ea867cec99d))
+
 ## [0.1.1](https://github.com/liara-engine/liara/compare/schemas-v0.1.0...schemas-v0.1.1) (2026-07-30)
 
 

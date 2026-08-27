@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1](https://github.com/liara-engine/liara/compare/launcher-v0.1.0...launcher-v0.1.1) (2026-08-27)
+
+
+### Features
+
+* **main:** enhance module loading and add smoke test option ([b22c6e5](https://github.com/liara-engine/liara/commit/b22c6e52d991be51b580211ef47971747ba7faeb))
+
+
+### Bug Fixes
+
+* **cmake:** enhance liara_launcher module loading and add runtime checks ([4fac2d9](https://github.com/liara-engine/liara/commit/4fac2d958dfcb40fc3da6ba96f2a4b249b47cd75))
+* **cmake:** prevent in-source builds and provide user guidance ([c0be191](https://github.com/liara-engine/liara/commit/c0be191c9101a747d6f24193b3caf4e979bff50d))
+
 ## [0.1.0](https://github.com/liara-engine/liara/compare/launcher-v0.0.1...launcher-v0.1.0) (2026-08-01)
 
 

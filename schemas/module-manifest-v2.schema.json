@@ -183,7 +183,7 @@
         {
           "allOf": [
             { "$ref": "#/$defs/versionEntryObject" },
-            { "required": ["abi"] }
+            { "type": "object", "required": ["abi"] }
           ]
         }
       ]

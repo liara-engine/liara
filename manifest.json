@@ -1,5 +1,5 @@
 {
-  "$schema": "https://liara-engine.github.io/liara/schemas/manifest-v2.schema.json",
+  "$schema": "https://liara-engine.github.io/liara/schemas/module-manifest-v2.schema.json",
   "manifest_version": 2,
   "kind": "host",
   "metadata": {

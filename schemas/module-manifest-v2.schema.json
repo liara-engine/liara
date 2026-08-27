@@ -181,19 +181,23 @@
       "oneOf": [
         { "$ref": "#/$defs/abiTarget" },
         {
-          "allOf": [
-            { "$ref": "#/$defs/versionEntryObject" },
-            { "required": ["abi"] }
-          ]
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["abi"],
+          "properties": {
+            "abi": { "$ref": "#/$defs/abiTarget" },
+            "note": { "type": "string" }
+          }
         }
       ]
     },
 
     "versionEntryWithoutAbi": {
-      "allOf": [
-        { "$ref": "#/$defs/versionEntryObject" },
-        { "properties": { "abi": false } }
-      ]
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "note": { "type": "string" }
+      }
     }
   }
 }

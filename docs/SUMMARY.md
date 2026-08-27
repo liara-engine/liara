@@ -7,7 +7,6 @@
 - [Contributing](./CONTRIBUTING.md)
 - [Code Style](./CODE_STYLE.md)
 - [Tooling](./TOOLING.md)
-- [Documentation Pipeline](./DOCUMENTATION_PIPELINE.md)
 - [Architecture Decision Records](./adr/README.md)
   - [ADR-0001: Multi-repository layout](./adr/0001-multi-repository-layout.md)
   - [ADR-0002: A C ABI as the inter-module contract](./adr/0002-c-abi-as-the-inter-module-contract.md)

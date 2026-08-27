@@ -21,13 +21,6 @@
         }
       ]
     },
-    "docker": {
-      "package-name": "docker",
-      "release-type": "simple",
-      "include-component-in-tag": true,
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true
-    },
     "schemas": {
       "package-name": "schemas",
       "release-type": "simple",

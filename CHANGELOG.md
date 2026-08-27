@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.2.0](https://github.com/liara-engine/liara/compare/v0.1.0...v0.2.0) (2026-08-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* documentation docker moved to docs-shared
+
+### Features
+
+* add Contributor Covenant 3.0 Code of Conduct ([f338c19](https://github.com/liara-engine/liara/commit/f338c19cecec3951fc49413d168e17f864e7fc5c))
+* documentation docker moved to docs-shared ([00c5692](https://github.com/liara-engine/liara/commit/00c5692d8fe0bea0d5979d91d72e30a021e44a3b))
+* **main:** enhance module loading and add smoke test option ([b22c6e5](https://github.com/liara-engine/liara/commit/b22c6e52d991be51b580211ef47971747ba7faeb))
+* **schema:** add module manifest v2 JSON schema definition ([9fe19c1](https://github.com/liara-engine/liara/commit/9fe19c1ac578fdf3fa624730c405a87eb59e0440))
+
+
+### Bug Fixes
+
+* **build:** colocate module libraries and executables in a shared bin/ output dir ([d8a1e91](https://github.com/liara-engine/liara/commit/d8a1e91e0e2533ad9c3767cf7e4f3af42b979f52))
+* **cmake:** enhance liara_launcher module loading and add runtime checks ([4fac2d9](https://github.com/liara-engine/liara/commit/4fac2d958dfcb40fc3da6ba96f2a4b249b47cd75))
+* **cmake:** prevent in-source builds and add IPO support checks ([57be176](https://github.com/liara-engine/liara/commit/57be176bed17334534e7fa22bfcb8a82076493de))
+* **cmake:** prevent in-source builds and provide user guidance ([c0be191](https://github.com/liara-engine/liara/commit/c0be191c9101a747d6f24193b3caf4e979bff50d))
+* **manifest:** change kind from host to infrastructure in module manifest v2 ([e342b0b](https://github.com/liara-engine/liara/commit/e342b0bdbfc24407be8bdd18b5cfec3e6c3d235a))
+* **manifest:** update schema URL for module manifest v2 ([56ffb31](https://github.com/liara-engine/liara/commit/56ffb31a15d8bee43bac144781e399f1008c7e28))
+* **manifest:** update schema version and restructure versions for module manifest v2 ([300a79c](https://github.com/liara-engine/liara/commit/300a79c336d93090452d73851362602dd26b52ec))
+* **schema:** change required property type to object in module manifest v2 schema ([f4e7690](https://github.com/liara-engine/liara/commit/f4e76902ff78106789c1eb1aaef3dd2abc521136))
+* **schema:** update version entry object to enforce property structure in module manifest v2 schema ([931e03f](https://github.com/liara-engine/liara/commit/931e03f7bf3383effa43eab97fcb90dd871b82be))
+* **schema:** update versions property type to object in module manifest v2 schema ([e7350f3](https://github.com/liara-engine/liara/commit/e7350f33f9505d9c0f809ed4ef133ea867cec99d))
+* **workspace:** validate vcpkg configuration files and ensure consistent baselines ([c0d52a4](https://github.com/liara-engine/liara/commit/c0d52a41a7a97eb915c333733f76c027406eb21d))
+
 ## [0.1.0](https://github.com/liara-engine/liara/compare/v0.0.3...v0.1.0) (2026-08-01)
 
 

@@ -92,6 +92,7 @@ int main(int argc, char** argv) {
     }
 
     std::cout << "Liara core and renderer libraries loaded successfully.\n";
+    std::cout << std::format("Smoke test mode: {}. Demo duration: {} seconds.\n\n", smoke ? "enabled" : "disabled", DEMO_DURATION_SECONDS);
 #endif
 
     bool error = false;

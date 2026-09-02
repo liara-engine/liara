@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/liara-engine/liara/compare/launcher-v0.1.1...launcher-v0.1.2) (2026-09-02)
+
+
+### Bug Fixes
+
+* **main:** use some variables in a silly output to avoid unused warning ([16347b1](https://github.com/liara-engine/liara/commit/16347b119f7f0630883cf01151f629271e3786ca))
+
 ## [0.1.1](https://github.com/liara-engine/liara/compare/launcher-v0.1.0...launcher-v0.1.1) (2026-08-27)
 
 

@@ -1,3 +1,8 @@
+---
+title: About Liara
+description: High-level overview of the Liara engine, its goals, and its structure.
+---
+
 # Liara Engine
 
 > A modern 3D game engine, built from scratch in C++ with Vulkan, as a

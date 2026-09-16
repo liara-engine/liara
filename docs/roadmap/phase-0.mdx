@@ -1,0 +1,73 @@
+---
+title: "Phase 0: bootstrap"
+description: Not a version of the engine, but the infrastructure engine work happens on top of. One item away from closing.
+sidebar:
+  label: Phase 0
+  order: 1
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+Phase 0 is not a version of the engine. It produces no engine code, and it produces an environment in which engine code can be productively written. It is treated as one atomic unit, and it is complete only when every item below is in place.
+
+## The Phase 0 exemption
+
+The processes described in [`contributing.md`](../contributing/), [Tooling](../tooling/) and `INTERFACES.md`<!-- TODO link → the interfaces guide, once interfaces is split into a directory --> are target processes: they describe how the project operates once its infrastructure exists. During Phase 0 that infrastructure is the work, and subjecting its own construction to it would be circular and needlessly heavy.
+
+So until Phase 0 closes, four things are relaxed.
+
+Replacing a planned tool with a better one found during implementation, or dropping one that turned out to be unrealistic, does not require a decision record. It requires updating the document that described it.
+
+The documents written before implementation are drafts rather than contracts. Where implementation and document disagree, the implementation is presumed right and the document is corrected, unless review concludes the opposite.
+
+Interfaces, workflows, scripts and schemas may change shape without the version ceremony `INTERFACES.md` describes.
+
+The decision records written at the end of Phase 0 record the decisions as they ended up, rather than the sequence of intermediate positions that produced them.
+
+That is what the zero means: nothing is fixed yet, and Phase 0 is where the plan meets the tools and the tools sometimes win.
+
+What the exemption does not cover is the Definition of Done. Its items may be reworded as understanding improves, and they are not waived. The permissiveness is about how an item is reached, not about whether it is.
+
+## Repositories <Badge text="Done" variant="success" />
+
+Seven repositories exist under the `liara-engine` organization: `liara`, `liara-interfaces`, `liara-core`, `liara-renderer`, `docs-shared`, `liara-docs` and `.github`.
+
+Each module repository carries a minimal stub: a `CMakeLists.txt` that compiles, a README pointing at the meta repository, a LICENSE, a `.gitignore`, an `.editorconfig`, a `.clang-format`, a `.clang-tidy`, and a placeholder test that passes.
+
+`liara-editor` and `liara-physics` are deliberately not created. They arrive when their first line of code is written.
+
+## Documentation <Badge text="Done" variant="success" />
+
+The meta repository carries the architecture, modules, roadmap, contributing, code style, tooling and bootstrap documents, plus the decision records covering the decisions taken so far. `liara-interfaces` carries its own `INTERFACES.md`. `docs-shared` carries the Astro preset, the site tools, the hub and the builder image, along with its own guide to all of it.
+
+## CI <Badge text="Done" variant="success" />
+
+Each module repository has workflows that build on Linux under GCC and Clang and on Windows under MSVC, run clang-format and clang-tidy, run the test suite, generate the documentation, and deploy it on a push to `main`. The workflows that implement all of that live in `.github` and are called from each repository.
+
+## Release automation <Badge text="Done" variant="success" />
+
+Every repository has release-please configured against its conventional commits, with `release-please-config.json` and `.release-please-manifest.json` at its root.
+
+## Workspace bootstrap <Badge text="Done" variant="success" />
+
+`scripts/liara.py` clones each module repository into `workspace/`, generates the superbuild `CMakeLists.txt`, configures CMake through the presets, and produces the `compile_commands.json` clangd consumes.
+
+Its success criterion: from a fresh clone of the meta repository on a machine meeting the prerequisites, `./scripts/liara.sh setup` produces a configured, buildable workspace with no manual intervention. The first run also resolves and builds the vcpkg dependencies, which dominates wall-clock time and is not part of the criterion. A warm re-run finishes in under five minutes.
+
+## Documentation hub <Badge text="Done" variant="success" />
+
+The hub displays a landing page with the project's name and description, and offers the version and module switchers.
+
+The module pages it links to may be empty placeholders at this stage. What Phase 0 needs is for the navigation infrastructure to work.
+
+## Definition of Done
+
+- [x] All listed repositories exist and are configured.
+- [x] All listed documents are written.
+- [x] CI is green on every repository, even where it tests only stubs.
+- [x] Documentation is generated and deployed to Cloudflare Workers.
+- [x] The hub is reachable and renders.
+- [x] The workspace bootstrap runs on a clean Arch Linux machine.
+- [ ] The workspace bootstrap runs on a clean Windows 11 machine with Visual Studio 2022.
+- [x] A decision record exists for each major decision.
+- [x] Every module builds as a shared library with hidden default visibility and an explicit export macro, and the launcher links and runs against the shared build.

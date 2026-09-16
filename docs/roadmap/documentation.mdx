@@ -1,0 +1,32 @@
+---
+title: The documentation track
+description: A continuous track that gates nothing, never ends, and has just had most of its open items closed at once.
+sidebar:
+  label: Documentation track
+  order: 11
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+This track runs alongside the milestones rather than inside one. It has no Definition of Done, because it is complete when the project stops producing documentation, which is to say never. Individual items have checkboxes and the track gates nothing.
+
+## Manifests and compatibility metadata <Badge text="Mostly done" variant="success" />
+
+`manifest.json` was designed when `liara-interfaces` was the only repository, and it showed. Every module version declared an `abi_compatibility` list, including the repositories for which that means nothing (the meta repository, `docs-shared`) and the one that ships a host rather than a module. The schema needed to distinguish the kinds of repository it actually describes, and require of each only what applies.
+
+- [x] The schema models repository kinds and validates each accordingly. `module-manifest-v2.schema.json` carries a `kind` of `contract`, `module`, `host` or `infrastructure`.
+- [x] The meta repository's manifest describes the launcher's ABI requirement rather than a compatibility it does not have. That is the `artifacts` block.
+- [x] The switchers' compatibility badges are derived from the new model without special cases.
+
+## Version lifecycle <Badge text="Done" variant="success" />
+
+Nothing used to remove a published version, and nothing could rebuild an old one. Both were needed: the 0.0.x series stops being worth hosting once 1.x ships, with only the last 0.0 carrying any archival value, and a template change that improves every page should reach pages already published.
+
+- [x] A published version can be retired, and its URLs redirect somewhere sensible rather than returning a 404.
+- [x] Any tag can be re-rendered with the current pipeline, from its own sources, without a new release of the module.
+
+## Rendering and pipeline <Badge text="Done" variant="success" />
+
+- [x] The Doxygen renderer is replaced. Doxygen now produces XML only, and a loader in the Astro preset turns it into Starlight pages, so the API reference and the guide share one visual language instead of approximating each other.
+- [x] The pipeline is simplified. The baked and runtime split of `docs-shared` is gone: everything is baked into the builder image, and a style change reaches readers when the image is rebuilt and the sites are rebuilt with it, which one workflow does.
+- [x] The published site stops carrying byte-identical copies of the same asset across versions. Assets are fingerprinted into a content-addressed store, so two versions producing identical bytes occupy one path.

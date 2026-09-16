@@ -1,0 +1,69 @@
+---
+title: Roadmap
+description: The path from an empty repository to Liara 2.0, with an exit criterion for every milestone and no dates anywhere.
+sidebar:
+  label: Overview
+  order: 0
+---
+
+import { Badge } from '@astrojs/starlight/components';
+
+The path from an empty repository to Liara 2.0. It is precise about Phase 0 through v1.0 and vague about everything after, and the vagueness is deliberate.
+
+## Where things stand
+
+| Milestone | What it delivers | Status |
+| --- | --- | --- |
+| [Phase 0](./phase-0/) | The infrastructure engine work happens on top of | <Badge text="Almost done" variant="caution" /> |
+| [v0.1](./v0-1/) | Hello triangle, through the full modular pipeline | <Badge text="Next" variant="note" /> |
+| [v0.2](./v0-2/) | The ECS, the math types, the real render packet | <Badge text="Planned" variant="note" /> |
+| [v0.3](./v0-3/) | Assets loaded from disk, and `liara-assets` | <Badge text="Planned" variant="note" /> |
+| [v0.4](./v0-4/) | Lighting, materials, and debug rendering | <Badge text="Planned" variant="note" /> |
+| [v0.5](./v0-5/) | Input and audio, and `liara-audio` | <Badge text="Planned" variant="note" /> |
+| [v0.6](./v0-6/) | Distribution: AUR package and Windows archive | <Badge text="Planned" variant="note" /> |
+| [v0.7 to v0.9](./v0-7-to-v0-9/) | Building a game with it, and fixing what hurts | <Badge text="Planned" variant="note" /> |
+| [v1.0](./v1-0/) | The first shippable game, and the API freeze | <Badge text="Planned" variant="note" /> |
+| [Post-v1.0](./post-v1/) | Themes only: editor, scripting, physics, advanced rendering | <Badge text="Unscoped" variant="note" /> |
+| [Documentation](./documentation/) | A continuous track that gates nothing and never ends | <Badge text="Ongoing" variant="tip" /> |
+
+## How to read this
+
+Every milestone has a scope, a list of what is explicitly not in scope, and a Definition of Done. The out-of-scope list matters as much as the scope: it is what keeps a version from growing while it is being built.
+
+Precision decreases in three steps. **Phase 0** is specified down to the file. **v0.1 through v1.0** are specified at the feature level. **Post-v1.0** is specified only as themes, and will be scoped when v1.0 ships, with the benefit of having actually used the engine.
+
+That stratification is an honest assessment of what can be planned and what cannot. A solo project's priorities six months out are shaped mostly by what the first six months teach, and pretending otherwise produces detailed roadmaps that get shredded on contact with reality.
+
+## Cadence
+
+There is no calendar. No "v0.3 in March". A version ships when its Definition of Done is met, CI is green and the documentation is updated.
+
+That acknowledges how this project actually gets built: a hyperfocus period may produce two releases in a week, and academic or external commitments may produce a month of silence. Both are normal, and the roadmap neither stresses about the silence nor slows down the bursts.
+
+Four things follow.
+
+**Scope is bounded per version.** A milestone is sized to finish inside one focus burst. A version that starts to feel like it will not is too big, and gets split. Open-ended versions invite abandonment.
+
+**Pauses are not failures.** The roadmap grants explicit permission to not touch the project for weeks. The next burst picks up where the last one stopped, with the milestone page as the bookmark, and there is no such thing as falling behind.
+
+**Definitions of Done are checkable.** Every item is objectively verifiable: a test passes, a binary runs, a page exists. No item reads "feature X feels good".
+
+**Developer tools ship with the features they observe.** A new subsystem without a way to inspect its state is incomplete, so the tools are part of each version's Definition of Done rather than a workstream that lags behind. All of them are compiled out of release builds or hidden behind a toggle that is off by default.
+
+## Version numbers
+
+The meta repository versions separately from the modules. "v0.3" without qualification means the meta repository at 0.3, and the module versions that go with a meta release are recorded in the manifests.
+
+Anything before 0.1 is a development version: unstable, breaking on patch bumps, incompletely documented. The point of pre-0.1 is to build the infrastructure and prove the architecture rather than to produce a usable engine, and 0.0.x is the playground where that happens.
+
+Before 1.0, a minor bump may break things and a patch bump is reserved for fixes and documentation. From 1.0 the meta repository follows strict semantic versioning.
+
+Module repositories follow strict semantic versioning from day one. A breaking change to a module is a major bump whether it sits at 0.x or 1.x.
+
+## This page changes
+
+Shipped versions are annotated as shipped. Unshipped ones may be revised in light of experience, under three rules.
+
+A version's scope may shrink, and features may move to a later version. It should not silently grow, because adding scope to a version in flight is how vaporware starts. A Definition of Done may become more precise, and an item is not removed without a reason written down. The post-v1.0 themes are freely revisable, which is what they are for.
+
+The review happens at the end of every shipped version, and it either confirms the next one's plan or changes it.

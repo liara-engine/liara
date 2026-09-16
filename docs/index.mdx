@@ -1,0 +1,74 @@
+---
+title: Liara Engine
+description: Where to start, in what order, and what each document is for.
+sidebar:
+  label: Start here
+  order: 0
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+Liara is a 3D game engine built as a set of independently versioned modules talking to each other through a C ABI. These pages are the engine's own documentation: the reasoning, the repository map, the mechanics and the process.
+
+## Reading order
+
+For anyone arriving here, myself included after a break, this is the order that works. Each one assumes the ones above it.
+
+<CardGrid>
+  <LinkCard
+    title="Architecture"
+    href="./architecture/"
+    description="The philosophy and the high-level structure. Why the project is split the way it is, and what it refuses to be."
+  />
+  <LinkCard
+    title="Modules"
+    href="./modules/"
+    description="What each repository holds, how responsibilities are divided, and what is allowed to cross a boundary."
+  />
+  <LinkCard
+    title="Roadmap"
+    href="./roadmap/"
+    description="The current milestone, and what the engine can and cannot do today."
+  />
+  <LinkCard
+    title="Bootstrap"
+    href="./bootstrap/"
+    description="Getting a workspace building on your machine. Read this when you want to run something rather than read about it."
+  />
+  <LinkCard
+    title="Contributing"
+    href="./contributing/"
+    description="The working process: branches, pull requests, reviews, and what crossing several repositories costs."
+  />
+  <LinkCard
+    title="Code style"
+    href="./code-style/"
+    description="The six invariants, the shared baselines, and where a module is free to diverge."
+  />
+  <LinkCard
+    title="Tooling"
+    href="./tooling/"
+    description="The mechanics. Build, dependencies, CI, tests, releases. Reference rather than narrative."
+  />
+  <LinkCard
+    title="Decision records"
+    href="./adr/"
+    description="Ten decisions, each with what else was on the table and what it cost. Read one when a choice looks arbitrary."
+  />
+</CardGrid>
+
+## Reading it another way
+
+If you are here for one thing rather than for the whole picture, three entry points are faster than the order above.
+
+**To get something running**, go to [Bootstrap](./bootstrap/) and skip everything else until it builds. The architecture reads better once you have seen the thing compile.
+
+**To find out where something lives**, [Where things live](./modules/cross-reference/) is a topic-to-repository table, and it is the fastest answer to "which repository owns this".
+
+**To understand why a decision looks the way it does**, go to the [decision record](./adr/) before the page describing it. The pages state what is true, and the records state what else was considered and why it lost, which is usually the part that actually answers the question.
+
+## A note on what is true today
+
+The engine is in Phase 0, which means most of what these pages describe is designed and not yet built. That is stated page by page rather than hidden behind a disclaimer: where something is planned, it says so, and where the code currently contradicts a stated principle, there is a note saying which one wins and when.
+
+The parts that are real today are the contract, the two placeholder modules, the launcher that composes them, and the infrastructure around all of it. [Roadmap](./roadmap/) is the honest account of the rest.

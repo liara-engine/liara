@@ -29,7 +29,7 @@ bool           liara_platform_quit_requested(const liara_platform_handle_t*);
 
 Three constraints follow from that shape, and all three are easy to violate later.
 
-**No function pointer crosses the boundary for this.** A callback invoked from a POSIX signal handler would be async-signal-unsafe, and a callback stored in a struct is one of the anti-patterns `INTERFACES.md`<!-- TODO link → the anti-patterns section, once interfaces is split --> lists. The handler does the only thing it is allowed to do, which is write a flag, and the loop reads it.
+**No function pointer crosses the boundary for this.** A callback invoked from a POSIX signal handler would be async-signal-unsafe, and a callback stored in a struct is one of the [anti-patterns](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/anti-patterns/) the interface guide lists. The handler does the only thing it is allowed to do, which is write a flag, and the loop reads it.
 
 **Signal handlers are process-global rather than per-instance.** `liara_platform_install_signal_handlers` is documented as idempotent and installed at most once per process, whatever number of platform handles exist.
 

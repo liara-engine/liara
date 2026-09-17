@@ -31,6 +31,6 @@ The reasoning is in [ADR 0005](../../adr/0005-version-encoding-and-compatibility
 
 ## What lives in the contract
 
-Headers, and nothing else. The precise contents, the layout and what the repository is forbidden from holding are in [`liara-interfaces`](../../modules/interfaces/), and the rules for designing and evolving an interface are in that repository's own `INTERFACES.md`<!-- TODO link → the interfaces guide, once interfaces is split into a directory -->, which is required reading before touching anything in it.
+Headers, and nothing else. The precise contents, the layout and what the repository is forbidden from holding are in [`liara-interfaces`](../../modules/interfaces/), and the rules for designing and evolving an interface are in that repository's own [interface guide](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/), which is required reading before touching anything in it.
 
 Those two documents are deliberately the detailed ones, and this page is deliberately not. A rule stated in two places is a rule that will eventually be stated differently in each.

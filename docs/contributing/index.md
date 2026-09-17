@@ -18,7 +18,7 @@ Contributing means reporting a bug, suggesting a feature, opening a pull request
 
 The [reading order](../) on the guide's front page is the general one. Two things are worth adding for someone about to change code rather than read about it.
 
-[Code style](../code-style/) is worth reading only when actually writing code, and `INTERFACES.md`<!-- TODO link → the interfaces guide, once interfaces is split into a directory --> only when modifying something in `liara-interfaces`, where it is required reading rather than recommended.
+[Code style](../code-style/) is worth reading only when actually writing code, and the [interface guide](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/) only when modifying something in `liara-interfaces`, where it is required reading rather than recommended.
 
 Reading the whole codebase is not necessary. Reading the documents that govern the area being modified is.
 

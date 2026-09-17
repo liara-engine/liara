@@ -18,7 +18,7 @@ Everything shared by every documentation site in the project, and the image that
 
 The consequence worth knowing is that everything in this repository is baked into the image. A change to the styles reaches a reader only once the image is rebuilt and the sites are rebuilt with it, which is why one workflow does both. There is no runtime bundle a page fetches and no version pin to keep in step by hand.
 
-The full guide lives in [this repository's own documentation](https://liara-engine.liara-engine-documentation.workers.dev/docs-shared/dev/guides/), and it is worth reading before changing anything here, because the blast radius of a change is every site at once.
+The full guide lives in [this repository's own documentation](https://liara-engine.liara-engine-documentation.workers.dev/docs-shared/latest/guides/), and it is worth reading before changing anything here, because the blast radius of a change is every site at once.
 
 ## `liara-docs`
 

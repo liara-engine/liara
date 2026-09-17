@@ -37,7 +37,7 @@ The ECS (v0.2), asset loading (v0.3), lighting (v0.4), input beyond the window c
 - [ ] Tests pass on every platform.
 - [ ] The user documentation has a "Build hello triangle" page.
 - [ ] The compatibility record is updated.
-- [ ] The v1 manifest schema is removed, and nothing declares or reads it any more.
+- [ ] The v1 manifest schema is retired: no manifest declares it, and a new one that did would not pass validation. Reading v1 stays, for old-tag rebuilds.
 - [ ] `liara-platform` exists, is released, and appears in it.
 - [ ] Closing the window and sending SIGINT produce the same clean shutdown path.
 

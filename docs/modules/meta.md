@@ -25,7 +25,7 @@ And it is the **compatibility record**, in the sense that its `manifest.json` de
 | `docs/`         | These pages, the other foundational documents, and the ADRs                                                                                                                           |
 | `launcher/`     | The host application: `main.cpp`, its `config.h.in`, its `CMakeLists.txt`                                                                                                             |
 | `scripts/`      | `liara.py`, the `liara.sh` and `liara.ps1` wrappers, and the `CMakeLists.txt` and `CMakePresets.json` templates the workspace is generated from                                       |
-| `schemas/`      | The JSON schemas for `manifest.json` and the modules registry, served over GitHub Pages so that a `$schema` URL resolves. The v1 manifest schema is deprecated and is removed in v0.1 |
+| `schemas/`      | The JSON schemas for `manifest.json` and the modules registry, served over GitHub Pages so that a `$schema` URL resolves. The v1 manifest schema is deprecated and is retired in v0.1 |
 | `workspace/`    | Where `liara.sh setup` clones the module repositories. Not tracked                                                                                                                    |
 | `manifest.json` | This repository's own manifest, in v2 form, with an `artifacts` block declaring the launcher's ABI requirement separately from the repository's versions                              |
 
@@ -37,7 +37,7 @@ The user guide arrives with v0.1, for the reason that writing tutorials against 
 
 No engine logic, no rendering, no ECS. Nothing that belongs in a module.
 
-No generated API reference either. Each module's Doxygen XML is turned into pages by its own documentation build and published to `liara-docs`, which is described in [The documentation pipeline](https://liara-engine.liara-engine-documentation.workers.dev/docs-shared/dev/guides/documentation-pipeline/).
+No generated API reference either. Each module's Doxygen XML is turned into pages by its own documentation build and published to `liara-docs`, which is described in [The documentation pipeline](https://liara-engine.liara-engine-documentation.workers.dev/docs-shared/latest/guides/documentation-pipeline/).
 
 And no Dockerfile. The documentation builder image used to live here in a `docker/` directory and now lives in `docs-shared`, which is the repository the image is built from. One trace of the move is still in the code: the root package of `release-please-config.json` lists `docker/**` in its `exclude-paths` for a directory that no longer exists.
 

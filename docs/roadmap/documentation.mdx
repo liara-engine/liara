@@ -18,8 +18,10 @@ This track runs alongside the milestones rather than inside one. It has no Defin
 - [x] The meta repository's manifest describes the launcher's ABI requirement rather than a compatibility it does not have. That is the `artifacts` block.
 - [x] The switchers' compatibility badges are derived from the new model without special cases.
 - [x] Schema v1 is deprecated, and the file says so rather than a page saying it elsewhere. `module-manifest.schema.json` carries `deprecated: true`, what supersedes it, and the milestone it goes in.
-- [ ] Every manifest still declaring v1 is migrated to v2, and every consumer that branches on the absence of `manifest_version` drops that branch.
-- [ ] Schema v1 is removed, which is scheduled for [v0.1](../v0-1/).
+- [x] Every manifest in the project declares v2, and `docs-shared` documents v1 as deprecated rather than as an option.
+- [ ] Schema v1 stops being offered for a new manifest, which is scheduled for [v0.1](../v0-1/).
+
+Reading v1 is not on that list, and its absence is not an oversight. Rebuilding the documentation of an old tag meets the v1 manifest that tag shipped with, so the consumers keep the branch that detects a manifest without `manifest_version` for as long as an old tag is rebuildable. What v0.1 retires is writing v1, not reading it.
 
 ## Version lifecycle <Badge text="Ongoing" variant="tip" />
 

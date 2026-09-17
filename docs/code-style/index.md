@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-These pages cover the C++ implementation behind the interfaces, plus the build rules that apply everywhere. The style of the C interfaces themselves is in `INTERFACES.md`<!-- TODO link → the naming and type conventions, once interfaces is split into a directory -->, which wins over anything here.
+These pages cover the C++ implementation behind the interfaces, plus the build rules that apply everywhere. The style of the C interfaces themselves is in [Naming](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/naming/) and [Types](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/types/), which win over anything here.
 
 ## Why there are rules at all
 

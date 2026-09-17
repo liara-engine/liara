@@ -7,6 +7,18 @@ sidebar:
 
 # Changelog
 
+## [0.2.1](https://github.com/liara-engine/liara/compare/v0.2.0...v0.2.1) (2026-09-17)
+
+
+### Features
+
+* **test:** enhance label selection with inclusion and exclusion options in liara.py ([a2feaf9](https://github.com/liara-engine/liara/commit/a2feaf9b22868ce2927c494328c8b9301503977b))
+
+
+### Bug Fixes
+
+* **release:** update exclude-paths format in release-please-config.json ([428189a](https://github.com/liara-engine/liara/commit/428189a0b10489362e4478d271b5ede9f006e703))
+
 ## [0.2.0](https://github.com/liara-engine/liara/compare/v0.1.0...v0.2.0) (2026-08-27)
 
 

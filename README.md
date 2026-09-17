@@ -1,87 +1,29 @@
 ---
 title: About Liara
 description: High-level overview of the Liara engine, its goals, and its structure.
+sidebar:
+    order: 0
 ---
 
 # Liara Engine
 
-> A modern 3D game engine, built from scratch in C++ with Vulkan, as a
-> personal learning project. Modular by construction, cross-platform,
-> and honest about what it is.
+A 3D game engine in modern C++ with Vulkan, built as a set of independently versioned modules that talk to each other through a C ABI.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![C++20](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
-[![Vulkan 1.3](https://img.shields.io/badge/Vulkan-1.3-red.svg)](https://www.vulkan.org/)
-[![Linux](https://img.shields.io/badge/Linux-supported-success.svg)](#)
-[![Windows](https://img.shields.io/badge/Windows-supported-success.svg)](#)
+It is a personal project, and a reboot of an earlier monolithic engine of mine. The reboot exists to apply what that one taught rather than to discard it.
 
----
-
-## Status
-
-**Current version:** Phase 0 (bootstrap) — see
-[`docs/ROADMAP.md`](./docs/ROADMAP.md).
-
-This is a **reboot** of an earlier engine project. The earlier
-project taught lessons; this one applies them. The goal is not to
-build a Unity competitor; it is to build a clean, modular engine
-that the author understands top to bottom and that, by version 1.0,
-is good enough to ship a small game with.
-
-The project is openly developed, MIT-licensed, and welcomes
-spectators, suggestions, and contributors. It is also openly a
-**personal project** with one primary developer; pace and priorities
-reflect that.
-
----
-
-## What Is This?
-
-Liara is a 3D game engine composed of independently developed
-modules:
-
-- **`liara-interfaces`** — C ABI headers that define the contract
-  between modules. Header-only.
-- **`liara-core`** — engine foundation: ECS, math, asset management,
-  logger, settings, application loop.
-- **`liara-renderer`** — Vulkan reference renderer, the engine's
-  "graphics backend".
-- **`liara-editor`** *(post-v1.0)* — visual editor, Unity-style.
-- **`liara-physics`** *(post-v1.0)* — physics module.
-
-The modules communicate through a stable C interface, which means
-any of them can in principle be replaced by an alternative
-implementation, in any language. The C++ implementation is the
-reference, not the only possibility.
-
-Each module lives in its own repository under the
-[`liara-engine`](https://github.com/liara-engine) GitHub
-organization. This meta repository orchestrates the lot.
-
----
-
-## Why Another Engine?
+## Why
 
 Three reasons:
 
-1. **Learning.** Modern graphics programming, Vulkan, modern C++,
-   large-scale software architecture, build systems, CI/CD. Building
-   a game engine touches all of these and forces good answers.
-2. **Curiosity.** Wanting to understand how engines work, in detail,
-   not just at the API level.
-3. **Joy.** Some people garden; some people build engines.
-   Productivity is not the metric here.
+1. **Learning.** Modern graphics programming, Vulkan, modern C++, large-scale software architecture, build systems, CI/CD. Building a game engine touches all of these and forces good answers.
+2. **Curiosity.** Wanting to understand how engines work, in detail, not just at the API level.
+3. **Joy.** Some people garden; some people build engines. Productivity is not the metric here.
 
-Liara does not aim to be the next Unity. It aims to be an engine
-that, by v1.0, lets a sufficiently motivated developer build and
-ship a small 3D game without feeling cheated.
+Liara does not aim to be the next Unity. It aims to be an engine that, by v1.0, lets a sufficiently motivated developer build and ship a small 3D game without feeling cheated.
 
----
+## Quick start
 
-## Quick Start
-
-Build the engine and run the demo (assuming you have Arch Linux
-with all required dependencies installed):
+Build the engine and run the demo (assuming you have Arch Linux with all required dependencies installed):
 
 ```bash
 git clone https://github.com/liara-engine/liara.git
@@ -91,75 +33,42 @@ cd liara
 ./scripts/liara.sh launch --preset linux-release-clang
 ```
 
-For Windows, or for the full setup procedure, see
-[`docs/BOOTSTRAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP).
-
----
+For Windows, or for the full procedure from a machine that has none of the dependencies, see [Bootstrap](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/bootstrap/).
 
 ## Documentation
 
-The project documentation is structured as separate documents, each
-focused on one aspect:
+| Section                                                                                                       | For                                                                  |
+|---------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------|
+| [Architecture](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/architecture/) | The design and the reasoning behind it                               |
+| [Modules](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/modules/)           | What each repository holds, and what crosses a boundary              |
+| [Roadmap](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/roadmap/)           | Phase 0 through v2.0, with an exit criterion per milestone           |
+| [Bootstrap](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/bootstrap/)       | Setting up Arch or Windows for development                           |
+| [Contributing](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/contributing/) | Branches, pull requests, reviews                                     |
+| [Code style](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/code-style/)     | The invariants, the shared baselines, and where a module may diverge |
+| [Tooling](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/tooling/)           | Build, dependencies, CI, tests, releases                             |
+| [Decision records](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/adr/)      | Major decisions, with what else was on the table                     |
 
-| Document                                                                                                                            | Purpose                                      |
-|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
-| [`ARCHITECTURE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ARCHITECTURE)                     | Foundational design, philosophy, principles  |
-| [`MODULES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/MODULES)                               | Concrete module decomposition and boundaries |
-| [`ROADMAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ROADMAP)                               | Phase 0 → v2.0 milestones with exit criteria |
-| [`CONTRIBUTING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CONTRIBUTING)                     | Daily workflow: branches, PRs, reviews       |
-| [`CODE_STYLE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CODE_STYLE)                         | C++ conventions, clang-format, clang-tidy    |
-| [`TOOLING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/TOOLING)                               | CI/CD, build, vcpkg, releases, docs          |
-| [`BOOTSTRAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/BOOTSTRAP)                           | Setting up Arch and Windows for development  |
-| [`DOCUMENTATION_PIPELINE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/DOCUMENTATION_PIPELINE) | How the docs are built and deployed          |
+The interface design rules live in the `liara-interfaces` repository, as [`INTERFACES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/INTERFACES/).
 
-Interface design rules live in their own document, in the
-`liara-interfaces` repository:
-[`INTERFACES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/book/INTERFACES).
+Everything is published at [liara-engine.liara-engine-documentation.workers.dev](https://liara-engine.liara-engine-documentation.workers.dev/).
 
-Documentation of the whole project can be found at
-[liara-engine.liara-engine-documentation.workers.dev](https://liara-engine.liara-engine-documentation.workers.dev/).
+User-facing documentation, meaning tutorials and guides rather than the engine's own design documents, can be found at TODO.
 
-User-facing documentation (tutorials, guides) is hosted at
-[TODO]: add link when section is ready.
+## Repositories
 
-For newcomers, the recommended reading order is the sequence above,
-top to bottom.
+| Repository                                                             | Holds                                                                              |
+|------------------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [`liara`](https://github.com/liara-engine/liara)                       | This one: the launcher, the workspace orchestrator, the documentation, the schemas |
+| [`liara-interfaces`](https://github.com/liara-engine/liara-interfaces) | The C ABI headers every module implements or consumes                              |
+| [`liara-core`](https://github.com/liara-engine/liara-core)             | The ECS, math, logger, settings, events, loop primitives                           |
+| [`liara-renderer`](https://github.com/liara-engine/liara-renderer)     | The reference Vulkan renderer                                                      |
+| [`docs-shared`](https://github.com/liara-engine/docs-shared)           | The Astro preset, the site tools, the documentation builder image                  |
+| [`liara-docs`](https://github.com/liara-engine/liara-docs)             | Where the documentation is hosted, and the edge worker serving it                  |
+| [`.github`](https://github.com/liara-engine/.github)                   | The reusable CI workflows every repository calls                                   |
 
----
+`liara-platform`, `liara-assets`, `liara-audio`, `liara-physics` and `liara-editor` have their ABI namespaces claimed and no repository yet. Each is created when its first line of code is written.
 
-## Project Structure
-
-Liara is a set of independently versioned repositories rather than one tree. Each module owns one concern, exposes it through the shared C ABI, and knows nothing about its siblings.
-
-The repositories under [`liara-engine`](https://github.com/liara-engine):
-
-```
-liara-engine/
-├── liara                  # This repository: launcher, packaging,
-│                          # documentation, compatibility matrix.
-├── liara-interfaces       # The C ABI contract. Header-only.
-│                          # Every module depends on it; it depends on nothing.
-├── liara-core             # ECS, math, logger, settings, event bus, loop primitives.
-├── liara-platform         # Window, input, OS signals, timing (v0.1).
-├── liara-renderer         # Vulkan reference renderer.
-├── liara-assets           # Asset loading, decoding, lifetime (v0.3).
-├── liara-audio            # Playback and mixing (v0.5).
-├── liara-editor           # Editor application (post-v1.0).
-├── liara-physics          # Physics module (post-v1.0).
-├── docs-shared            # Shared documentation templates.
-├── liara-docs             # Documentation for the engine.
-└── .github                # Organization-level workflows and templates.
-```
-
-Modules do not compose themselves. The launcher creates each one, negotiates ABI versions, and wires them together; `liara-core` neither loads nor references any of the others. The consequence worth stating up front is that there is no dependency order to learn between modules — there is only each module's dependency on the contract.
-
-The interfaces repository is the contract; everything else
-implements or consumes it. See [`MODULES.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/MODULES)
-for the full picture.
-
----
-
-## Roadmap at a Glance
+## Roadmap at a glance
 
 The full roadmap is in [`ROADMAP.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ROADMAP).
 The high-level shape:
@@ -179,69 +88,29 @@ The high-level shape:
 The cadence is **variable, milestone-driven**, not calendar-based.
 Pauses happen and are not failures.
 
----
+## State
 
-## Technical Overview
+Phase 0, which is the infrastructure rather than the engine. What exists today is the contract, two placeholder modules, a launcher that composes them and checks their ABI versions against each other, and the CI and documentation pipeline around all of it.
 
-A condensed summary of the choices documented in
-[`ARCHITECTURE.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/ARCHITECTURE)
-and
-[`TOOLING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/TOOLING):
-
-| Concern             | Choice                                      |
-|---------------------|---------------------------------------------|
-| Language            | C++20 (interfaces in C ABI)                 |
-| Graphics API        | Vulkan 1.3 via Vulkan-Hpp + VMA             |
-| Windowing           | SDL3                                        |
-| UI                  | Dear ImGui                                  |
-| Audio               | miniaudio                                   |
-| Math                | Engine-internal types; GLM as private dep   |
-| 3D format           | glTF 2.0                                    |
-| Image formats       | PNG, JPG via stb_image                      |
-| Configuration       | TOML (toml++)                               |
-| Build system        | CMake 3.29+ with presets                    |
-| Dependency manager  | vcpkg in manifest mode                      |
-| Test framework      | doctest                                     |
-| ECS                 | Hand-written (sparse-set storage)           |
-| Documentation       | Doxygen (API) + mdBook (user)               |
-| CI/CD               | GitHub Actions with reusable workflows      |
-| Static analysis     | clang-tidy + SonarCloud                     |
-| Code formatting     | clang-format                                |
-| Release automation  | release-please                              |
-| Platforms           | Linux (Arch primary, Ubuntu CI), Windows 11 |
-| Compilers           | GCC 14+, Clang 20+, MSVC 2022 17.6+         |
-
----
+The roadmap is the honest account of the rest.
 
 ## Contributing
 
-Contributions are welcome but optional. The project's primary mode is
-solo development, and the workflow reflects that. If you would like
-to contribute:
+Contributions are welcome, but optional. The project is a personal one, and I will not be offended if you do not contribute. If you would like to contribute:
 
-- Read [`CONTRIBUTING.md`](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/book/CONTRIBUTING) for the workflow.
-- Open an issue before a substantial PR, so the change can be
-  discussed before code is written.
-- Small PRs (typo fixes, doc clarifications, obvious bug fixes) can
-  be opened directly without prior discussion.
+1. Read the [contributing guide](https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/contributing/).
+2. Open an issue before a substantial PR, so the change can be discussed before code is written. Small PRs (typo fixes, doc clarifications, obvious bug fixes) can be opened directly without prior discussion.
+3. Fork the repository, make your changes in a branch, and open a pull request against `main`. The PR will be reviewed and merged if it is acceptable.
 
-The project follows the [Contributor Covenant](https://www.contributor-covenant.org/)
-code of conduct (a copy lives in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)).
-
----
+This project follows the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/3/0/code_of_conduct/). By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers. A copy of the code of conduct can be found in the [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file.
 
 ## License
 
-Liara is released under the **MIT License**. See
-[`LICENSE`](./LICENSE) for the full text. In short: do whatever you
-want with the code, as long as you preserve the copyright notice.
+Liara is released under the [MIT License](https://opensource.org/license/mit/). See the [LICENSE](LICENSE) file for details. In short: do whatever you want with the code, as long as you preserve the copyright notice.
 
-The license applies uniformly across all repositories in the
-`liara-engine` organization.
+The license applies uniformly across all repositories in the `liara-engine` organization, and to all code in the `liara` repository, including the launcher, the documentation, the schemas, and the CI workflows. The license does not apply to third-party dependencies, which are under their own licenses.
 
----
-
-## Acknowledgments
+## Acknowledgements
 
 Liara stands on the shoulders of others.
 
@@ -268,11 +137,6 @@ The architectural patterns owe debt to:
   module interfaces.
 - **Unreal Engine** for the *m_-prefixed PascalCase* style and the
   *editor-as-host* application model.
-- **Hyprland** for the original (if imperfect) analogy of swappable
-  components, even though Liara's modularity ended up working
-  differently.
-
----
 
 ## Connect
 

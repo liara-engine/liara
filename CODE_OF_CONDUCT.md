@@ -1,3 +1,9 @@
+---
+title: Code of Conduct
+description: The code of conduct to which all contributors to the Liara project are expected to adhere.
+sidebar:
+    order: 2
+---
 
 # Contributor Covenant 3.0 Code of Conduct
 

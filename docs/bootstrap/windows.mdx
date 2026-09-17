@@ -1,0 +1,133 @@
+---
+title: Windows 11
+description: The detailed setup for the platform CI validates on, including the multi-config quirk that catches everyone once.
+sidebar:
+  order: 2
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+## Visual Studio 2022
+
+Install it from visualstudio.microsoft.com with the **Desktop development with C++** workload. Version 17.6 or newer.
+
+## The Vulkan SDK
+
+Download the latest 1.3.x release from vulkan.lunarg.com and run the installer, which puts the SDK in `C:\VulkanSDK\<version>\`, sets `VULKAN_SDK`, and adds `%VULKAN_SDK%\Bin` to `PATH`.
+
+Open a fresh PowerShell session and check:
+
+```powershell frame="terminal"
+$env:VULKAN_SDK
+glslc --version
+vulkaninfo --summary
+```
+
+If `vulkaninfo` lists no GPU with Vulkan 1.3, the problem is the GPU driver. Update it from NVIDIA, AMD or Intel before going further.
+
+## CMake, Git and Python
+
+Visual Studio ships all three, and a standalone install of each is better for command-line work:
+
+```powershell frame="terminal"
+winget install Kitware.CMake
+winget install Git.Git
+winget install Python.Python.3.12
+```
+
+```powershell frame="terminal"
+cmake --version    # 3.29 or newer
+git --version
+python --version   # 3.12 or newer
+```
+
+Zig and Rust are optional, and they are what the cross-language ABI tests run on:
+
+```powershell frame="terminal"
+winget install Ziglang.Zig
+winget install Rustlang.Rustup
+```
+
+Without them those tests are not registered at all, so `ctest` reports success without having run them, and `liara verify --optional` is what tells you.
+
+## vcpkg
+
+<Steps>
+
+1. Clone and bootstrap it in `C:\vcpkg`.
+
+   ```powershell frame="terminal"
+   git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+   C:\vcpkg\bootstrap-vcpkg.bat
+   ```
+
+2. Set the environment permanently for the user.
+
+   ```powershell frame="terminal"
+   [Environment]::SetEnvironmentVariable("VCPKG_ROOT", "C:\vcpkg", "User")
+   [Environment]::SetEnvironmentVariable(
+       "PATH",
+       [Environment]::GetEnvironmentVariable("PATH", "User") + ";C:\vcpkg",
+       "User")
+   ```
+
+3. Restart PowerShell and check.
+
+   ```powershell frame="terminal"
+   vcpkg --version
+   ```
+
+</Steps>
+
+## Clone and bootstrap
+
+```powershell frame="terminal"
+git clone https://github.com/liara-engine/liara.git
+cd liara
+.\scripts\liara.ps1 verify
+.\scripts\liara.ps1 setup
+```
+
+The PowerShell wrapper runs the same Python orchestrator Linux runs, and performs exactly the same workspace setup.
+
+If PowerShell refuses to run the script over its execution policy:
+
+```powershell frame="terminal"
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Then run it again.
+
+## Build, test, run
+
+```powershell frame="terminal"
+# Configure once. One configure preset serves both Debug and Release.
+.\scripts\liara.ps1 setup --preset windows
+
+# The configuration is chosen at build time.
+.\scripts\liara.ps1 build  --preset windows-release
+.\scripts\liara.ps1 test   --preset windows-release
+.\scripts\liara.ps1 launch --preset windows-release
+```
+
+The three configure presets differ by linkage alone:
+
+| Configure preset  | `BUILD_SHARED_LIBS` | `LIARA_LAUNCHER_MODULE_LOADING` |
+|-------------------|---------------------|---------------------------------|
+| `windows`         | `OFF`               | `link`                          |
+| `windows-link`    | `ON`                | `link`                          |
+| `windows-runtime` | `ON`                | `runtime`                       |
+
+Each serves a debug and a release build preset (`windows-debug`, `windows-release`, `windows-debug-link`, and so on), and the build preset is what carries the configuration. Switching between Debug and Release therefore does not re-resolve dependencies, which is the practical reason the Windows side is arranged this way.
+
+The thing that catches everyone once: a build preset's name does not always match its configure preset's name, and a configure preset cannot be passed where a build preset is expected. `liara.ps1` resolves the build directory through the preset file rather than guessing it from a name, and anything else that needs it should do the same.
+
+Binaries land under a configuration subdirectory, `Release\` or `Debug\`, rather than in the flat layout Ninja produces on Linux. That is the multi-config generator, not a project decision.
+
+## Editors
+
+**Visual Studio 2022** opens the workspace through File then Open then Folder, pointing at `workspace\`. It detects the `CMakeLists.txt` and the presets, and a preset is selected from the dropdown next to the build and run buttons. It picks up `.clang-format` and applies it on save, configurable under Tools, Options, Text Editor, C/C++, Code Style.
+
+**CLion** works as it does on Linux: open `workspace\`, select a preset, build. Set the toolchain to Visual Studio so that it uses MSVC rather than MinGW.
+
+**VSCode** needs the clangd extension and `workspace\` opened. The Visual Studio generator produces no `compile_commands.json`, so clangd-based tooling on Windows needs a Ninja configuration of its own, and clangd's binary has to be installed separately or taken from the Vulkan SDK, which ships one.

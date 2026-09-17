@@ -1,0 +1,157 @@
+---
+title: Arch Linux
+description: The detailed setup for the platform the engine is developed on, step by step, with the verification each step answers to.
+sidebar:
+  order: 1
+---
+
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## System packages
+
+| Package                    | For                                      |
+|----------------------------|------------------------------------------|
+| `base-devel`               | Compilers, make, autotools               |
+| `cmake`                    | The build system, 3.29 or newer          |
+| `ninja`                    | What CMake drives on Linux               |
+| `git`                      | Source control                           |
+| `vulkan-devel`             | Vulkan headers and loader                |
+| `vulkan-validation-layers` | Required by debug builds                 |
+| `shaderc`                  | `glslc`, which compiles the shaders      |
+| `clang`                    | The recommended toolchain                |
+| `gcc`                      | Also tested                              |
+| `mold`                     | The fast linker, picked up automatically |
+| `clang-tools-extra`        | clang-format and clang-tidy              |
+| `python`                   | What the orchestrator runs on            |
+
+```bash frame="terminal"
+sudo pacman -S --needed base-devel cmake ninja git vulkan-devel \
+     vulkan-validation-layers shaderc clang gcc mold \
+     clang-tools-extra python
+```
+
+Zig and Rust are optional, and they are what the cross-language ABI tests of `liara-interfaces` run on:
+
+```bash frame="terminal"
+sudo pacman -S zig rust
+```
+
+Without them those tests are not registered at all, so `ctest` reports success without having run them. `liara verify --optional` is what tells you they are missing.
+
+Check the versions against what the project requires:
+
+```bash frame="terminal"
+cmake --version    # 3.29 or newer
+clang --version    # 20 or newer
+gcc --version      # 14 or newer
+glslc --version    # should report a Vulkan SDK version
+```
+
+Anything below its requirement is a `pacman -Syu` away. As of 2026, Arch ships versions that meet all of them, and if a future release lags, the AUR is the workaround.
+
+## Vulkan
+
+`vulkan-devel` provides the core development files. Three more are worth having, and the first is not optional for debug builds:
+
+```bash frame="terminal"
+sudo pacman -S vulkan-validation-layers  # required by debug builds
+sudo pacman -S vulkan-tools              # vulkaninfo and friends
+sudo pacman -S spirv-tools               # SPIR-V utilities
+```
+
+Then check that Vulkan works at all:
+
+```bash frame="terminal"
+vulkaninfo --summary
+```
+
+The output has to list at least one GPU with Vulkan 1.3. If it lists none, the problem is drivers rather than Liara: Mesa for AMD and Intel, the proprietary driver or NVK for NVIDIA. Fix that before going further, because nothing below will work until it is fixed.
+
+## vcpkg
+
+vcpkg goes in the home directory rather than system-wide. That is vcpkg's own convention and it avoids permission problems.
+
+<Steps>
+
+1. Clone and bootstrap it.
+
+   ```bash frame="terminal"
+   git clone https://github.com/microsoft/vcpkg.git ~/.vcpkg
+   ~/.vcpkg/bootstrap-vcpkg.sh
+   ```
+
+2. Put `VCPKG_ROOT` in the environment.
+
+   <Tabs syncKey="shell">
+   <TabItem label="zsh">
+
+   ```bash frame="terminal"
+   echo 'export VCPKG_ROOT="$HOME/.vcpkg"' >> ~/.zshrc
+   echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
+   ```
+
+   </TabItem>
+   <TabItem label="bash">
+
+   ```bash frame="terminal"
+   echo 'export VCPKG_ROOT="$HOME/.vcpkg"' >> ~/.bashrc
+   echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.bashrc
+   ```
+
+   </TabItem>
+   <TabItem label="fish">
+
+   ```fish frame="terminal"
+   set -Ux VCPKG_ROOT $HOME/.vcpkg
+   fish_add_path $VCPKG_ROOT
+   ```
+
+   </TabItem>
+   </Tabs>
+
+3. Open a new terminal and check.
+
+   ```bash frame="terminal"
+   vcpkg --version
+   ```
+
+</Steps>
+
+## Clone and bootstrap
+
+```bash frame="terminal"
+git clone https://github.com/liara-engine/liara.git
+cd liara
+./scripts/liara.sh verify
+./scripts/liara.sh setup
+```
+
+`verify` checks the environment before anything is cloned, and `--optional` adds the recommended tools to what it checks. What `setup` then does, and what it leaves on disk, is in [Quick start](./).
+
+The first run is where vcpkg resolves and builds every dependency, which can take 10 to 30 minutes and is the one moment this project feels slow. If it fails partway through, re-run it: the script is idempotent and running it twice breaks nothing.
+
+## Build, test, run
+
+```bash frame="terminal"
+# The script default is linux-debug-clang
+./scripts/liara.sh build
+
+# Or name one
+./scripts/liara.sh build --preset linux-release-clang
+./scripts/liara.sh test  --preset linux-release-clang
+./scripts/liara.sh launch --preset linux-release-clang
+```
+
+The demo opens a window showing whatever the current version renders. In v0.1 that is a triangle.
+
+## Editors
+
+Anything that consumes `compile_commands.json` works, and `setup` has already put it at the workspace root.
+
+**CLion** opens `workspace/` (not the meta repository's root, which has no `CMakePresets.json`), detects the presets, and builds.
+
+**VSCode** needs the clangd extension, then opening `workspace/` activates it.
+
+**Neovim** needs clangd through nvim-lspconfig, and **Vim** through vim-lsp or coc.nvim.
+
+In every case the `.clang-format` and `.clang-tidy` at each repository root drive the formatting and the linting, so the editor is configured by the repository. Nothing editor-specific is committed.

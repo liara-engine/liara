@@ -1,0 +1,69 @@
+---
+title: Branches, and the shape of a change
+description: Trunk-based development with a one-week ceiling on branches, and the eight stages a change goes through.
+sidebar:
+  label: Branches and changes
+  order: 1
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+## The branch model
+
+Trunk-based development with short-lived feature branches. Three rules.
+
+`main` is always green: it builds, its tests pass, and it is in a consistent state. Direct pushes are forbidden and everything goes through a pull request, which [branch protection](../../tooling/repository-rules/) enforces rather than trusting anyone to remember.
+
+A feature branch lives for at most one week. A change not finished in a week is a branch that is too big, and it gets split into pieces that each merge on their own.
+
+Long-running branches do not exist. No `develop`, no `release/*`, no `next`. The release process produces tags.
+
+### Why one week
+
+That ceiling is the most important rule here, and it exists to prevent the most common way solo development dies: a feature branch that grows for two months, diverges from `main`, becomes unmergeable, and is abandoned along with the project around it.
+
+Short branches force scope discipline. A change that needs more time is usually a change conflating several concerns, and the week is what makes that visible early enough to act on.
+
+One practical exception: the dogfooding phase of v0.7 to v0.9 involves building a real game, which takes longer than a week. The branch model is unchanged for engine work, and the game itself is built in a separate workspace and merged piece by piece.
+
+### Naming
+
+`<type>/<short-description>`, where the type prefix matches the conventional-commit type and the description is short, lowercase and hyphenated.
+
+```text
+feat/ecs-sparse-set
+fix/swapchain-recreation
+refactor/asset-handle-types
+docs/architecture-revision
+chore/update-vcpkg-baseline
+```
+
+Branch names are never exposed to anybody. They exist for the developer's own organization.
+
+## The eight stages
+
+<Steps>
+
+1. **Identify the need.** A change starts from a failing test or a bug report, a milestone task in the [roadmap](../../roadmap/), an idea recorded in an issue, or a friction found while using the engine. Frictions found while building the dogfood game are recorded as issues even when they are not fixed immediately, because they are the input for later versions.
+
+2. **Decide the scope.** Four questions before opening a branch: what is the minimum set of modifications that ships this, does it require an interface change (if so it crosses into `liara-interfaces` and follows [cross-repository changes](../cross-repository/)), what tests does it need (almost always some), and what documentation does it need (often some).
+
+   A change touching three modules and four files in `liara-interfaces` is not one change. It is several, each with its own branch, opened in a coordinated order.
+
+3. **Open a branch and code.** Branch from `main`, make the changes, run `./scripts/liara.sh check` before pushing. That script runs what CI runs, in the same order, and fails on the same things.
+
+   Push early and often. The branch tier of CI runs on every push, so an intermediate state gets a build and a format check within a couple of minutes, which is the point of having a branch tier at all.
+
+4. **Open a pull request** against `main`, following [the template](../pull-requests/). Opening it as a draft before the change is finished is a good pattern: the integration tier starts validating the branch, the diff becomes reviewable, and the pull request becomes where the change's progress is tracked.
+
+5. **Self-review.** Even alone. Read the diff in GitHub's pull request view, which is a genuinely different perspective from reading it in the editor. Check for forgotten TODOs and debug code. Verify the description still describes the change. Confirm the tests cover the new code and the documentation is updated.
+
+   This catches a surprising fraction of bugs and half-finished changes, because the person writing the code and the person reading the diff are, for review purposes, different people.
+
+6. **Address CI feedback.** A failure is fixed before merging, and re-running is not a fix. A flaky test is either repaired or quarantined with an issue tracking the repair.
+
+7. **Merge**, by squash. The squash commit takes the pull request's title, which is itself a conventional commit, and the description as its body. Then delete the branch.
+
+8. **Verify** that `main` is still green. If a flaky test or an unexpected interaction broke it, the follow-up fix is opened immediately rather than added to a list.
+
+</Steps>

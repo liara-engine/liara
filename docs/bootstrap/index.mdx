@@ -1,0 +1,123 @@
+---
+title: Bootstrap
+description: Getting Liara to build on a fresh machine, on Arch Linux or Windows 11. Start here, and read the detailed page for your platform when something fails.
+sidebar:
+  label: Quick start
+  order: 0
+---
+
+import { Tabs, TabItem, Steps, FileTree } from '@astrojs/starlight/components';
+
+Two platforms are covered: Arch Linux, which is where the engine is developed, and Windows 11, which CI validates on every change.
+
+Another Linux distribution works from the Arch instructions with the package names translated. Distribution-specific support is not a project goal, and setup instructions contributed for other distributions are welcome.
+
+## If everything works first try
+
+<Tabs syncKey="platform">
+<TabItem label="Arch Linux">
+
+```bash frame="terminal"
+# System dependencies
+sudo pacman -S --needed base-devel cmake ninja git vulkan-devel \
+    vulkan-validation-layers shaderc clang gcc mold clang-tools-extra python
+
+# vcpkg
+git clone https://github.com/microsoft/vcpkg.git ~/.vcpkg
+~/.vcpkg/bootstrap-vcpkg.sh
+echo 'export VCPKG_ROOT="$HOME/.vcpkg"' >> ~/.zshrc
+echo 'export PATH="$VCPKG_ROOT:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+# The project
+git clone https://github.com/liara-engine/liara.git
+cd liara
+./scripts/liara.sh verify # Should succeed with no errors
+./scripts/liara.sh setup
+
+# Build, test, run
+./scripts/liara.sh build --preset linux-release-clang
+./scripts/liara.sh test --preset linux-release-clang
+./scripts/liara.sh launch --preset linux-release-clang
+```
+
+</TabItem>
+<TabItem label="Windows 11">
+
+Visual Studio 2022+ with the Desktop development with C++ workload (from visualstudio.microsoft.com), and the Vulkan SDK (from https://vulkan.lunarg.com/), are installed by hand from their own installers before any of this.
+
+```powershell frame="terminal"
+# vcpkg
+git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+C:\vcpkg\bootstrap-vcpkg.bat
+[Environment]::SetEnvironmentVariable("VCPKG_ROOT", "C:\vcpkg", "User")
+
+# The project
+git clone https://github.com/liara-engine/liara.git
+cd liara
+.\scripts\liara.ps1 verify # Should succeed with no errors
+.\scripts\liara.ps1 setup
+
+# Build, test, run
+.\scripts\liara.ps1 build --preset windows-release
+.\scripts\liara.ps1 test --preset windows-release
+.\scripts\liara.ps1 launch --preset windows-release
+```
+
+</TabItem>
+</Tabs>
+
+When something fails, the page for your platform explains each step and [troubleshooting](./troubleshooting/) lists what is already known to go wrong.
+
+## What `setup` actually does
+
+<Steps>
+
+1. Clones or fast-forwards `liara-interfaces`, `liara-core` and `liara-renderer` into `workspace/`.
+
+2. Generates the superbuild `CMakeLists.txt` that pulls each module in with `add_subdirectory()`.
+
+3. Merges every module's `vcpkg.json` into one manifest at the workspace root, and refuses to continue if two of them pin different registry baselines.
+
+4. Generates the workspace `CMakePresets.json` from the template in `scripts/`.
+
+5. Runs the CMake configure, which is where vcpkg resolves and builds the dependencies. On a machine that has never built the project this takes 10 to 30 minutes, and every run after it is cached.
+
+6. On Linux, symlinks `compile_commands.json` at the workspace root so that clangd finds it with no configuration.
+
+</Steps>
+
+The result:
+
+<FileTree>
+- liara/
+  - scripts/
+  - workspace/
+    - CMakeLists.txt **generated**
+    - CMakePresets.json **generated**
+    - vcpkg.json **generated, merged**
+    - compile_commands.json **symlink, Linux only**
+    - liara-interfaces/
+    - liara-core/
+    - liara-renderer/
+</FileTree>
+
+Re-running `setup` is safe. It is idempotent, and it is the normal way to refresh a workspace after the module repositories have moved. `--no-pull` leaves the existing clones alone, which is what you want while working on a branch.
+
+## Which preset
+
+The full explanation of what the presets are and why there are so many is in [Build system](../tooling/build/). The short practical version:
+
+**On Linux**, `linux-<debug|release>-<gcc|clang>` builds the modules as static libraries and links them into the launcher. That is the default and the right choice for day-to-day work, with `linux-debug-clang` being what the script picks when you name nothing. The same four names suffixed `-link` build them as shared libraries, still linked at build time, which is what catches a missing export macro. Suffixed `-runtime`, they are shared libraries the launcher opens with `dlopen`, which is the configuration the architecture is designed for and the one that catches accidental static coupling. Experimental in Phase 0.
+
+**On Windows**, the Visual Studio generator chooses the build type at build time, so there are three configure presets (`windows`, `windows-link`, `windows-runtime`) and six build presets pairing each with a configuration. `windows-release` is the development default, and a configure preset cannot be passed where a build preset is expected.
+
+## When the instructions are wrong
+
+Check [troubleshooting](./troubleshooting/) first, then the issues on the meta repository, closed ones included, because the answer is often there.
+
+A new issue uses the Bug Report template and includes the platform and version, the compiler version, the exact command that failed, the complete error output, and the output of `liara verify --optional`.
+
+For a question about how something works, as opposed to something being broken, GitHub Discussions on the meta repository is the place.
+
+These pages are maintained as part of the project. Instructions that are out of date or unclear are a documentation defect, and a pull request fixing one is welcome.

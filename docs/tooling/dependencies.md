@@ -11,7 +11,7 @@ Each repository declares its direct dependencies in `vcpkg.json` and pins a regi
 
 The baseline has to be identical across repositories, and that is a constraint rather than an observation. The workspace merges every manifest into one and resolves once, so two modules pinned to different baselines would produce a build in which one of them silently gets versions it never asked for. The bootstrap script compares them and refuses to proceed when they disagree, instead of picking one.
 
-The reasoning behind vcpkg over Conan or distribution packages is in [ADR 0007](../adr/0007-cmake-presets-and-vcpkg/). The short version is that Microsoft maintaining it makes MSVC first-class, manifest mode drops straight into `find_package` with no adapter, and a triplet states target, linkage and build type in one place.
+The reasoning behind vcpkg over Conan or distribution packages is in [ADR 0007](../../adr/0007-cmake-presets-and-vcpkg/). The short version is that Microsoft maintaining it makes MSVC first-class, manifest mode drops straight into `find_package` with no adapter, and a triplet states target, linkage and build type in one place.
 
 ## The binary cache
 
@@ -42,7 +42,7 @@ Today the lists are shorter than that table: `liara-core/vcpkg.json` declares no
 
 Logging is deliberately missing from the table. Whether `liara-core` uses spdlog or its own logger is undecided, and the decision belongs to v0.2 rather than to a line in a manifest.
 
-The Vulkan SDK is not managed by vcpkg. It is a system dependency the developer installs, with instructions in [`bootstrap.md`](../bootstrap/).
+The Vulkan SDK is not managed by vcpkg. It is a system dependency the developer installs, with instructions in [Bootstrap](../../bootstrap/).
 
 ## Between Liara's own modules
 

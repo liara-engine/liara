@@ -16,7 +16,7 @@ Modules version independently, so something has to record which versions of whic
 
 It never got written. Before it reached the top of my todo list, `docs-shared` needed something else: the documentation navbar has to know, for a given repository and version, what other versions exist and what they are compatible with. A `compatibility.toml` in the meta repository could not answer that. It would have had to be fetched from another repository at documentation build time, and it would have described the engine rather than each module's own history. So each repository got a `manifest.json` instead, listing its versions with an `abi_compatibility` field per version.
 
-When `compatibility.toml` finally came up, I read the item and realised the manifests already did almost all of it, and did it better. They live next to the thing they describe, they are updated in the same pull request that changes it, and CI already validates them against `.release-please-manifest.json`.
+When `compatibility.toml` finally came up, I read the item and realized the manifests already did almost all of it, and did it better. They live next to the thing they describe, they are updated in the same pull request that changes it, and CI already validates them against `.release-please-manifest.json`.
 
 ## Decision
 

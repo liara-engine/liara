@@ -41,7 +41,7 @@ The rule is written once. `LIARA_CONSTEXPR_FN` expands to `constexpr` in C++ and
 
 **Comparing the packed words as integers.** The bit layout orders correctly, so `provided >= required` gives the right answer for the common case in one instruction. This is what the launcher actually did until the audit, and it worked, which is the problem. It cannot distinguish `DEGRADED` from `INCOMPATIBLE`, it ignores the major boundary entirely, and it gets rule 3 wrong in both directions. The launcher now goes through the rule.
 
-**Treating 0.0.x as an ordinary minor comparison**, dropping rule 3. One fewer special case, and it would let a 0.0.x module satisfy an 0.0.y requirement instead of demanding lockstep. Rejected because a playground version would silently pass for a released one, and the failure would show up as undefined behaviour at a struct layout mismatch instead of a refusal at load time. During Phase 0, lockstep is what is actually true.
+**Treating 0.0.x as an ordinary minor comparison**, dropping rule 3. One fewer special case, and it would let a 0.0.x module satisfy an 0.0.y requirement instead of demanding lockstep. Rejected because a playground version would silently pass for a released one, and the failure would show up as undefined behavior at a struct layout mismatch instead of a refusal at load time. During Phase 0, lockstep is what is actually true.
 
 **Applying rule 3 to only one side**, either reading. Both were on the table, since both were already written down somewhere. I took the symmetric version because I would eventually apply an asymmetric rule in the wrong direction, and because the strict reading fails safe: the worst case is refusing a combination that would have worked, which I find out immediately.
 
@@ -53,9 +53,9 @@ Version words are unreadable in a debugger or a log. `liara_version_to_string` e
 
 Under rule 3, every 0.0.x release breaks anything pinned to a different one. Phase 0 is therefore more rigid than it looks from outside, and that rigidity is deliberate.
 
-`LIARA_MAKE_VERSION_UNSAFE` corrupts neighbouring fields if a component overflows, and the `_UNSAFE` suffix is the whole mitigation. That is thin, but its callers are compile-time literals in headers I review, and the checked form exists for anything else.
+`LIARA_MAKE_VERSION_UNSAFE` corrupts neighboring fields if a component overflows, and the `_UNSAFE` suffix is the whole mitigation. That is thin, but its callers are compile-time literals in headers I review, and the checked form exists for anything else.
 
-The ABI pipeline cannot see a change like this one. `liara_version_provides` keeps its signature when its behaviour changes, so the snapshot shows no diff, and the breaking change has to be declared by hand in the pull request title and a `BREAKING CHANGE` footer. Nothing catches me forgetting.
+The ABI pipeline cannot see a change like this one. `liara_version_provides` keeps its signature when its behavior changes, so the snapshot shows no diff, and the breaking change has to be declared by hand in the pull request title and a `BREAKING CHANGE` footer. Nothing catches me forgetting.
 
 ## Revisit if
 

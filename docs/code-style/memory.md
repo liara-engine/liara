@@ -29,7 +29,7 @@ A module's `create` entry point hands back an opaque handle whose lifetime belon
 
 Those two functions, in each module's shim, are the only place raw ownership is allowed. They carry a `// NOLINT(cppcoreguidelines-owning-memory)`, which is the visible marker that this is the exception rather than a slip. Everything behind the handle uses smart pointers as usual.
 
-That is invariant 6 in its concrete form, and [File organization](./files/#the-shim) shows the shim it lives in.
+That is invariant 6 in its concrete form, and [File organization](../files/#the-shim) shows the shim it lives in.
 
 ## A raw pointer means non-owning
 

@@ -14,7 +14,7 @@ Most of the Phase 0 records are retrospective: the decision was taken while boot
 
 ## The format
 
-[`contributing.md`](../contributing/) §11.2 gives the plain Michael Nygard template: context, decision, consequences. The records here add two sections to it, and those two carry most of what makes them worth re-reading.
+[The format](../contributing/decision-records/#the-format) gives the plain Michael Nygard template: context, decision, consequences. The records here add two sections to it, and those two carry most of what makes them worth re-reading.
 
 **Alternatives considered** names every option that was on the table and what killed it. An alternatives section that lists options without saying why each one lost is no help at all to whoever reopens the question two years later.
 
@@ -37,4 +37,4 @@ Every record opens with a table giving its status, its date, and who decided. St
 | [0009](./0009-in-house-ecs/)                              | An in-house ECS rather than an existing library             | Proposed |
 | [0010](./0010-vulkan-without-abstraction-layer/)          | Vulkan directly, without a rendering abstraction layer      | Proposed |
 
-New tooling requires a record of its own (`TOOLING.md` §1<!-- TODO link → the tooling inventory page, once tooling is split into a directory -->). The one exception is the bootstrapping phase, whose policy is in [`roadmap.md`](../roadmap/) §4.
+New tooling requires a record of its own, which is what [The inventory](../tooling/#the-inventory) states. The one exception is the bootstrapping phase, whose policy is in [Phase 0](../roadmap/phase-0/).

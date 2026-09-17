@@ -9,9 +9,9 @@ sidebar:
 
 Five decisions are made in anticipation of later versions. Each passed the same test: cheap to do now, expensive to retrofit later. Nothing else in v0.x is designed for a version that does not exist.
 
-**Editor readiness.** The renderer interface uses abstract render targets and admits several views per frame from v0.1, which makes an editor buildable later with no change to it. [Render targets](./render-targets/) covers why this one matters more than the other four combined.
+**Editor readiness.** The renderer interface uses abstract render targets and admits several views per frame from v0.1, which makes an editor buildable later with no change to it. [Render targets](../render-targets/) covers why this one matters more than the other four combined.
 
-**Large-scale readiness.** A transform crossing the boundary uses double precision for translation, and the view structure carries a hint about scene scale, so a KSP-style simulation needs no interface change. [Cross-platform strategy](./cross-platform/) has the reasoning.
+**Large-scale readiness.** A transform crossing the boundary uses double precision for translation, and the view structure carries a hint about scene scale, so a KSP-style simulation needs no interface change. [Cross-platform strategy](../cross-platform/) has the reasoning.
 
 **Picking.** The renderer interface will optionally produce an entity ID buffer alongside the color buffer. It stays dormant through v0.x, since nothing requests the buffer, and the interface accepting the option is what stops picking from being a breaking change later.
 

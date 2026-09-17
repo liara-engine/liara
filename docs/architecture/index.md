@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-These pages hold the why. [Modules](../modules/) holds the what, meaning the repository list, the responsibilities and the file layout, and [Tooling](../tooling/) and [`contributing.md`](../contributing/) hold the how.
+These pages hold the why. [Modules](../modules/) holds the what, meaning the repository list, the responsibilities and the file layout, and [Tooling](../tooling/) and [Contributing](../contributing/) hold the how.
 
 ## What the project is
 

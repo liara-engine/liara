@@ -12,7 +12,7 @@ It takes render packets and produces pixels. It knows nothing about the ECS, abo
 
 ## Contents
 
-**The Vulkan device layer.** Instance creation, physical device selection, logical device creation, queue management, command pool management. Built on Vulkan-Hpp and VMA, for the reasons in [ADR 0010](../adr/0010-vulkan-without-abstraction-layer/).
+**The Vulkan device layer.** Instance creation, physical device selection, logical device creation, queue management, command pool management. Built on Vulkan-Hpp and VMA, for the reasons in [ADR 0010](../../adr/0010-vulkan-without-abstraction-layer/).
 
 **The swapchain manager.** Surface creation from the native window handle, which the host obtained from `liara-platform` and passed in at initialization, then swapchain creation, recreation on resize, image acquisition and presentation.
 

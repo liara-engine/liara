@@ -14,13 +14,13 @@ If v0.1 ships, the hardest architectural risk is behind the project and every ve
 
 ## Scope
 
-The launcher initialises the platform, the core and the renderer independently through the C interface, checks their ABI versions against each other, and composes them. It creates a window through the platform module, passes its native handle to the renderer, drives the core's per-tick step, and carries the render packets the core produces across to the renderer, which draws one hardcoded triangle and presents it.
+The launcher initializes the platform, the core and the renderer independently through the C interface, checks their ABI versions against each other, and composes them. It creates a window through the platform module, passes its native handle to the renderer, drives the core's per-tick step, and carries the render packets the core produces across to the renderer, which draws one hardcoded triangle and presents it.
 
 The window's close button and a Ctrl+C surface as the same shutdown request from the platform module, and both produce the same graceful shutdown.
 
 The triangle is hardcoded in the launcher: three vertices, a vertex shader, a fragment shader. No ECS, no asset loader, no math beyond what the renderer needs internally.
 
-The renderer initialises Vulkan with validation layers on in debug builds, using Vulkan-Hpp for type safety and VMA for memory.
+The renderer initializes Vulkan with validation layers on in debug builds, using Vulkan-Hpp for type safety and VMA for memory.
 
 ## Out of scope
 
@@ -37,6 +37,7 @@ The ECS (v0.2), asset loading (v0.3), lighting (v0.4), input beyond the window c
 - [ ] Tests pass on every platform.
 - [ ] The user documentation has a "Build hello triangle" page.
 - [ ] The compatibility record is updated.
+- [ ] The v1 manifest schema is removed, and nothing declares or reads it any more.
 - [ ] `liara-platform` exists, is released, and appears in it.
 - [ ] Closing the window and sending SIGINT produce the same clean shutdown path.
 
@@ -52,9 +53,9 @@ Modules version independently, so the question "does core 0.2 still work against
 
 ### Scope
 
-A script in the meta repository's `scripts/` that takes a set of module versions, downloads the matching release artefacts, validates the combination against each module's `manifest.json`, assembles them into a runnable layout next to the launcher, and reports whether the combination is ABI-consistent before anything runs.
+A script in the meta repository's `scripts/` that takes a set of module versions, downloads the matching release artifacts, validates the combination against each module's `manifest.json`, assembles them into a runnable layout next to the launcher, and reports whether the combination is ABI-consistent before anything runs.
 
-It reads the same manifests the documentation switchers already consume, which is what makes those manifests the single machine-readable source of truth for compatibility, and is why there is no separate compatibility file. [ADR 0006](../adr/0006-manifest-as-compatibility-source-of-truth/) records that.
+It reads the same manifests the documentation switchers already consume, which is what makes those manifests the single machine-readable source of truth for compatibility, and is why there is no separate compatibility file. [ADR 0006](../../adr/0006-manifest-as-compatibility-source-of-truth/) records that.
 
 This form is for me. It is allowed to be rough: a command-line tool, minimal error prettiness, Linux first.
 
@@ -64,7 +65,7 @@ User-facing polish, meaning interactive selection, friendly diagnostics and a cu
 
 ### Definition of Done
 
-- [ ] Given explicit module versions, it fetches the matching artefacts and manifests.
+- [ ] Given explicit module versions, it fetches the matching artifacts and manifests.
 - [ ] It rejects an ABI-incompatible combination with a clear message, before assembly.
 - [ ] It assembles a compatible combination into a layout the launcher can run against.
 - [ ] It works on Linux for my own workflow.
@@ -77,11 +78,11 @@ Also not a milestone. It is the piece of the host that turns "the interfaces are
 
 ### Why
 
-[Modularity model](../architecture/modularity/) claims that switching to runtime loading is a matter of writing a loader rather than rewriting contracts. A claim nothing exercises is a claim nobody has checked. The `-runtime` presets exist from Phase 0 precisely so the claim is testable early, before enough code has accumulated for a static coupling to be expensive to undo.
+[Modularity model](../../architecture/modularity/) claims that switching to runtime loading is a matter of writing a loader rather than rewriting contracts. A claim nothing exercises is a claim nobody has checked. The `-runtime` presets exist from Phase 0 precisely so the claim is testable early, before enough code has accumulated for a static coupling to be expensive to undo.
 
 ### Scope
 
-The launcher gains a small loader. It resolves each module's shared library by a platform-correct name, opens it, resolves that module's `liara_<module>_info` entry point plus the handful of functions the host actually calls, runs the negotiation of [ADR 0005](../adr/0005-version-encoding-and-compatibility/) on the result, and refuses to proceed on `INCOMPATIBLE`. Library names live in one place, next to the platform macros, rather than being spelled at each call site.
+The launcher gains a small loader. It resolves each module's shared library by a platform-correct name, opens it, resolves that module's `liara_<module>_info` entry point plus the handful of functions the host actually calls, runs the negotiation of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) on the result, and refuses to proceed on `INCOMPATIBLE`. Library names live in one place, next to the platform macros, rather than being spelled at each call site.
 
 In this form it is deliberately naive: a fixed list of modules, no discovery, no plugin directory, no versioned filename resolution, no graceful degradation when a module is absent.
 

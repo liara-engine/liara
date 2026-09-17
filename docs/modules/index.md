@@ -6,7 +6,7 @@ sidebar:
   order: 0
 ---
 
-Where `architecture.md`<!-- TODO link → the modularity page, once architecture is split --> explains why the project is modular, these pages specify what is actually built and where it lives. One page per repository, plus the boundaries between them.
+Where [Modularity model](../architecture/modularity/) explains why the project is modular, these pages specify what is actually built and where it lives. One page per repository, plus the boundaries between them.
 
 Everything is hosted under the `liara-engine` organization, and everything falls into one of four kinds. The kind matters more than the list, because it decides what a repository is allowed to do.
 

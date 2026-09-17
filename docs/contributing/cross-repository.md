@@ -15,7 +15,7 @@ Some changes span repositories. A new function in `liara-interfaces` needs imple
 
 **Open the consumer changes**, each an independent pull request in its own repository, referencing the new interface version in its own `manifest.json`.
 
-**Update the manifests** so that the compatibility is recorded where everything else reads it. There is no separate matrix file, and [ADR 0006](../adr/0006-manifest-as-compatibility-source-of-truth/) is why.
+**Update the manifests** so that the compatibility is recorded where everything else reads it. There is no separate matrix file, and [ADR 0006](../../adr/0006-manifest-as-compatibility-source-of-truth/) is why.
 
 **Update the launcher**, if it is affected, in a pull request of its own.
 
@@ -23,7 +23,7 @@ For a breaking change, the order inverts at the end: the consumer pull requests 
 
 ## Why it is this slow
 
-The procedure has five steps on purpose. Cross-repository changes are friction, and that friction is what discourages a frivolous interface change. [ADR 0001](../adr/0001-multi-repository-layout/) is the argument in full: a boundary that can be crossed by editing one line is a boundary that gets crossed at 2am with a good reason.
+The procedure has five steps on purpose. Cross-repository changes are friction, and that friction is what discourages a frivolous interface change. [ADR 0001](../../adr/0001-multi-repository-layout/) is the argument in full: a boundary that can be crossed by editing one line is a boundary that gets crossed at 2am with a good reason.
 
 The cost is real, and on a day when the work is obvious and the ceremony is not, it is the thing standing in the way. It is still cheaper than the alternative, which the previous engine demonstrated.
 

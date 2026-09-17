@@ -36,7 +36,7 @@ Knowing about them now does not change the answer, and the reason is worth stati
 
 The honest framing: for a project whose goal is to ship a renderer, an abstraction layer is very likely the correct choice. For this project, it defeats the purpose. That is a statement about the project, not about the libraries.
 
-**OpenGL**, or a Vulkan renderer with an OpenGL fallback for older hardware. Rejected on the legacy point above. Supporting old hardware means two rendering paths, two sets of bugs, and design decisions constrained by the weaker one. `ARCHITECTURE.md` §2.2<!-- TODO link → the non-goals section, once architecture is split into a directory --> already declares broad hardware support a non-goal, and this is that non-goal applied.
+**OpenGL**, or a Vulkan renderer with an OpenGL fallback for older hardware. Rejected on the legacy point above. Supporting old hardware means two rendering paths, two sets of bugs, and design decisions constrained by the weaker one. [Non-goals](../../architecture/#non-goals) already declares broad hardware support a non-goal, and this is that non-goal applied.
 
 **DirectX 12**, as in the first attempt. Rejected on portability, since Linux is the primary development platform now and a Windows-only renderer would make the platform I actually use the secondary one.
 
@@ -44,9 +44,9 @@ The honest framing: for a project whose goal is to ship a renderer, an abstracti
 
 ## Consequences
 
-Everything takes longer. Vulkan requires explicit synchronisation, memory management, descriptor handling and swapchain recreation before it draws anything, so the first triangle is weeks of work rather than an afternoon. That is the accepted cost and, for this project, part of the point. It also means v0.1 is a large milestone by any measure other than what it displays.
+Everything takes longer. Vulkan requires explicit synchronization, memory management, descriptor handling and swapchain recreation before it draws anything, so the first triangle is weeks of work rather than an afternoon. That is the accepted cost and, for this project, part of the point. It also means v0.1 is a large milestone by any measure other than what it displays.
 
-There is a real risk of stalling in it. That is what happened to the previous project, in the architecture rather than in the rendering, and the mechanism is the same: a task that is harder than it should be is a task that does not get done. Vulkan is legitimately hard, so the milestone structure has to keep producing something visible instead of accumulating infrastructure. That is what `ARCHITECTURE.md` §3.5<!-- TODO link → the milestone structure section, once architecture is split into a directory --> is for.
+There is a real risk of stalling in it. That is what happened to the previous project, in the architecture rather than in the rendering, and the mechanism is the same: a task that is harder than it should be is a task that does not get done. Vulkan is legitimately hard, so the milestone structure has to keep producing something visible instead of accumulating infrastructure. That is what [Visible progress at every step](../../architecture/principles/#visible-progress-at-every-step) is for.
 
 Vulkan-Hpp and VMA are themselves abstraction layers, which would sit oddly next to the reasoning above if I had not already done without them. The predecessor project (also called Liara, since changing the name would have been more practical but I like it and how it sounds) was written against raw Vulkan, following Brendan Galea's series at the start. I have written the allocator, the descriptor handling and the boilerplate by hand, badly, and I know what these libraries are doing on my behalf.
 

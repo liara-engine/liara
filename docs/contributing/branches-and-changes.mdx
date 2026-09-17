@@ -12,7 +12,7 @@ import { Steps } from '@astrojs/starlight/components';
 
 Trunk-based development with short-lived feature branches. Three rules.
 
-`main` is always green: it builds, its tests pass, and it is in a consistent state. Direct pushes are forbidden and everything goes through a pull request, which [branch protection](../tooling/repository-rules/) enforces rather than trusting anyone to remember.
+`main` is always green: it builds, its tests pass, and it is in a consistent state. Direct pushes are forbidden and everything goes through a pull request, which [branch protection](../../tooling/repository-rules/) enforces rather than trusting anyone to remember.
 
 A feature branch lives for at most one week. A change not finished in a week is a branch that is too big, and it gets split into pieces that each merge on their own.
 
@@ -44,9 +44,9 @@ Branch names are never exposed to anybody. They exist for the developer's own or
 
 <Steps>
 
-1. **Identify the need.** A change starts from a failing test or a bug report, a milestone task in the [roadmap](../roadmap/), an idea recorded in an issue, or a friction found while using the engine. Frictions found while building the dogfood game are recorded as issues even when they are not fixed immediately, because they are the input for later versions.
+1. **Identify the need.** A change starts from a failing test or a bug report, a milestone task in the [roadmap](../../roadmap/), an idea recorded in an issue, or a friction found while using the engine. Frictions found while building the dogfood game are recorded as issues even when they are not fixed immediately, because they are the input for later versions.
 
-2. **Decide the scope.** Four questions before opening a branch: what is the minimum set of modifications that ships this, does it require an interface change (if so it crosses into `liara-interfaces` and follows [cross-repository changes](./cross-repository/)), what tests does it need (almost always some), and what documentation does it need (often some).
+2. **Decide the scope.** Four questions before opening a branch: what is the minimum set of modifications that ships this, does it require an interface change (if so it crosses into `liara-interfaces` and follows [cross-repository changes](../cross-repository/)), what tests does it need (almost always some), and what documentation does it need (often some).
 
    A change touching three modules and four files in `liara-interfaces` is not one change. It is several, each with its own branch, opened in a coordinated order.
 
@@ -54,7 +54,7 @@ Branch names are never exposed to anybody. They exist for the developer's own or
 
    Push early and often. The branch tier of CI runs on every push, so an intermediate state gets a build and a format check within a couple of minutes, which is the point of having a branch tier at all.
 
-4. **Open a pull request** against `main`, following [the template](./pull-requests/). Opening it as a draft before the change is finished is a good pattern: the integration tier starts validating the branch, the diff becomes reviewable, and the pull request becomes where the change's progress is tracked.
+4. **Open a pull request** against `main`, following [the template](../pull-requests/). Opening it as a draft before the change is finished is a good pattern: the integration tier starts validating the branch, the diff becomes reviewable, and the pull request becomes where the change's progress is tracked.
 
 5. **Self-review.** Even alone. Read the diff in GitHub's pull request view, which is a genuinely different perspective from reading it in the editor. Check for forgotten TODOs and debug code. Verify the description still describes the change. Confirm the tests cover the new code and the documentation is updated.
 

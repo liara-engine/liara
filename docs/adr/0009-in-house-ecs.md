@@ -14,7 +14,7 @@ sidebar:
 
 ## Context
 
-The core needs a way to hold game state. I want an ECS, an entity-component-system layout where entities are bare identifiers, components are plain data attached to them, and systems iterate over whatever component set they care about. It separates data from behaviour, it suits data-oriented layouts, and it lets systems be written independently of each other, which fits an architecture where the renderer and a future physics module both operate on the same entities through different components without knowing about each other.
+The core needs a way to hold game state. I want an ECS, an entity-component-system layout where entities are bare identifiers, components are plain data attached to them, and systems iterate over whatever component set they care about. It separates data from behavior, it suits data-oriented layouts, and it lets systems be written independently of each other, which fits an architecture where the renderer and a future physics module both operate on the same entities through different components without knowing about each other.
 
 EnTT and flecs exist, are excellent, are faster than what I will write, and would take an afternoon to integrate.
 
@@ -32,7 +32,7 @@ The fuller version is that I work on things I can see the bottom of. Assembling 
 
 **flecs.** More featureful than EnTT, with relationships and queries I would not write myself. Rejected for the same reason, more so: the more it does, the less of it I would understand.
 
-**No ECS**, plain object hierarchies, or arrays of structs with hand-written iteration. Simpler, and sufficient for the scale Liara will reach before v1.0. Rejected because it does not compose with the module boundaries: the render packet pattern of `ARCHITECTURE.md` §6.3<!-- TODO link → the render packet page, once architecture is split into a directory --> depends on the core being able to iterate a specific component set cheaply, and an object hierarchy makes that a traversal rather than a scan.
+**No ECS**, plain object hierarchies, or arrays of structs with hand-written iteration. Simpler, and sufficient for the scale Liara will reach before v1.0. Rejected because it does not compose with the module boundaries: the [render packet pattern](../../architecture/ecs/#the-render-packet) depends on the core being able to iterate a specific component set cheaply, and an object hierarchy makes that a traversal rather than a scan.
 
 **Archetype storage** (Bevy, Unity DOTS) instead of sparse sets. Better for multi-component queries, which is most of them, and worse in every other way to implement: fragment management, archetype graph transitions, and structural change deferral. Rejected for v0.x as a first implementation and not on principle. If iteration performance becomes the bottleneck, this is where to go, and switching is an internal change since the ECS is not exposed across the ABI.
 

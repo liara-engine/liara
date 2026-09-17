@@ -16,18 +16,18 @@ It is the **host**: `launcher/` is the small executable that creates each module
 
 It is the **workspace orchestrator**: `scripts/liara.py` and its two wrappers clone every other repository into `workspace/`, generate the superbuild and the presets, and configure the build.
 
-And it is the **compatibility record**, in the sense that its `manifest.json` declares what the launcher requires and every module's manifest declares what it provides. There is no separate matrix file, and [ADR 0006](../adr/0006-manifest-as-compatibility-source-of-truth/) says why.
+And it is the **compatibility record**, in the sense that its `manifest.json` declares what the launcher requires and every module's manifest declares what it provides. There is no separate matrix file, and [ADR 0006](../../adr/0006-manifest-as-compatibility-source-of-truth/) says why.
 
 ## Contents
 
-| Path            | Holds                                                                                                                                                    |
-|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `docs/`         | These pages, the other foundational documents, and the ADRs                                                                                              |
-| `launcher/`     | The host application: `main.cpp`, its `config.h.in`, its `CMakeLists.txt`                                                                                |
-| `scripts/`      | `liara.py`, the `liara.sh` and `liara.ps1` wrappers, and the `CMakeLists.txt` and `CMakePresets.json` templates the workspace is generated from          |
-| `schemas/`      | The JSON schemas for `manifest.json`, the modules registry and the version file, served over GitHub Pages so that a `$schema` URL resolves               |
-| `workspace/`    | Where `liara.sh setup` clones the module repositories. Not tracked                                                                                       |
-| `manifest.json` | This repository's own manifest, in v2 form, with an `artifacts` block declaring the launcher's ABI requirement separately from the repository's versions |
+| Path            | Holds                                                                                                                                                                                 |
+|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `docs/`         | These pages, the other foundational documents, and the ADRs                                                                                                                           |
+| `launcher/`     | The host application: `main.cpp`, its `config.h.in`, its `CMakeLists.txt`                                                                                                             |
+| `scripts/`      | `liara.py`, the `liara.sh` and `liara.ps1` wrappers, and the `CMakeLists.txt` and `CMakePresets.json` templates the workspace is generated from                                       |
+| `schemas/`      | The JSON schemas for `manifest.json` and the modules registry, served over GitHub Pages so that a `$schema` URL resolves. The v1 manifest schema is deprecated and is removed in v0.1 |
+| `workspace/`    | Where `liara.sh setup` clones the module repositories. Not tracked                                                                                                                    |
+| `manifest.json` | This repository's own manifest, in v2 form, with an `artifacts` block declaring the launcher's ABI requirement separately from the repository's versions                              |
 
 `packaging/`, holding the `PKGBUILD` and the Windows packaging script, arrives with v0.6.
 
@@ -37,7 +37,7 @@ The user guide arrives with v0.1, for the reason that writing tutorials against 
 
 No engine logic, no rendering, no ECS. Nothing that belongs in a module.
 
-No generated API reference either. Each module's Doxygen XML is turned into pages by its own documentation build and published to `liara-docs`, which is described in `docs-shared`<!-- TODO link → the documentation-pipeline page of docs-shared -->.
+No generated API reference either. Each module's Doxygen XML is turned into pages by its own documentation build and published to `liara-docs`, which is described in [The documentation pipeline](https://liara-engine.liara-engine-documentation.workers.dev/docs-shared/dev/guides/documentation-pipeline/).
 
 And no Dockerfile. The documentation builder image used to live here in a `docker/` directory and now lives in `docs-shared`, which is the repository the image is built from. One trace of the move is still in the code: the root package of `release-please-config.json` lists `docker/**` in its `exclude-paths` for a directory that no longer exists.
 
@@ -45,4 +45,4 @@ And no Dockerfile. The documentation builder image used to live here in a `docke
 
 The meta repository versions along the milestone roadmap rather than with any module, and module repositories version independently of it and of each other.
 
-It is also the only repository releasing more than one thing: the repository itself on plain `vX.Y.Z` tags, plus `schemas` and `launcher` on component-prefixed ones. The mechanics are in [Commits and releases](../tooling/commits-and-releases/#several-packages-in-one-repository).
+It is also the only repository releasing more than one thing: the repository itself on plain `vX.Y.Z` tags, plus `schemas` and `launcher` on component-prefixed ones. The mechanics are in [Commits and releases](../../tooling/commits-and-releases/#several-packages-in-one-repository).

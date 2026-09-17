@@ -31,7 +31,7 @@ Repositories fall into four kinds, and the kind decides what the repository is a
 
 Three of the module repositories exist today: `liara-interfaces`, `liara-core` and `liara-renderer`. The other three are named here because the namespaces are claimed from the first line, not because the repositories are there.
 
-The test for whether something is a module comes from `MODULES.md` §1.5<!-- TODO link → the repository-kinds section, once modules is split into a directory -->: could it be reimplemented in another language against the same C interface and substituted? If not, it is not a module and it does not get a repository.
+The test for whether something is a module comes from [The rule that defines a module](../../modules/#the-rule-that-defines-a-module): could it be reimplemented in another language against the same C interface and substituted? If not, it is not a module and it does not get a repository.
 
 Applying that test, `liara-core` keeps the ECS, math, the logger, settings, the event bus and the loop primitives. Platform, assets and audio become their own modules at the point where they exist, instead of starting in the core and being extracted afterwards.
 
@@ -39,7 +39,7 @@ Applying that test, `liara-core` keeps the ECS, math, the logger, settings, the 
 
 **Start with a large core and extract when it hurts.** The obvious approach: fewer repositories early, split when the pain is real, avoid guessing wrong. Rejected because "when it hurts" lands after every extraction has become expensive. A subsystem inside the core accumulates callers that reach into it directly, and by the time the split is obviously needed, the work is a rewrite. I have done the extract-later version and it did not get done.
 
-**Keep the boundaries but ship them from one repository at first**, splitting the repositories later while keeping the interfaces. This one was seriously considered, and it is already what `ARCHITECTURE.md` §4.3<!-- TODO link → the ABI namespaces section, once architecture is split into a directory --> does for ABI namespaces: every subsystem gets its own namespace from the first line, whichever repository implements it. Rejected as a general policy for the reason above, and because doing the split in two steps means doing the packaging work twice.
+**Keep the boundaries but ship them from one repository at first**, splitting the repositories later while keeping the interfaces. This one was seriously considered, and it is already what [One namespace per subsystem](../../architecture/modularity/#one-namespace-per-subsystem-from-the-first-line) does for ABI namespaces: every subsystem gets its own namespace from the first line, whichever repository implements it. Rejected as a general policy for the reason above, and because doing the split in two steps means doing the packaging work twice.
 
 **Finer modules**, math separate from the ECS, the logger separate again. Rejected because none of them passes the substitution test in a way that means anything. Nobody reimplements a logger in Rust and swaps it in, and each additional repository has a fixed cost in CI, in releases and in documentation.
 

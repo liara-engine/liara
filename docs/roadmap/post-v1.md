@@ -12,11 +12,11 @@ The themes below are aspirational and unordered, and they will be prioritised an
 
 ## v1.x themes
 
-**The editor.** The largest single effort after v1.0. A scene editor with a viewport, hierarchy, inspector, asset browser, play and pause controls, and scene save and load. That is roughly what Unity shipped as its first editor in 2005, and it is years of work. It is also the headline of the v1.x line, and the interfaces are already designed for it: [render targets](../architecture/render-targets/) and [forward-looking decisions](../architecture/forward-looking/) are what make it possible without an interface break.
+**The editor.** The largest single effort after v1.0. A scene editor with a viewport, hierarchy, inspector, asset browser, play and pause controls, and scene save and load. That is roughly what Unity shipped as its first editor in 2005, and it is years of work. It is also the headline of the v1.x line, and the interfaces are already designed for it: [render targets](../../architecture/render-targets/) and [forward-looking decisions](../../architecture/forward-looking/) are what make it possible without an interface break.
 
 **Scripting.** Hot-reloadable game logic. The first host language is C++ through shared libraries reloaded on change, with Lua, AngelScript and others added as plugins to the scripting host module afterwards. The interface is designed for several languages from the start even though only one is implemented first.
 
-**Physics.** Rigid body dynamics and collision detection. Whether it is written outright or wraps Bullet, Jolt or PhysX is deliberately not decided until this milestone, for the reasons in [forward-looking decisions](../architecture/forward-looking/).
+**Physics.** Rigid body dynamics and collision detection. Whether it is written outright or wraps Bullet, Jolt or PhysX is deliberately not decided until this milestone, for the reasons in [forward-looking decisions](../../architecture/forward-looking/).
 
 **Advanced rendering.** PBR, cascaded shadow mapping, image-based lighting, post-processing, anti-aliasing options. Added incrementally, each as its own minor release.
 

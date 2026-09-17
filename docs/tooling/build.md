@@ -55,4 +55,4 @@ The Visual Studio generator does not produce one, so the symlink step is skipped
 
 The generated workspace `CMakeLists.txt` picks a compiler cache (sccache if present, otherwise ccache) and a linker (mold, otherwise lld) before it creates any target, which is the only point at which those settings take effect. The presets configure neither. Both are found on `PATH`, both are optional, and their absence is silent.
 
-CI deliberately installs neither, for reasons that belong with the [CI matrix](./ci/#parallelism-and-caching).
+CI deliberately installs neither, for reasons that belong with the [CI matrix](../ci/#parallelism-and-caching).

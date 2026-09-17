@@ -27,7 +27,7 @@ Modules are linked statically today, and the interfaces between them are designe
 
 The discipline costs little at the boundary, and what it buys is that switching to runtime loading later is a matter of writing a loader rather than rewriting contracts. It also buys something available immediately and independent of any loader: any module could be replaced by an implementation in another language, by implementing the same C interface. Whether that ever happens is a separate question, and what matters is that nothing in the architecture forbids it.
 
-The claim is checked rather than asserted. One CI leg builds every module as a shared library and links the launcher against them, and another makes the launcher resolve them at run time instead, through the `-link` and `-runtime` presets described in [CI](../tooling/ci/#the-build-matrix). A module that quietly acquired a link-time dependency on a sibling, or leaked C++ across its boundary, fails one of the two. The static-versus-dynamic choice is therefore a pair of build flags rather than an architectural fork.
+The claim is checked rather than asserted. One CI leg builds every module as a shared library and links the launcher against them, and another makes the launcher resolve them at run time instead, through the `-link` and `-runtime` presets described in [CI](../../tooling/ci/#the-build-matrix). A module that quietly acquired a link-time dependency on a sibling, or leaked C++ across its boundary, fails one of the two. The static-versus-dynamic choice is therefore a pair of build flags rather than an architectural fork.
 
 ## One namespace per subsystem, from the first line
 
@@ -41,6 +41,6 @@ The codebase is split across Git repositories, one per module, under the `liara-
 
 A monorepo would be easier to refactor across, easier to bootstrap, and easier to keep version-locked. The multi-repository layout needs coordination across pull requests, a workspace bootstrap for local development, and an explicit record of which versions work together.
 
-It is preferred because the cognitive cost of mixing unrelated concerns in one repository is, for me specifically, higher than the cost of running a bootstrap script. [ADR 0001](../adr/0001-multi-repository-layout/) records what that judgment is based on, which is the previous engine and how it ended. The discipline imposed by separate repositories is the feature.
+It is preferred because the cognitive cost of mixing unrelated concerns in one repository is, for me specifically, higher than the cost of running a bootstrap script. [ADR 0001](../../adr/0001-multi-repository-layout/) records what that judgment is based on, which is the previous engine and how it ended. The discipline imposed by separate repositories is the feature.
 
-The repository list itself is in [Modules](../modules/).
+The repository list itself is in [Modules](../../modules/).

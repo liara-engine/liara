@@ -11,7 +11,7 @@ Both tools are configured per repository, in a `.clang-format` and a `.clang-tid
 
 Two things survive that freedom. Formatting is mechanical and never manual, so every repository has a configuration and CI enforces it; a formatting argument in a review is a bug in the configuration rather than in the pull request. And a check a module removes from its baseline carries a comment above it saying what noise it produced, in the file, for whoever wonders six months later whether it can go back on.
 
-The baselines themselves, with the reasoning for each choice, are in [`code-style.md`](../code-style/).
+The baselines themselves, with the reasoning for each choice, are in [`code-style.md`](../../code-style/).
 
 ## clang-format
 

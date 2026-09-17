@@ -48,7 +48,7 @@ The What, Why and How structure is borrowed from established practice, and it is
 
 ## Review
 
-In solo mode the reviewer is the contributor. That is a real review rather than a checkbox, and it is the self-review pass of [stage 5](./branches-and-changes/#the-eight-stages).
+In solo mode the reviewer is the contributor. That is a real review rather than a checkbox, and it is the self-review pass of [stage 5](../branches-and-changes/#the-eight-stages).
 
 If external contributors appear, the maintainer reviews the first one, a maintainer's own pull requests are still reviewed by themselves, which is the practical reality of a solo project, and a substantial change by a new contributor is worth discussing in an issue before any code is written.
 
@@ -66,6 +66,6 @@ Review is about the code and not about whoever wrote it. Comments are specific a
 
 ## Commits
 
-The format, the types, the scopes and what makes a change breaking are all in [Commits and releases](../tooling/commits-and-releases/). They matter more than they look: release-please reads them to decide version numbers and write changelogs, so a badly typed commit produces a wrong release rather than an untidy log.
+The format, the types, the scopes and what makes a change breaking are all in [Commits and releases](../../tooling/commits-and-releases/). They matter more than they look: release-please reads them to decide version numbers and write changelogs, so a badly typed commit produces a wrong release rather than an untidy log.
 
 That discipline applies to the merged history and not to the branch. Because merges are squashed, a feature branch can hold "wip", "fix typo" and "respond to review" without any of it reaching `main`. The squash commit takes the pull request's title, which is where the conventional commit actually has to be correct.

@@ -7,7 +7,7 @@ sidebar:
 
 ## Two tiers
 
-CI answers two questions that are not the same question, so it runs as two pipelines with different build models. [ADR 0008](../adr/0008-two-tier-ci/) records why.
+CI answers two questions that are not the same question, so it runs as two pipelines with different build models. [ADR 0008](../../adr/0008-two-tier-ci/) records why.
 
 The **branch tier** runs on every push outside `main`. It builds the repository on its own, on one Linux preset, against the `liara-interfaces` version that repository's own manifest declares, and runs clang-format. It fetches the preset template from the meta repository rather than carrying a copy. It is not a required check, and it is deliberately incomplete: no Windows, no shared libraries, no clang-tidy, no composition check. A green branch build means the repository compiles, and nothing beyond that.
 

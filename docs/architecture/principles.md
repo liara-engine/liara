@@ -35,4 +35,4 @@ This one is about motivation rather than engineering, and it is load-bearing for
 
 The author six months from now is a different person, with none of the context that currently lives only in my head, and the project has to be navigable by that person.
 
-Two things follow. Decisions are written down when they are made rather than reconstructed later, which is what the decision records are for. And consistency across the project matters more than local cleverness, because the future reader recognises a pattern faster than they reconstruct an argument.
+Two things follow. Decisions are written down when they are made rather than reconstructed later, which is what the decision records are for. And consistency across the project matters more than local cleverness, because the future reader recognizes a pattern faster than they reconstruct an argument.

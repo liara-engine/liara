@@ -16,7 +16,7 @@ Liara is a set of modules that version on their own cadence and talk to each oth
 
 The core is the obvious candidate. It is the module everything else seems to revolve around, it is created first, and handing it the job costs no new component.
 
-That instinct had already been acted on before any of this was written down. The core held a reference to the renderer, drove the frame loop, and produced a render packet (the flat list of plain-old-data structures the core builds once per tick, described in `ARCHITECTURE.md` §6.3<!-- TODO link → the render packet page, once architecture is split into a directory -->) that the renderer consumed.
+That instinct had already been acted on before any of this was written down. The core held a reference to the renderer, drove the frame loop, and produced a render packet (the flat list of plain-old-data structures the core builds once per tick, described in [The render packet](../../architecture/ecs/#the-render-packet)) that the renderer consumed.
 
 Read from outside it, the same arrangement costs three things at once: the core can no longer be built without a renderer, nor tested without one, and its release cadence stops being its own. Which is exactly the independence the multi-repository layout of [ADR 0001](../0001-multi-repository-layout/) was set up to buy.
 

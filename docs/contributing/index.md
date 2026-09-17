@@ -8,7 +8,7 @@ sidebar:
 
 ## Who this is for
 
-Liara is primarily a personal learning project, so the contributor these pages address is most often its own developer returning after a pause. The workflow is optimized for one specific failure mode: someone who has not touched the project in three weeks and needs to re-enter without losing momentum. [After a pause](./after-a-pause/) is the page written for exactly that.
+Liara is primarily a personal learning project, so the contributor these pages address is most often its own developer returning after a pause. The workflow is optimized for one specific failure mode: someone who has not touched the project in three weeks and needs to re-enter without losing momentum. [Coming back after a pause](./recovering/#coming-back-after-a-pause) is written for exactly that.
 
 External contributors are welcome, and the workflow is meant to be navigable for them too. The project is small enough that no contributor agreement is needed: the MIT license covers the legal side and these pages cover the practical one.
 

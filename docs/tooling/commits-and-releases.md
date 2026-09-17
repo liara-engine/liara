@@ -77,7 +77,7 @@ Each repository configures release-please in `release-please-config.json`, with 
 
 Release cycles are independent. Nothing synchronizes versions between modules, and nothing is meant to.
 
-Because `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` are both on, a breaking change below 1.0.0 bumps the minor rather than the major, and a feature bumps the patch. That is the normal pre-1.0 reading of semver, and it is what makes the 0.0.x lockstep rule of [ADR 0005](../adr/0005-version-encoding-and-compatibility/) load-bearing during Phase 0.
+Because `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` are both on, a breaking change below 1.0.0 bumps the minor rather than the major, and a feature bumps the patch. That is the normal pre-1.0 reading of semver, and it is what makes the 0.0.x lockstep rule of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) load-bearing during Phase 0.
 
 Each module's configuration also carries `extra-files`, so the release commit rewrites `$.metadata.latest` in `manifest.json` and `$.version` in `vcpkg.json` alongside the tag. Those two fields are therefore never edited by hand.
 
@@ -105,4 +105,4 @@ Each module release publishes the compiled library for Linux under GCC, Linux un
 
 Names follow `liara-<module>-<version>-<platform>-<toolchain>-<linkage>.<ext>`, as in `liara-core-0.3.1-linux-clang-shared.tar.zst` or `liara-renderer-0.3.0-windows-msvc-static.zip`. The convention is stable because the composition tooling parses it, which makes any change to it a breaking change for that tooling.
 
-These are per-module artifacts and not a bundled engine. Assembling a specific set of module versions into something runnable is the composition script's job, described in [`roadmap.md`](../roadmap/), and it consumes these artifacts rather than producing them.
+These are per-module artifacts and not a bundled engine. Assembling a specific set of module versions into something runnable is the composition script's job, described in [Roadmap](../../roadmap/), and it consumes these artifacts rather than producing them.

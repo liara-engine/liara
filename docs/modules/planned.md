@@ -14,7 +14,7 @@ The application a developer launches to build a game: it hosts the engine, place
 
 It does not exist in v0.x, and scenes are built in code or loaded from JSON written by hand. That is a real limitation rather than a design position.
 
-What makes it possible to defer is that the v0.x interfaces are designed so introducing it later needs no interface change, which is what the render-target and multi-view decisions in `architecture.md`<!-- TODO link → the render targets and forward-looking decisions sections, once architecture is split --> are for. An editor is a host that renders the scene into a texture and shows it in a panel, so if the renderer can already draw into something other than the swapchain, the editor needs nothing new from the contract.
+What makes it possible to defer is that the v0.x interfaces are designed so introducing it later needs no interface change, which is what the [render-target and multi-view decisions](../../architecture/render-targets/) are for, and why editor readiness heads the list in [Designed now](../../architecture/forward-looking/#designed-now). An editor is a host that renders the scene into a texture and shows it in a panel, so if the renderer can already draw into something other than the swapchain, the editor needs nothing new from the contract.
 
 When it is built, the repository will hold an application owning its own window and swapchain and driving the engine's tick manually, an ImGui interface (scene hierarchy, component inspector, asset browser, viewport, play and pause and step), gizmo rendering built on the renderer's debug primitives, scene serialization, and project management.
 

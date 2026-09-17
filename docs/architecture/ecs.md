@@ -15,7 +15,7 @@ It is not the only model that could work here, and it is not chosen for ideologi
 
 ## A hand-written one
 
-The ECS is written by hand rather than taken from EnTT or flecs. [ADR 0009](../adr/0009-in-house-ecs/) records that decision in full, including the part of the reasoning that is about me rather than about the code.
+The ECS is written by hand rather than taken from EnTT or flecs. [ADR 0009](../../adr/0009-in-house-ecs/) records that decision in full, including the part of the reasoning that is about me rather than about the code.
 
 What it aims at is narrower than what a library offers. Correct, meaning entities are not confused with each other and a destroyed entity produces no dangling reference. Fast enough for what this engine does. Small enough to hold in my head. And free to change as experience accumulates, without migrating through somebody else's API changes.
 

@@ -50,6 +50,6 @@ No external dependency of any kind. The headers may use fixed-width integer type
 
 Strict semantic versioning, with the rules in `INTERFACES.md`<!-- TODO link → the versioning section, once interfaces is split into a directory -->. A major bump for anything that breaks ABI or source compatibility, a minor bump for purely additive change, a patch bump for documentation and comments.
 
-Two things make that stricter in practice than the sentence above suggests. Below 1.0.0, release-please is configured to bump the minor for a breaking change and the patch for a feature, so the major stays at zero throughout Phase 0. And under the 0.0.x rule of [ADR 0005](../adr/0005-version-encoding-and-compatibility/), the patch component is significant during that period: a consumer pinned to 0.0.4 does not accept 0.0.5.
+Two things make that stricter in practice than the sentence above suggests. Below 1.0.0, release-please is configured to bump the minor for a breaking change and the patch for a feature, so the major stays at zero throughout Phase 0. And under the 0.0.x rule of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/), the patch component is significant during that period: a consumer pinned to 0.0.4 does not accept 0.0.5.
 
 The version lives in `version.h` as macros and is checked at load time through `liara_<module>_info()`, which every module exports for exactly this.

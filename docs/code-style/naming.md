@@ -7,7 +7,7 @@ sidebar:
 
 ## Identifiers
 
-The table is encoded in the `CheckOptions` block of the C++ clang-tidy baseline. clang-tidy reports deviations as warnings rather than errors, for the reasons in [Static analysis baselines](./checks/#naming-is-reported-not-enforced), so the table is the reference and review is the backstop.
+The table is encoded in the `CheckOptions` block of the C++ clang-tidy baseline. clang-tidy reports deviations as warnings rather than errors, for the reasons in [Static analysis baselines](../checks/#naming-is-reported-not-enforced), so the table is the reference and review is the backstop.
 
 | Identifier kind             | Convention  | Example                      |
 |-----------------------------|-------------|------------------------------|

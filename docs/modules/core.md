@@ -12,7 +12,7 @@ It owns the data and the schedule, and the other modules transform data on a sch
 
 ## Contents
 
-**The ECS.** Entity allocation with generational handles, sparse-set component storage, the world container, the query API, system scheduling. Written by hand, for the reasons in [ADR 0009](../adr/0009-in-house-ecs/), and arriving in v0.2.
+**The ECS.** Entity allocation with generational handles, sparse-set component storage, the world container, the query API, system scheduling. Written by hand, for the reasons in [ADR 0009](../../adr/0009-in-house-ecs/), and arriving in v0.2.
 
 **The math layer.** Vector, matrix and quaternion types as plain C structs declared in `liara-interfaces`, with implementation functions operating on them. Internal computation may use GLM where convenient, and no GLM type ever crosses the boundary.
 
@@ -25,7 +25,7 @@ It owns the data and the schedule, and the other modules transform data on a sch
 **The loop primitives.** `liara_core_update(core, dt)` advances the simulation by one tick, and `liara_core_get_render_packet()` hands back what the host should submit to the renderer.
 
 :::caution[Three provisional entry points]
-`liara_core_set_run_mode()`, `liara_core_run()` and `liara_core_stop()` currently let the core own the loop and call back into the host, which is how the Phase 0 demo runs. They are marked provisional in `core.h` and are removed in ABI 1.0.x. `LIARA_CORE_RUN_MODE_MANUAL` plus `liara_core_update()` is the arrangement [ADR 0003](../adr/0003-the-host-composes-modules/) actually describes, and it is what the test suite uses.
+`liara_core_set_run_mode()`, `liara_core_run()` and `liara_core_stop()` currently let the core own the loop and call back into the host, which is how the Phase 0 demo runs. They are marked provisional in `core.h` and are removed in ABI 1.0.x. `LIARA_CORE_RUN_MODE_MANUAL` plus `liara_core_update()` is the arrangement [ADR 0003](../../adr/0003-the-host-composes-modules/) actually describes, and it is what the test suite uses.
 :::
 
 **Module lifecycle.** Creation, destruction and the per-tick step, exposed through the C interface for a host to drive. The core neither loads nor registers nor holds a reference to another module. Deciding which renderer to pair it with, checking their versions against each other and wiring them together is the host's job.

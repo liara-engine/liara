@@ -52,7 +52,7 @@ Tests are written alongside the feature rather than retrofitted, and a pull requ
 
 Coverage is not collected yet. The plan is gcovr on Linux GCC debug builds producing a Cobertura report, OpenCppCoverage producing the equivalent on Windows, and Codecov for history and pull request comments, and none of that is switched on.
 
-The reason is in [CI](./ci/#what-blocks-a-merge): measuring coverage of Phase 0's placeholder implementations would report a number about scaffolding. It arrives in v0.2, alongside the first code worth covering.
+The reason is in [CI](../ci/#what-blocks-a-merge): measuring coverage of Phase 0's placeholder implementations would report a number about scaffolding. It arrives in v0.2, alongside the first code worth covering.
 
 When it does, the target is direction rather than a percentage: a pull request should not lower coverage without saying why. That avoids both the hundred-percent cult, which produces tests that test the test framework, and the excuse that the number means nothing.
 

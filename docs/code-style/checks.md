@@ -5,11 +5,11 @@ sidebar:
   order: 2
 ---
 
-What CI actually runs, and when, is in [Static analysis](../tooling/static-analysis/). This page is the baselines themselves and the reasoning behind them.
+What CI actually runs, and when, is in [Static analysis](../../tooling/static-analysis/). This page is the baselines themselves and the reasoning behind them.
 
 ## Two of them
 
-**The C++ baseline**, used by every repository holding C++, enables broad families (`bugprone-*`, `cert-*`, `clang-analyzer-*`, `concurrency-*`, `cppcoreguidelines-*`, `misc-*`, `modernize-*`, `performance-*`, `portability-*`, `readability-*`) and then subtracts the ones that produce noise in this project's material. It carries a `CheckOptions` block encoding the [naming table](./naming/).
+**The C++ baseline**, used by every repository holding C++, enables broad families (`bugprone-*`, `cert-*`, `clang-analyzer-*`, `concurrency-*`, `cppcoreguidelines-*`, `misc-*`, `modernize-*`, `performance-*`, `portability-*`, `readability-*`) and then subtracts the ones that produce noise in this project's material. It carries a `CheckOptions` block encoding the [naming table](../naming/).
 
 **The C baseline**, used by `liara-interfaces`, starts from `-*` and adds back the same families minus everything that assumes C++: `modernize-use-using`, `use-nullptr`, `use-override`, `use-equals-default`, `concat-nested-namespaces`, and the whole `cppcoreguidelines-*` family. Its `CheckOptions` encode the C naming rules of `INTERFACES.md`: the `liara_` prefix, the `_t` suffix, and `LIARA_` plus `UPPER_CASE` for macros and enum constants.
 
@@ -41,4 +41,4 @@ Three things are expected to differ between modules, and none needs a change her
 
 `HeaderFilterRegex`, which depends on the repository's directory layout. Checks subtracted because a module's material makes them noisy, which is the common case and where invariant 5 applies: the removal carries its reason in the file. And `CheckOptions` beyond naming, tuned to a module's idioms.
 
-Two things are not adapted. The naming `CheckOptions`, because they encode [Naming](./naming/) and `INTERFACES.md`, which are invariants. And the fact that `WarningsAsErrors` is `*` minus explicit exceptions rather than an opt-in list: a module wanting a check to be non-fatal names it, so that the exception is visible.
+Two things are not adapted. The naming `CheckOptions`, because they encode [Naming](../naming/) and `INTERFACES.md`, which are invariants. And the fact that `WarningsAsErrors` is `*` minus explicit exceptions rather than an opt-in list: a module wanting a check to be non-fatal names it, so that the exception is visible.

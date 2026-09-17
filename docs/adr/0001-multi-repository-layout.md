@@ -38,7 +38,7 @@ I rejected it because I have already built the monorepo version of this project 
 
 ## Consequences
 
-A change that crosses modules is several pull requests in a defined order, and I have to write down which versions work together. [`contributing.md`](../../contributing/) §12 describes the procedure. It is slow on purpose, since the friction is what keeps interface changes from being casual, but it is also genuinely slow, and on a day where I want to move fast it is the thing standing in the way.
+A change that crosses modules is several pull requests in a defined order, and I have to write down which versions work together. [Changing more than one repository](../../contributing/cross-repository/) describes the procedure. It is slow on purpose, since the friction is what keeps interface changes from being casual, but it is also genuinely slow, and on a day where I want to move fast it is the thing standing in the way.
 
 Local development needs tooling that would not otherwise exist: a bootstrap script, a generated superbuild, a preset template shared across repositories, and a CI that assembles the workspace around whichever repository is under test. That is a real amount of Phase 0 work that a monorepo would not have required at all.
 

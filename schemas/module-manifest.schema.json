@@ -1,7 +1,10 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://liara-engine.github.io/liara/schemas/module-manifest.schema.json",
-  "title": "Liara Engine Module Manifest",
+  "title": "Liara Engine Module Manifest v1 (deprecated)",
+  "description": "Deprecated. Superseded by module-manifest-v2.schema.json, which models repository kinds and asks of each only what applies. Scheduled for removal in the v0.1 milestone.",
+  "deprecated": true,
+  "$comment": "Deprecated in favour of module-manifest-v2.schema.json, and scheduled for removal in the v0.1 milestone (meta repository 1.0.0). No manifest in the project declares it any more. Consumers deliberately keep reading v1 rather than dropping it with this schema: rebuilding the documentation of an old tag meets the v1 manifest that tag shipped with, so that branch stays for as long as an old tag is rebuildable.",
   "type": "object",
   "additionalProperties": false,
 

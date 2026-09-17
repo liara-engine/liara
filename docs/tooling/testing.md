@@ -34,7 +34,15 @@ Tests are classified with CTest labels rather than doctest tags, because the tax
 | `slow`        | More than a few hundred milliseconds                                     |
 | `cross-lang`  | Exercises the C API from a language with a C FFI, currently Zig and Rust |
 
-A test may carry several (`LABELS "integration;slow"`). A category is selected with `ctest -L unit` and excluded with `ctest -LE gpu`.
+A test may carry several (`LABELS "integration;slow"`). A category is selected with `ctest -L unit` and excluded with `ctest -LE gpu`, and the orchestrator exposes both without dropping to ctest:
+
+```bash
+./scripts/liara.sh test --label unit
+./scripts/liara.sh test --exclude-label slow,gpu
+./scripts/liara.sh test --label unit,integration --exclude-label slow
+```
+
+Both flags are repeatable and accept a comma-separated list. Several labels in one flag are an or, each name matches a label exactly rather than as a substring, and `--exclude-label` wins over `--label` for a test carrying both.
 
 **Selection works by exclusion.** CI and the developer both run everything and subtract what does not apply: `ctest -LE gpu` in CI, `ctest -LE "slow|gpu"` for a faster local loop. A test carrying no label therefore runs everywhere, which is the safe default, because forgetting a label costs time while the opposite convention would let a whole repository report success without executing anything.
 

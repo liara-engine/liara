@@ -399,14 +399,40 @@ def do_build(args):
     ok("Build succeeded!")
 
 
+def split_labels(values):
+    """Flatten repeated and comma-separated label options into a flat list of label names."""
+    return [label.strip() for value in values for label in value.split(",") if label.strip()]
+
+def labels_regex(labels):
+    """Anchored alternation, so that a label matches exactly and never as a substring."""
+    return "^(" + "|".join(re.escape(label) for label in labels) + ")$"
+
 def do_test(args):
     script_dir = Path(__file__).resolve().parent
     workspace = script_dir.parent / "workspace"
     preset_to_use = args.preset or DEFAULT_PRESETS[platform.system()]
 
-    info(f"Running tests with preset '{preset_to_use}'...")
-    code, _ = run_cmd(["ctest", "--preset", preset_to_use], cwd=workspace)
+    included = split_labels(args.label)
+    excluded = split_labels(args.exclude_label)
+
+    cmd = ["ctest", "--preset", preset_to_use]
+    if included:
+        cmd += ["-L", labels_regex(included)]
+    if excluded:
+        cmd += ["-LE", labels_regex(excluded)]
+
+    selection = []
+    if included:
+        selection.append(f"only {', '.join(included)}")
+    if excluded:
+        selection.append(f"excluding {', '.join(excluded)}")
+    suffix = f" ({'; '.join(selection)})" if selection else ""
+
+    info(f"Running tests with preset '{preset_to_use}'{suffix}...")
+    code, _ = run_cmd(cmd, cwd=workspace)
     if code != 0:
+        if selection:
+            fatal("Some tests failed, or no test carries the selected labels.")
         fatal("Some tests failed.")
     ok("All tests passed!")
 
@@ -618,6 +644,12 @@ def main():
     # Sub-command: test
     test_parser = subparsers.add_parser("test", help="Run CTest suite")
     test_parser.add_argument("--preset", help="Override CMake test preset")
+    test_parser.add_argument("--label", action="append", default=[], metavar="LABEL",
+        help="Run only the tests carrying LABEL. Repeatable, and accepts a comma-separated list. "
+             "Known labels: unit, integration, gpu, benchmark, slow, cross-lang. Example: --label unit,integration")
+    test_parser.add_argument("--exclude-label", action="append", default=[], metavar="LABEL",
+        help="Skip the tests carrying LABEL, even when --label selected them. "
+             "Repeatable, and accepts a comma-separated list. Example: --exclude-label slow,gpu")
 
     # Sub-command: launch
     launch_parser = subparsers.add_parser("launch", help="Launch the Liara Engine application")

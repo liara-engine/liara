@@ -9,9 +9,9 @@
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "exclude-paths": [
-        "docker/**",
-        "launcher/**",
-        "schemas/**"
+        "docker",
+        "launcher",
+        "schemas"
       ],
       "extra-files": [
         {

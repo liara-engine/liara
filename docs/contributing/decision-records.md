@@ -24,5 +24,3 @@ Records are numbered sequentially from `0001`, and they are write-once. A revers
 ## The workflow
 
 A record at proposal stage is opened as a pull request with its status set to `Proposed`, and the pull request's discussion is where the decision is argued. On merge the status becomes `Accepted` and the decision takes effect.
-
-Two of the ten current records sit at `Proposed` rather than `Accepted`, which is the format working as intended: both describe decisions whose milestone has not arrived, and recording them before the investment is the only point at which changing my mind is still cheap.

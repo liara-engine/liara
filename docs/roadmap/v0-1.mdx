@@ -96,5 +96,3 @@ Module discovery, meaning scanning a directory, reading a manifest and deciding 
 - [ ] A contrived ABI mismatch is detected after symbol resolution and refuses to proceed, with a message naming the module and both versions.
 - [ ] A missing or unopenable library produces a clear error rather than a crash.
 - [ ] The `-runtime` presets are exercised by CI on both platforms.
-
-Four of those five are already implemented in `launcher/src/main.cpp`, which resolves both modules through `dlopen` or `LoadLibrary`, checks what they report against `MIN_ABI_VERSION`, and fails with a named message. The CI item is the one still open.

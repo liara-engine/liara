@@ -1,0 +1,74 @@
+---
+title: When it does not work
+description: The failures that have already happened, what each one actually means, and the fix.
+sidebar:
+  label: Troubleshooting
+  order: 3
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Vulkan validation errors
+
+If validation errors persist on a driver known to be good, capture the exact message and open a bug report. This is often a real bug in the engine rather than a setup problem, and the message is the part that makes it findable.
+
+## `glslc` not found
+
+`glslc` comes from `shaderc` on Arch and from the Vulkan SDK on Windows.
+
+<Tabs syncKey="platform">
+<TabItem label="Arch Linux">
+
+```bash frame="terminal"
+which glslc   # expect /usr/bin/glslc
+```
+
+</TabItem>
+<TabItem label="Windows 11">
+
+```powershell frame="terminal"
+Get-Command glslc   # expect something under %VULKAN_SDK%\Bin\
+```
+
+</TabItem>
+</Tabs>
+
+If it is not on `PATH`, the SDK install is incomplete. Re-run the installer, or `pacman -S shaderc`.
+
+## `compile_commands.json` not found
+
+clangd looks for it at the workspace root or in the build directory. `setup` creates a symlink at the workspace root pointing at the active build's copy, so the symlink is dangling when the build has never been configured.
+
+Configure CMake once and it resolves. The symlink updates itself afterwards.
+
+## CLion does not see the presets
+
+CLion needs the project opened at the level where `CMakePresets.json` lives, which is `workspace/` and not the meta repository's root. The meta repository has no presets of its own, by design.
+
+If they still do not appear, re-run `./scripts/liara.sh setup` to regenerate the workspace.
+
+## Linking is slow on Linux
+
+GNU `ld` is slow on a C++ project of any size. The workspace `CMakeLists.txt` uses mold when it finds it, and silently does not when it does not.
+
+```bash frame="terminal"
+ninja -t commands | grep -- '-fuse-ld'
+```
+
+That should show `-fuse-ld=mold`. If it does not, install mold and make sure the CMake cache reflects it, deleting `build/` and reconfiguring if needed.
+
+## MSVC compile times
+
+They are significant for templates and modern C++. Three things help.
+
+Use the Ninja generator rather than the multi-config Visual Studio one, which is friendlier and slower. Install sccache with `winget install Mozilla.Sccache`, which the CMake configuration picks up automatically. And prefer `windows-debug` over `windows-release` for interactive work, since skipping the optimiser is worth something at compile time.
+
+## Antivirus slowing the build on Windows
+
+Defender and third-party antivirus scan every object file the build produces, which is as expensive as it sounds. Exclude the workspace:
+
+```powershell frame="terminal"
+Add-MpPreference -ExclusionPath "$HOME\src\liara\workspace"
+```
+
+Adjust the path to wherever the workspace actually is. This typically halves the build time, and sometimes better.

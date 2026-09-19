@@ -6,7 +6,7 @@ sidebar:
   order: 4
 ---
 
-Arrives with v0.1. Everything the engine needs from the operating system, behind one interface, which is what makes "Linux and Windows are both first-class" a property of one repository instead of an `#ifdef` scattered through all of them.
+Its capabilities arrive with v0.1; the repository exists from Phase 0, holding the module's self-description and nothing else. Everything the engine needs from the operating system, behind one interface, which is what makes "Linux and Windows are both first-class" a property of one repository instead of an `#ifdef` scattered through all of them.
 
 ## Contents
 

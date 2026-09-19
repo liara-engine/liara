@@ -12,7 +12,7 @@ import hashlib
 from pathlib import Path
 
 # --- Configuration -----------------------------------------------------------
-MODULES = ["liara-interfaces", "liara-core", "liara-renderer"]
+MODULES = ["liara-interfaces", "liara-core", "liara-platform", "liara-renderer"]
 DEFAULT_PRESETS = {
     "Linux": "linux-debug-clang",
     "Windows": "windows-release"

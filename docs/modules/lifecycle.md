@@ -16,7 +16,9 @@ sidebar:
 
 **4. Bump `liara-interfaces`.** A new namespace is purely additive, so it is a minor bump, and a patch one below 1.0.0.
 
-**5. Create the repository**, and not before this point. Copy the standard scaffolding, then register it in three places: the workspace orchestrator's module list, `modules-registry.json` so the documentation switchers know about it, and its own `manifest.json` so compatibility can be computed against it.
+**5. Create the repository**, and not before this point. Copy the standard scaffolding, then register it in four places: the workspace orchestrator's module list, the preset template's per-module `LIARA_<NAME>_BUILD_TESTS` and `LIARA_<NAME>_INSTALL` flags, `modules-registry.json` so the documentation switchers know about it, and its own `manifest.json` so compatibility can be computed against it.
+
+The second one is the easy one to miss, because missing it fails nothing: the module builds, and its tests are silently not built.
 
 **6. Update these pages**, the dependency graph, and the cross-reference table.
 

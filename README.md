@@ -61,12 +61,13 @@ User-facing documentation, meaning tutorials and guides rather than the engine's
 | [`liara`](https://github.com/liara-engine/liara)                       | This one: the launcher, the workspace orchestrator, the documentation, the schemas |
 | [`liara-interfaces`](https://github.com/liara-engine/liara-interfaces) | The C ABI headers every module implements or consumes                              |
 | [`liara-core`](https://github.com/liara-engine/liara-core)             | The ECS, math, logger, settings, events, loop primitives                           |
+| [`liara-platform`](https://github.com/liara-engine/liara-platform)     | Window, input devices, OS signals and timing                                       |
 | [`liara-renderer`](https://github.com/liara-engine/liara-renderer)     | The reference Vulkan renderer                                                      |
 | [`docs-shared`](https://github.com/liara-engine/docs-shared)           | The Astro preset, the site tools, the documentation builder image                  |
 | [`liara-docs`](https://github.com/liara-engine/liara-docs)             | Where the documentation is hosted, and the edge worker serving it                  |
 | [`.github`](https://github.com/liara-engine/.github)                   | The reusable CI workflows every repository calls                                   |
 
-`liara-platform`, `liara-assets`, `liara-audio`, `liara-physics` and `liara-editor` have their ABI namespaces claimed and no repository yet. Each is created when its first line of code is written.
+`liara-assets`, `liara-audio`, `liara-physics` and `liara-editor` have their ABI namespaces claimed and no repository yet. Each is created when its first line of code is written.
 
 ## Roadmap at a glance
 

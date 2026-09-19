@@ -40,14 +40,14 @@ endif()
 if(NOT TARGET Liara::Interfaces)
     message(FATAL_ERROR
             "Liara::Interfaces is not available. Build the launcher through the workspace superbuild "
-            " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/BOOTSTRAP)")
+            " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/bootstrap)")
 endif()
 
 if(NOT TARGET Liara::Core)
     find_package(LiaraCore REQUIRED)
     if(NOT TARGET Liara::Core)
         message(FATAL_ERROR "Liara::Core is not available. Build the launcher through the workspace superbuild "
-                " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/BOOTSTRAP)")
+                " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/bootstrap)")
     endif()
 endif()
 
@@ -55,7 +55,7 @@ if(NOT TARGET Liara::Renderer)
     find_package(LiaraRenderer REQUIRED)
     if(NOT TARGET Liara::Renderer)
         message(FATAL_ERROR "Liara::Renderer is not available. Build the launcher through the workspace superbuild "
-                " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/BOOTSTRAP)")
+                " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/bootstrap)")
     endif()
 endif()
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/liara-engine/liara/compare/launcher-v0.1.2...launcher-v0.1.3) (2026-09-19)
+
+
+### Bug Fixes
+
+* **CMake:** update bootstrap guide link to use lowercase ([e879676](https://github.com/liara-engine/liara/commit/e879676b3a5afa522c8fc58cdc90ac245915a946))
+
 ## [0.1.2](https://github.com/liara-engine/liara/compare/launcher-v0.1.1...launcher-v0.1.2) (2026-09-17)
 
 

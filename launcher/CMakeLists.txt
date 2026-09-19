@@ -51,6 +51,14 @@ if(NOT TARGET Liara::Core)
     endif()
 endif()
 
+if(NOT TARGET Liara::Platform)
+    find_package(LiaraPlatform REQUIRED)
+    if(NOT TARGET Liara::Platform)
+        message(FATAL_ERROR "Liara::Platform is not available. Build the launcher through the workspace superbuild "
+                " (see https://liara-engine.liara-engine-documentation.workers.dev/liara/latest/guides/bootstrap)")
+    endif()
+endif()
+
 if(NOT TARGET Liara::Renderer)
     find_package(LiaraRenderer REQUIRED)
     if(NOT TARGET Liara::Renderer)
@@ -72,9 +80,10 @@ if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
     target_link_libraries(liara_launcher PRIVATE
             Liara::Interfaces
             $<COMPILE_ONLY:Liara::Core>
+            $<COMPILE_ONLY:Liara::Platform>
             $<COMPILE_ONLY:Liara::Renderer>)
 
-    foreach(module IN ITEMS liara_core liara_renderer)
+    foreach(module IN ITEMS liara_core liara_platform liara_renderer)
         if(TARGET ${module})
             add_dependencies(liara_launcher ${module})
         endif()
@@ -87,7 +96,7 @@ if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
     endif()
 else()
     target_link_libraries(liara_launcher PRIVATE
-            Liara::Interfaces Liara::Core Liara::Renderer)
+            Liara::Interfaces Liara::Core Liara::Platform Liara::Renderer)
 endif()
 
 set_target_properties(liara_launcher PROPERTIES

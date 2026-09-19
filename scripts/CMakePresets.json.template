@@ -8,14 +8,7 @@
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
         "VCPKG_MANIFEST_FEATURES": "tests",
-        "LIARA_INTERFACES_BUILD_TESTS": "ON",
-        "LIARA_CORE_BUILD_TESTS": "ON",
-        "LIARA_PLATFORM_BUILD_TESTS": "ON",
-        "LIARA_RENDERER_BUILD_TESTS": "ON",
-        "LIARA_INTERFACES_INSTALL": "ON",
-        "LIARA_CORE_INSTALL": "ON",
-        "LIARA_PLATFORM_INSTALL": "ON",
-        "LIARA_RENDERER_INSTALL": "ON",
+        "__LIARA_MODULE_FLAGS__": "GENERATED",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },

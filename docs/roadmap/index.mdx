@@ -52,13 +52,19 @@ Four things follow.
 
 ## Version numbers
 
-The meta repository versions separately from the modules. "v0.3" without qualification means the meta repository at 0.3, and the module versions that go with a meta release are recorded in the manifests.
+**A milestone name is not a version number, and from v0.1 they deliberately differ.** "v0.4" names a milestone on this page. The meta repository shipping it is at 4.x.y. The shift is one level: a milestone's minor is a repository's major.
 
-Anything before 0.1 is a development version: unstable, breaking on patch bumps, incompletely documented. The point of pre-0.1 is to build the infrastructure and prove the architecture rather than to produce a usable engine, and 0.0.x is the playground where that happens.
+**Everything at 0.x belongs to Phase 0.** From v0.1 onward, a repository's first breaking change takes it to 1.0.0, and each breaking change after that increments the major normally. The meta repository therefore tracks the milestones exactly: Phase 0 was 0.x, v0.1 is 1.x, v0.2 is 2.x. Which module versions go with a given meta release is recorded in the manifests, as it always was.
 
-Before 1.0, a minor bump may break things and a patch bump is reserved for fixes and documentation. From 1.0 the meta repository follows strict semantic versioning.
+**Two digits were the reason.** Staying on 0.x until the project's own v1.0 was the original plan, and it left only the minor and the patch to express everything that happens to a contract that breaks on purpose. That is one field too few.
 
-Module repositories follow strict semantic versioning from day one. A breaking change to a module is a major bump whether it sits at 0.x or 1.x.
+**The ABI tends to follow the same rhythm**, because a milestone needing a breaking change to the contract is what moves both. ABI 4.x.y beside milestone v0.4 reads well, and keeping that correspondence where it falls out naturally is worth a little care. It is not worth twisting a release for: a milestone that needs no breaking change to the contract leaves the ABI where it is, and the correspondence slips. That is the right outcome, since a version describes what happened to the contract rather than which milestone was open at the time.
+
+**Modules drift more, and that is expected.** They break less often than the contract does, so their majors fall behind. A module's major says what happened to that module and nothing else. One manual intervention is anticipated: a module still at 0.x when the project reaches v1.0 will probably be moved to 1.0.0 by hand, because 0.x advertises an instability a shipped engine contradicts — unless the module is young enough that 0.x is still telling the truth.
+
+**`docs-shared` and `.github` follow none of this.** They version on their own cycles, dissociated from the milestones entirely: infrastructure consumed by CI and the documentation pipeline, with no ABI and no milestone. `.github` sitting at 2.x while the engine is at v0.1 means only that it has had two breaking changes of its own.
+
+How release-please is configured to produce all of that is in [Commits and releases](../tooling/commits-and-releases/#release-please).
 
 ## This page changes
 

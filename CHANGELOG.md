@@ -7,6 +7,15 @@ sidebar:
 
 # Changelog
 
+## [0.2.2](https://github.com/liara-engine/liara/compare/v0.2.1...v0.2.2) (2026-09-20)
+
+
+### Bug Fixes
+
+* **bootstrap:** update preset selection for windows ([d9dc390](https://github.com/liara-engine/liara/commit/d9dc390f7e97114ca60e23091a48e9c0d1a7b19c))
+* **clang-tidy:** adjust header filter regex and update checks ([8c7f54c](https://github.com/liara-engine/liara/commit/8c7f54cfef89d7f1070d2333816e0d09526430b8))
+* **liara:** improve source collection logic for repositories ([752801c](https://github.com/liara-engine/liara/commit/752801cf03a3e31e3ed223496cbc59d31c52f064))
+
 ## [0.2.1](https://github.com/liara-engine/liara/compare/v0.2.0...v0.2.1) (2026-09-17)
 
 

@@ -71,22 +71,29 @@ def version_ge(actual, minimum):
 # --- Source Discovery -----------------------------------------
 
 def collect_sources(workspace_path):
-    sources = []
-    if not workspace_path.exists():
-        return sources
+    repos = [Path(__file__).resolve().parent.parent]
+    if workspace_path.exists():
+        repos += [item for item in sorted(workspace_path.iterdir())
+                  if item.is_dir() and (item / ".git").exists()]
 
-    for item in workspace_path.iterdir():
-        if item.is_dir() and (item / ".git").exists():
-            # git ls-files command filtered by typical C/C++ extensions
-            code, out = run_cmd(
-                ["git", "-C", str(item), "ls-files", "--", "*.h", "*.hpp", "*.c", "*.cc", "*.cpp", "*.cxx"],
-                capture=True
-            )
-            if code == 0 and out:
-                for line in out.splitlines():
-                    line = line.strip()
-                    if line:
-                        sources.append(str(item / line))
+    sources = []
+    seen = set()
+    for repo in repos:
+        code, out = run_cmd(
+            ["git", "-C", str(repo), "ls-files", "--cached", "--others", "--exclude-standard",
+             "--", "*.h", "*.hpp", "*.c", "*.cc", "*.cpp", "*.cxx"],
+            capture=True
+        )
+        if code != 0 or not out:
+            continue
+        for line in out.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            path = str(repo / line)
+            if path not in seen:
+                seen.add(path)
+                sources.append(path)
     return sources
 
 # --- Build Layout Resolution ----------------------------------

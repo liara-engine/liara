@@ -14,7 +14,7 @@ sidebar:
 
 **3. Design the interface.** Add the headers to `liara-interfaces`. This is the expensive step and the one that must not be rushed, and it is also why a module's interface is designed when its first real implementation is written rather than years ahead. `liara-physics` is the standing example of the second half of that rule.
 
-**4. Bump `liara-interfaces`.** A new namespace is purely additive, so it is a minor bump, and a patch one below 1.0.0.
+**4. Bump `liara-interfaces`.** A new namespace is purely additive, so it is a minor bump.
 
 **5. Create the repository**, and not before this point. Copy the standard scaffolding, then register it in three places: the workspace orchestrator's module list, `modules-registry.json` so the documentation switchers know about it, and its own `manifest.json` so compatibility can be computed against it.
 

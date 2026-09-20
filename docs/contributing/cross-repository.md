@@ -11,7 +11,7 @@ Some changes span repositories. A new function in `liara-interfaces` needs imple
 
 **Open the change in `liara-interfaces` first.** The interface change is the contract, and it is reviewed and merged on its own.
 
-**Tag a release of `liara-interfaces`**, a minor bump under the rules in [What breaks, and what does not](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/breaking-changes/#the-table), or a patch bump below 1.0.0, since release-please is configured to shift both down one level before then.
+**Tag a release of `liara-interfaces`**, under the rules in [What breaks, and what does not](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/breaking-changes/#the-table): a minor bump for a purely additive change, a major one for anything that breaks. [Version numbers](../../roadmap/#version-numbers) covers the one case that surprises, which is that the first breaking change after Phase 0 lands on 1.0.0 rather than incrementing from 0.x.
 
 **Open the consumer changes**, each an independent pull request in its own repository, referencing the new interface version in its own `manifest.json`.
 

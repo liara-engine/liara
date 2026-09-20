@@ -25,7 +25,7 @@ A module implements one namespace of the contract, versions on its own cadence, 
 | Repository       | ABI namespace      | Role                                                 | Introduced |
 |------------------|--------------------|------------------------------------------------------|------------|
 | `liara-core`     | `liara_core_*`     | ECS, math, logger, settings, events, loop primitives | Phase 0    |
-| `liara-platform` | `liara_platform_*` | Window, input devices, OS signals, timing            | v0.1       |
+| `liara-platform` | `liara_platform_*` | Window, input devices, OS signals, timing            | Phase 0    |
 | `liara-renderer` | `liara_renderer_*` | Reference Vulkan renderer                            | Phase 0    |
 | `liara-assets`   | `liara_assets_*`   | Loading, decoding and lifetime of asset data         | v0.3       |
 | `liara-audio`    | `liara_audio_*`    | Audio playback and mixing                            | v0.5       |
@@ -62,4 +62,6 @@ The substitution test follows from that, and it is what [ADR 0004](../adr/0004-m
 
 ## When each one appears
 
-A repository is created when its first line of code is written, and not before. `liara-platform` therefore arrives with v0.1, `liara-assets` with v0.3, `liara-audio` with v0.5, and `liara-physics` and `liara-editor` with v1.x. Until then they exist in these pages and nowhere else, which is deliberate: the namespace is claimed from the start, the repository is not.
+A repository is created when its first line of code is written, and not before. `liara-assets` therefore arrives with v0.3, `liara-audio` with v0.5, and `liara-physics` and `liara-editor` with v1.x. Until then they exist in these pages and nowhere else, which is deliberate: the namespace is claimed from the start, the repository is not.
+
+`liara-platform` is the rule working as intended rather than an exception to it. Its window and input work belongs to v0.1, but its first line of code — the module reporting itself, so the launcher can negotiate against it — was written in Phase 0, and the repository was created then.

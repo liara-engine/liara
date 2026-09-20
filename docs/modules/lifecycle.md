@@ -18,6 +18,8 @@ sidebar:
 
 **5. Create the repository**, and not before this point. Copy the standard scaffolding, then register it in three places: the workspace orchestrator's module list, `modules-registry.json` so the documentation switchers know about it, and its own `manifest.json` so compatibility can be computed against it.
 
+Only the first of the three touches the build, and it is the whole of what the build needs: the superbuild's `add_subdirectory` lines, the merged vcpkg manifest, and the per-module `LIARA_<NAME>_BUILD_TESTS` and `LIARA_<NAME>_INSTALL` preset flags are all generated from that list.
+
 **6. Update these pages**, the dependency graph, and the cross-reference table.
 
 Splitting an existing module follows steps 1 to 3 only, then moves files. That is the entire point of step 1: if the namespace was claimed early, a split is a repository move and consumers recompile unchanged.

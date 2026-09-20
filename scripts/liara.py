@@ -12,7 +12,10 @@ import hashlib
 from pathlib import Path
 
 # --- Configuration -----------------------------------------------------------
-MODULES = ["liara-interfaces", "liara-core", "liara-renderer"]
+MODULES = ["liara-interfaces", "liara-core", "liara-platform", "liara-renderer"]
+# The line in CMakePresets.json.template that the per-module cache variables are generated over.
+PRESET_MODULE_FLAGS_PLACEHOLDER = '"__LIARA_MODULE_FLAGS__": "GENERATED",'
+
 DEFAULT_CONFIGURE_PRESETS = {
     "Linux": "linux-debug-clang",
     "Windows": "windows"
@@ -115,6 +118,26 @@ def resolve_build_layout(workspace: Path, build_preset: str) -> tuple[Path, str 
         warn(f"Could not read {presets_path}: {exc}. Falling back to preset name.")
 
     return workspace / "build" / configure_preset, configuration
+
+# --- Preset Generation ----------------------------------------
+def module_flag_name(module: str) -> str:
+    """Return the cache-variable infix a module declares its options under.
+
+    `liara-renderer` names its options LIARA_RENDERER_BUILD_TESTS and LIARA_RENDERER_INSTALL, so the
+    infix is the repository name without its `liara-` prefix. That spelling is the same one the ABI
+    namespace uses, which is what keeps this derivable rather than a table to maintain.
+    """
+    return module.removeprefix("liara-").upper().replace("-", "_")
+
+def render_module_flags(modules, indent: int = 8) -> str:
+    """Render the BUILD_TESTS and INSTALL cache variables for `modules`, as preset JSON lines.
+
+    The first line carries no indentation: it inherits the placeholder's own.
+    """
+    names = [module_flag_name(m) for m in modules]
+    lines = ([f'"LIARA_{n}_BUILD_TESTS": "ON",' for n in names]
+             + [f'"LIARA_{n}_INSTALL": "ON",' for n in names])
+    return ("\n" + " " * indent).join(lines)
 
 # --- Verification Logic ------------------------------------------------------
 
@@ -311,6 +334,15 @@ def do_setup(args):
     if not buildable:
         fatal("No buildable modules found.")
 
+    # Everything below derives from `buildable`: the superbuild's add_subdirectory lines, the merged
+    # vcpkg manifest, and the per-module preset flags. A module missing here is absent from the build
+    # entirely and its tests are never built, which looks exactly like a run where they all passed.
+    missing = [m for m in MODULES if m not in buildable]
+    if missing:
+        warn(f"No CMakeLists.txt found for: {', '.join(missing)}")
+        warn("Those modules are left out of the superbuild, the merged vcpkg manifest and the preset "
+             "flags, so their tests will not run. Re-run setup once they are cloned.")
+
     # Load the template and replace the placeholder with the actual module list
     cmake_template_path = script_dir / "CMakeLists.txt.template"
     if not cmake_template_path.exists():
@@ -375,7 +407,19 @@ def do_setup(args):
     # 4. Generate CMakePresets.json
     info("Generating CMakePresets.json...")
     presets_template = (script_dir / "CMakePresets.json.template")
-    (workspace / "CMakePresets.json").write_text(presets_template.read_text(encoding="utf-8"), encoding="utf-8")
+    if not presets_template.exists():
+        fatal(f"Missing CMakePresets.json.template in {script_dir}")
+    presets_content = presets_template.read_text(encoding="utf-8")
+    if PRESET_MODULE_FLAGS_PLACEHOLDER not in presets_content:
+        # Without the placeholder the presets carry no per-module flags at all, and CMake then falls
+        # back to each module's own default, which is OFF for a module built as a subproject. Nothing
+        # fails: the modules build and their tests are silently not built. Refuse instead.
+        fatal(f"{presets_template.name} no longer contains {PRESET_MODULE_FLAGS_PLACEHOLDER!r}.\n"
+              "That line is where the per-module BUILD_TESTS and INSTALL flags are generated; without "
+              "it the workspace would configure with none of them and skip every module's tests.")
+    presets_content = presets_content.replace(PRESET_MODULE_FLAGS_PLACEHOLDER,
+                                              render_module_flags(buildable))
+    (workspace / "CMakePresets.json").write_text(presets_content, encoding="utf-8")
 
     # 5. Configure CMake
     preset_to_use = args.preset or DEFAULT_CONFIGURE_PRESETS[platform.system()]

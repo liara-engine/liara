@@ -77,7 +77,11 @@ Each repository configures release-please in `release-please-config.json`, with 
 
 Release cycles are independent. Nothing synchronizes versions between modules, and nothing is meant to.
 
-Because `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` are both on, a breaking change below 1.0.0 bumps the minor rather than the major, and a feature bumps the patch. That is the normal pre-1.0 reading of semver, and it is what makes the 0.0.x lockstep rule of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) load-bearing during Phase 0.
+During Phase 0 every repository ran with `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` on, which shifts both levels down: a breaking change bumped the minor and a feature bumped the patch. That is the normal pre-1.0 reading of semver, and it is what kept every repository inside 0.x for the whole bootstrap.
+
+From v0.1 those two options are off, because the policy in [Version numbers](../../roadmap/#version-numbers) asks for the opposite: a repository's first breaking change after Phase 0 takes it to 1.0.0. With the options still on, that same commit would produce 0.3.0 instead. Turning them off is what makes `feat!` mean `1.0.0`, `feat` mean a minor bump and `fix` mean a patch bump, which is plain semver and what every repository does from here on.
+
+The 0.0.x lockstep rule of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) stays load-bearing for as long as any repository sits at 0.0.x, which today is `liara-platform` alone.
 
 Each module's configuration also carries `extra-files`, so the release commit rewrites `$.metadata.latest` in `manifest.json` and `$.version` in `vcpkg.json` alongside the tag. Those two fields are therefore never edited by hand.
 

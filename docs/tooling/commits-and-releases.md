@@ -77,7 +77,7 @@ Each repository configures release-please in `release-please-config.json`, with 
 
 Release cycles are independent. Nothing synchronizes versions between modules, and nothing is meant to.
 
-Because `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` are both on, a breaking change below 1.0.0 bumps the minor rather than the major, and a feature bumps the patch. That is the normal pre-1.0 reading of semver, and it is what makes the 0.0.x lockstep rule of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) load-bearing during Phase 0.
+Because `bump-minor-pre-major` and `bump-patch-for-minor-pre-major` are both on, a breaking change below 1.0.0 bumps the minor rather than the major, and a feature bumps the patch. That is the normal pre-1.0 reading of semver, and it is what makes the 0.0.x lockstep rule of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) load-bearing for as long as any module sits at 0.0.x.
 
 Each module's configuration also carries `extra-files`, so the release commit rewrites `$.metadata.latest` in `manifest.json` and `$.version` in `vcpkg.json` alongside the tag. Those two fields are therefore never edited by hand.
 

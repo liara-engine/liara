@@ -90,7 +90,7 @@ Pauses happen and are not failures.
 
 ## State
 
-Phase 0, which is the infrastructure rather than the engine. What exists today is the contract, two placeholder modules, a launcher that composes them and checks their ABI versions against each other, and the CI and documentation pipeline around all of it.
+v0.1, hello triangle. Phase 0 — the infrastructure rather than the engine — is closed. What exists today is the contract, three placeholder modules, a launcher that composes them and checks their ABI versions against each other, and the CI and documentation pipeline around all of it.
 
 The roadmap is the honest account of the rest.
 

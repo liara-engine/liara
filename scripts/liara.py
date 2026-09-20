@@ -15,6 +15,12 @@ from pathlib import Path
 MODULES = ["liara-interfaces", "liara-core", "liara-platform", "liara-renderer"]
 # The line in CMakePresets.json.template that the per-module cache variables are generated over.
 PRESET_MODULE_FLAGS_PLACEHOLDER = '"__LIARA_MODULE_FLAGS__": "GENERATED",'
+
+DEFAULT_CONFIGURE_PRESETS = {
+    "Linux": "linux-debug-clang",
+    "Windows": "windows"
+}
+
 DEFAULT_PRESETS = {
     "Linux": "linux-debug-clang",
     "Windows": "windows-release"
@@ -68,22 +74,29 @@ def version_ge(actual, minimum):
 # --- Source Discovery -----------------------------------------
 
 def collect_sources(workspace_path):
-    sources = []
-    if not workspace_path.exists():
-        return sources
+    repos = [Path(__file__).resolve().parent.parent]
+    if workspace_path.exists():
+        repos += [item for item in sorted(workspace_path.iterdir())
+                  if item.is_dir() and (item / ".git").exists()]
 
-    for item in workspace_path.iterdir():
-        if item.is_dir() and (item / ".git").exists():
-            # git ls-files command filtered by typical C/C++ extensions
-            code, out = run_cmd(
-                ["git", "-C", str(item), "ls-files", "--", "*.h", "*.hpp", "*.c", "*.cc", "*.cpp", "*.cxx"],
-                capture=True
-            )
-            if code == 0 and out:
-                for line in out.splitlines():
-                    line = line.strip()
-                    if line:
-                        sources.append(str(item / line))
+    sources = []
+    seen = set()
+    for repo in repos:
+        code, out = run_cmd(
+            ["git", "-C", str(repo), "ls-files", "--cached", "--others", "--exclude-standard",
+             "--", "*.h", "*.hpp", "*.c", "*.cc", "*.cpp", "*.cxx"],
+            capture=True
+        )
+        if code != 0 or not out:
+            continue
+        for line in out.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            path = str(repo / line)
+            if path not in seen:
+                seen.add(path)
+                sources.append(path)
     return sources
 
 # --- Build Layout Resolution ----------------------------------
@@ -409,7 +422,7 @@ def do_setup(args):
     (workspace / "CMakePresets.json").write_text(presets_content, encoding="utf-8")
 
     # 5. Configure CMake
-    preset_to_use = args.preset or DEFAULT_PRESETS[platform.system()]
+    preset_to_use = args.preset or DEFAULT_CONFIGURE_PRESETS[platform.system()]
     if not args.no_configure:
         info(f"Configuring CMake with preset '{preset_to_use}'...")
         build_dir, _ = resolve_build_layout(workspace, preset_to_use)

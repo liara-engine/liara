@@ -13,7 +13,7 @@ A bug fix does not. Neither does refactoring inside a module, nor adding a featu
 
 When it is unclear, write one. They are cheap to produce, and the context they hold is expensive to recover once it is gone.
 
-The one exception is the bootstrapping phase, where the project is still forming its architecture and subjecting that formation to its own output would be circular. [Phase 0](../../roadmap/phase-0/) states what the exemption does and does not cover.
+There was one exception, the bootstrapping phase, where the project was still forming its architecture and subjecting that formation to its own output would have been circular. It no longer applies: [Phase 0](../../roadmap/phase-0/) has closed, and the page records what the exemption covered while it lasted.
 
 ## The format
 

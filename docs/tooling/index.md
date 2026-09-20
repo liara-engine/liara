@@ -42,7 +42,7 @@ The documentation rows point out of this repository because the pipeline is owne
 
 ## Adding a tool
 
-The tools listed above are the only ones in use, and introducing another one requires a record in [Architecture decision records](../adr/). The single exception is the bootstrapping phase, whose policy is in [Phase 0](../roadmap/phase-0/).
+The tools listed above are the only ones in use, and introducing another one requires a record in [Architecture decision records](../adr/). The bootstrapping exemption that used to stand beside that rule expired when [Phase 0](../roadmap/phase-0/) closed, so the rule now has no exception.
 
 Zig and Rust are optional on a developer machine, since the cross-language tests are registered only when `find_program` locates a toolchain and are silently absent otherwise. They are not optional in CI, where one matrix leg fails configuration without them.
 

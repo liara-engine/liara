@@ -6,8 +6,6 @@
       "package-name": "liara",
       "release-type": "simple",
       "include-component-in-tag": false,
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true,
       "exclude-paths": [
         "docker",
         "launcher",
@@ -24,16 +22,12 @@
     "schemas": {
       "package-name": "schemas",
       "release-type": "simple",
-      "include-component-in-tag": true,
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true
+      "include-component-in-tag": true
     },
     "launcher": {
       "package-name": "launcher",
       "release-type": "simple",
-      "include-component-in-tag": true,
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true
+      "include-component-in-tag": true
     }
   }
 }

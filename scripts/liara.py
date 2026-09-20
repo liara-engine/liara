@@ -13,6 +13,11 @@ from pathlib import Path
 
 # --- Configuration -----------------------------------------------------------
 MODULES = ["liara-interfaces", "liara-core", "liara-renderer"]
+DEFAULT_CONFIGURE_PRESETS = {
+    "Linux": "linux-debug-clang",
+    "Windows": "windows"
+}
+
 DEFAULT_PRESETS = {
     "Linux": "linux-debug-clang",
     "Windows": "windows-release"
@@ -366,7 +371,7 @@ def do_setup(args):
     (workspace / "CMakePresets.json").write_text(presets_template.read_text(encoding="utf-8"), encoding="utf-8")
 
     # 5. Configure CMake
-    preset_to_use = args.preset or DEFAULT_PRESETS[platform.system()]
+    preset_to_use = args.preset or DEFAULT_CONFIGURE_PRESETS[platform.system()]
     if not args.no_configure:
         info(f"Configuring CMake with preset '{preset_to_use}'...")
         build_dir, _ = resolve_build_layout(workspace, preset_to_use)

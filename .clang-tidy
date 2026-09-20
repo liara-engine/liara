@@ -22,6 +22,7 @@ Checks: >
     -modernize-avoid-c-arrays,
     performance-*,
     portability-*,
+    -portability-avoid-pragma-once,
     readability-*,
     -readability-magic-numbers,
     -readability-identifier-length,
@@ -32,7 +33,8 @@ WarningsAsErrors: >
     -clang-diagnostic-deprecated-declaration,
     -readability-magic-numbers,
 
-HeaderFilterRegex: '^(src|include)/.*\.(h|hpp|tpp)$'
+HeaderFilterRegex: '(include|src|tests)/.*\.(h|hpp|tpp)$'
+ExcludeHeaderFilterRegex: '(/vcpkg_installed/|/build/|/liara-interfaces/)'
 
 CheckOptions:
     -   key: readability-identifier-naming.ClassCase

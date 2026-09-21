@@ -5,11 +5,11 @@
 
 #include "config.h"
 
-#include "liara/launcher/ModuleLoader.h"
 #include "liara/renderer/packet.h"
 
 #include <liara/abi_version.h>
 #include <liara/core/core.h>
+#include <liara/framework/ModuleLoader.h>
 #include <liara/modules.h>
 #include <liara/renderer/renderer.h>
 #include <liara/result.h>
@@ -85,11 +85,11 @@ int main(int argc, char** argv) {
 
     std::cout << std::format("ABI version:      {} (0x{:08x})\n\n", LIARA_ABI_VERSION_STR, LIARA_ABI_VERSION);
 
-    Liara::Launcher::Module<Liara::Launcher::CoreApi> core;
-    Liara::Launcher::Module<Liara::Launcher::PlatformApi> platform;
-    Liara::Launcher::Module<Liara::Launcher::RendererApi> renderer;
+    Liara::Framework::Module<Liara::Framework::CoreApi> core;
+    Liara::Framework::Module<Liara::Framework::PlatformApi> platform;
+    Liara::Framework::Module<Liara::Framework::RendererApi> renderer;
 
-    for (const Liara::Launcher::LoadFailure failure : {core.Load(), platform.Load(), renderer.Load()}) {
+    for (const Liara::Framework::LoadFailure failure : {core.Load(), platform.Load(), renderer.Load()}) {
         if (failure.Failed()) {
             std::cout << failure.Describe();
             return 1;

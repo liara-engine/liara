@@ -50,7 +50,7 @@ using LibHandle = void*;
 
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
     #define LIARA_DEFINE_MODULE_API(Name, prefix, FUNCTION_LIST)                                                       \
-        namespace Liara::Launcher                                                                                      \
+        namespace Liara::Framework                                                                                     \
         {                                                                                                              \
             struct Name##Api                                                                                           \
             {                                                                                                          \
@@ -72,7 +72,7 @@ using LibHandle = void*;
         }
 #else
     #define LIARA_DEFINE_MODULE_API(Name, prefix, FUNCTION_LIST)                     \
-        namespace Liara::Launcher                                                    \
+        namespace Liara::Framework                                                   \
         {                                                                            \
             struct Name##Api                                                         \
             {                                                                        \
@@ -88,7 +88,7 @@ using LibHandle = void*;
 
 // NOLINTEND(cppcoreguidelines-macro-usage, bugprone-macro-parentheses)
 
-namespace Liara::Launcher
+namespace Liara::Framework
 {
     /**
      * @brief The platform's description of the last dynamic-loading failure.
@@ -200,7 +200,7 @@ namespace Liara::Launcher
         LibHandle m_Library = nullptr;
 #endif
     };
-}  // namespace Liara::Launcher
+}  // namespace Liara::Framework
 
 // NOLINTBEGIN(readability-identifier-naming)
 LIARA_DEFINE_MODULE_API(Core, liara_core, LIARA_CORE_FUNCTIONS)

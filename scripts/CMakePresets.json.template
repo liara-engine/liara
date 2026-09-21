@@ -21,9 +21,9 @@
     { "name": "debug", "hidden": true, "cacheVariables": { "CMAKE_BUILD_TYPE": "Debug" }, "warnings": { "deprecated": true } },
     { "name": "release", "hidden": true, "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }, "errors": { "deprecated": true } },
 
-    { "name": "static", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "OFF", "LIARA_LAUNCHER_MODULE_LOADING": "link" } },
-    { "name": "link", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "ON", "LIARA_LAUNCHER_MODULE_LOADING": "link" } },
-    { "name": "runtime", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "ON", "LIARA_LAUNCHER_MODULE_LOADING": "runtime" } },
+    { "name": "static", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "OFF", "LIARA_MODULE_LOADING": "link" } },
+    { "name": "link", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "ON", "LIARA_MODULE_LOADING": "link" } },
+    { "name": "runtime", "hidden": true, "cacheVariables": { "BUILD_SHARED_LIBS": "ON", "LIARA_MODULE_LOADING": "runtime" } },
 
     { "name": "linux-debug-gcc",              "inherits": [ "linux-base", "debug",   "gcc",   "static"  ] },
     { "name": "linux-debug-gcc-link",         "inherits": [ "linux-base", "debug",   "gcc",   "link"    ] },

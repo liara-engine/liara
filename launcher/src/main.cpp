@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
         }
     }
 
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+#ifdef LIARA_MODULE_LOADING_RUNTIME
     std::cout << "Modules resolved at run time.\n";
 #else
     std::cout << "Modules linked at build time.\n";

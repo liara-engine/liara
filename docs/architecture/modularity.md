@@ -7,7 +7,7 @@ sidebar:
 
 The engine is a collection of separately versioned libraries linked together at build time. The build system decides which modules are present, and a shipped game is one executable with its modules linked in, with no plugin discovery mechanism to debug.
 
-An experimental runtime-loading path exists and is described below. It validates the interface boundary, and it is a testing facility rather than how a Liara game is distributed.
+A runtime-loading path exists alongside it and is described below. It is no longer experimental, and it is no longer only a test of the boundary: it is the only way to load a module that this build system did not build, which means it is how a module written in another language is loaded at all. A shipped Liara game still links its modules in, because that is the simplest thing that works for a game shipping its own engine.
 
 ## Why build-time selection
 
@@ -25,7 +25,7 @@ The first was chosen because it delivers the modularity this project actually wa
 
 Modules are linked statically today, and the interfaces between them are designed as though they were not. Every boundary uses C linkage, plain-old-data types, opaque handles and explicit version negotiation.
 
-The discipline costs little at the boundary, and what it buys is that switching to runtime loading later is a matter of writing a loader rather than rewriting contracts. It also buys something available immediately and independent of any loader: any module could be replaced by an implementation in another language, by implementing the same C interface. Whether that ever happens is a separate question, and what matters is that nothing in the architecture forbids it.
+The discipline costs little at the boundary, and what it buys is that switching to runtime loading later is a matter of writing a loader rather than rewriting contracts. It also buys something independent of any loader: a module can be replaced by an implementation in another language that implements the same C interface. That is checked rather than assumed — a Rust library exporting `liara_platform_*`, including no Liara header and linking against nothing, is loaded and version-negotiated by an unmodified launcher. Such a module is reachable through the `-runtime` presets and through nothing else, since linking one at build time would mean naming a CMake target for it.
 
 The claim is checked rather than asserted. One CI leg builds every module as a shared library and links the launcher against them, and another makes the launcher resolve them at run time instead, through the `-link` and `-runtime` presets described in [CI](../../tooling/ci/#the-build-matrix). A module that quietly acquired a link-time dependency on a sibling, or leaked C++ across its boundary, fails one of the two. The static-versus-dynamic choice is therefore a pair of build flags rather than an architectural fork.
 

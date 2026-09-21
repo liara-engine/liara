@@ -1,6 +1,6 @@
 ---
 title: "v0.1: hello triangle"
-description: Proving the modular pipeline works end to end, plus the two experimental tools that arrive with it.
+description: Proving the modular pipeline works end to end, plus the composition tool and the module loader that arrive with it.
 sidebar:
   label: v0.1
   order: 2
@@ -72,9 +72,11 @@ User-facing polish, meaning interactive selection, friendly diagnostics and a cu
 
 ---
 
-## The module loader <Badge text="Experimental" variant="caution" />
+## The module loader
 
 Also not a milestone. It is the piece of the host that turns "the interfaces are designed as if modules were dynamic" into something a program actually runs.
+
+It carried an `Experimental` badge until the loader was built. It no longer does: `-runtime` is the only way to load a module this build system did not build, so it is the production path for any module not written in C or C++, and [ADR 0012](../../adr/0012-generated-module-dispatch-tables/) records its shape.
 
 ### Why
 
@@ -92,8 +94,8 @@ Module discovery, meaning scanning a directory, reading a manifest and deciding 
 
 ### Definition of Done
 
-- [ ] Under the `-runtime` presets, the launcher links against `liara-interfaces` only, and the module libraries are resolved at load time.
+- [x] Under the `-runtime` presets, the launcher links against `liara-interfaces` only, and the module libraries are resolved at load time.
 - [ ] Library names are correct on Linux and Windows, and defined in one place.
-- [ ] A contrived ABI mismatch is detected after symbol resolution and refuses to proceed, with a message naming the module and both versions.
-- [ ] A missing or unopenable library produces a clear error rather than a crash.
-- [ ] The `-runtime` presets are exercised by CI on both platforms.
+- [x] A contrived ABI mismatch is detected after symbol resolution and refuses to proceed, with a message naming the module and both versions.
+- [x] A missing or unopenable library produces a clear error rather than a crash.
+- [x] The `-runtime` presets are exercised by CI on both platforms.

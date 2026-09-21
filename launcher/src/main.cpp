@@ -5,6 +5,7 @@
 
 #include "config.h"
 
+#include "liara/launcher/ModuleLoader.h"
 #include "liara/renderer/packet.h"
 
 #include <liara/abi_version.h>
@@ -17,38 +18,10 @@
 #include <chrono>
 #include <cstdint>
 #include <format>
+#include <initializer_list>
 #include <iostream>
+#include <string_view>
 #include <thread>
-
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
-    #ifdef _WIN32
-        #include <windows.h>
-        #include <string>
-        typedef HMODULE LibHandle;
-        #define LIB_LOAD(path) LoadLibraryA(path)
-        #define LIB_GET_SYMBOL(handle, name) GetProcAddress(handle, name)
-        #define LIB_FREE(handle) FreeLibrary(handle)
-        #define LIB_ERROR() std::to_string(GetLastError())
-        #define LIB_NAME(stem) stem ".dll"
-    #else
-        #include <dlfcn.h>
-        #include <string>
-        using LibHandle = void *;
-        #define LIB_LOAD(path) dlopen(path, RTLD_LAZY)
-        #define LIB_GET_SYMBOL(handle, name) dlsym(handle, name)
-        #define LIB_FREE(handle) dlclose(handle)
-        #define LIB_ERROR() std::string(dlerror())
-        #define LIB_NAME(stem) "lib" stem ".so"
-    #endif
-#endif
-
-#include <liara/core/core.h>
-#include <liara/platform/platform.h>
-#include <liara/renderer/renderer.h>
-#include <liara/version.h>
-
-#include "config.h"
-#include "liara/renderer/packet.h"
 
 /*
  * @brief Minimum ABI version required for this launcher.
@@ -66,6 +39,42 @@ static_assert(ABI_COMPAT == LIARA_VERSION_COMPAT_EXACT || ABI_COMPAT == LIARA_VE
 constexpr float DEMO_DURATION_SECONDS = 8.0F;
 constexpr float TARGET_FRAME_SECONDS = 1.0F / 60.0F;
 
+namespace
+{
+    /**
+     * @brief Check if a list of modules are compatible with the current ABI version.
+     * @param modules The list of modules to check.
+     * @return True if all modules are compatible, false otherwise.
+     */
+    bool ModulesAreCompatible(const std::initializer_list<const liara_module_info_t*> modules) {
+        bool compatible = true;
+
+        for (const auto* module : modules) {
+            if (module == nullptr) {
+                std::cout << "Error: Failed to retrieve module information.\n";
+                compatible = false;
+                continue;
+            }
+
+            if (const liara_version_compat_t compat = liara_abi_is_compatible(module->abi_version);
+                compat == LIARA_VERSION_COMPAT_EXACT || compat == LIARA_VERSION_COMPAT_COMPATIBLE) {
+                std::cout << std::format("{} {} is available and compatible (ABI {}).\n",
+                                         module->module_name,
+                                         module->module_version_str,
+                                         module->abi_version_str);
+            }
+            else {
+                std::cout << std::format("Error: {} {} is not compatible with ABI {}.\n",
+                                         module->module_name,
+                                         module->module_version_str,
+                                         module->abi_version_str);
+                compatible = false;
+            }
+        }
+        return compatible;
+    }
+}  // namespace
+
 int main(int argc, char** argv) {
     const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
 
@@ -74,98 +83,40 @@ int main(int argc, char** argv) {
                              LIARA_LAUNCHER_VERSION_STRING,
                              LIARA_LAUNCHER_VERSION);
 
-    std::cout << std::format("ABI version:      {} (0x{:08x})\n\n",
-                             LIARA_ABI_VERSION_STR,
-                             LIARA_ABI_VERSION);
+    std::cout << std::format("ABI version:      {} (0x{:08x})\n\n", LIARA_ABI_VERSION_STR, LIARA_ABI_VERSION);
 
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
-    LibHandle coreHandle = LIB_LOAD(LIB_NAME("liara_core"));
-    if (coreHandle == nullptr) {
-        std::cout << std::format("Error: Failed to load Liara core library ({}).\n", LIB_ERROR());
-        return 1;
-    }
+    Liara::Launcher::Module<Liara::Launcher::CoreApi> core;
+    Liara::Launcher::Module<Liara::Launcher::PlatformApi> platform;
+    Liara::Launcher::Module<Liara::Launcher::RendererApi> renderer;
 
-    LibHandle platformHandle = LIB_LOAD(LIB_NAME("liara_platform"));
-    if (platformHandle == nullptr) {
-        std::cout << std::format("Error: Failed to load Liara platform library ({}).\n", LIB_ERROR());
-        LIB_FREE(coreHandle);
-        return 1;
-    }
-
-    LibHandle rendererHandle = LIB_LOAD(LIB_NAME("liara_renderer"));
-    if (rendererHandle == nullptr) {
-        std::cout << std::format("Error: Failed to load Liara renderer library ({}).\n", LIB_ERROR());
-        LIB_FREE(coreHandle);
-        LIB_FREE(platformHandle);
-        return 1;
-    }
-
-    typedef const liara_module_info_t* (*ModuleInfoFunc)();
-    const auto liara_core_info = reinterpret_cast<ModuleInfoFunc>(LIB_GET_SYMBOL(coreHandle, "liara_core_info"));
-    const auto liara_platform_info = reinterpret_cast<ModuleInfoFunc>(LIB_GET_SYMBOL(platformHandle, "liara_platform_info"));
-    const auto liara_renderer_info = reinterpret_cast<ModuleInfoFunc>(LIB_GET_SYMBOL(rendererHandle, "liara_renderer_info"));
-
-    if (liara_core_info == nullptr || liara_platform_info == nullptr || liara_renderer_info == nullptr) {
-        std::cout << std::format("Error: Failed to retrieve module information ({}).\n", LIB_ERROR());
-        LIB_FREE(coreHandle);
-        LIB_FREE(platformHandle);
-        LIB_FREE(rendererHandle);
-        return 1;
-    }
-
-    std::cout << "Liara core, platform and renderer libraries loaded successfully.\n";
-    std::cout << std::format("Smoke test mode: {}. Demo duration: {} seconds.\n\n", smoke ? "enabled" : "disabled", DEMO_DURATION_SECONDS);
-#endif
-
-    bool error = false;
-    for (const auto& module : {liara_renderer_info(), liara_core_info(), liara_platform_info()}) {
-        if (module != nullptr) {
-            if (liara_version_compat_t const compat = liara_abi_is_compatible(module->abi_version); compat == LIARA_VERSION_COMPAT_EXACT || compat == LIARA_VERSION_COMPAT_COMPATIBLE) {
-                std::cout << std::format("{} {} is available and compatible (ABI {}).\n",
-                                         module->module_name,
-                                         module->module_version_str,
-                                         module->abi_version_str);
-            } else {
-                std::cout << std::format("Error: {} {} is not compatible with ABI {}. Please update your Liara installation to a compatible version.\n",
-                                         module->module_name,
-                                         module->module_version_str,
-                                         module->abi_version_str);
-                error = true;
-            }
-        } else {
-            std::cout << "Error: Failed to retrieve module information.\n";
-            error = true;
+    for (const Liara::Launcher::LoadFailure failure : {core.Load(), platform.Load(), renderer.Load()}) {
+        if (failure.Failed()) {
+            std::cout << failure.Describe();
+            return 1;
         }
     }
 
-    if (error) {
-        std::cout << "\nError: Required modules are not available or compatible. Exiting launcher.\n";
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
-        LIB_FREE(coreHandle);
-        LIB_FREE(platformHandle);
-        LIB_FREE(rendererHandle);
+    std::cout << "Modules resolved at run time.\n";
+#else
+    std::cout << "Modules linked at build time.\n";
 #endif
+
+    if (!ModulesAreCompatible({renderer->info(), core->info(), platform->info()})) {
+        std::cout << "\nError: Required modules are not available or compatible. Exiting launcher.\n";
         return 1;
     }
 
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
-    std::cout << "\nDynamic module loading: ABI compatibility smoke test passed.\n";
-    LIB_FREE(coreHandle);
-    LIB_FREE(platformHandle);
-    LIB_FREE(rendererHandle);
-    return 0;
-#else
-
-    liara_renderer_handle_t* renderer = nullptr;
-    if (liara_renderer_create(&renderer) != LIARA_RESULT_SUCCESS || renderer == nullptr) {
+    liara_renderer_handle_t* rendererInstance = nullptr;
+    if (renderer->create(&rendererInstance) != LIARA_RESULT_SUCCESS || rendererInstance == nullptr) {
         std::cout << "Error: Failed to create renderer instance.\n";
         return 1;
     }
 
-    liara_core_handle_t* core = nullptr;
-    if (liara_core_create(&core) != LIARA_RESULT_SUCCESS || core == nullptr) {
+    liara_core_handle_t* coreInstance = nullptr;
+    if (core->create(&coreInstance) != LIARA_RESULT_SUCCESS || coreInstance == nullptr) {
         std::cout << "Error: Failed to create core instance.\n";
-        liara_renderer_destroy(renderer);
+        renderer->destroy(rendererInstance);
         return 1;
     }
 
@@ -181,28 +132,27 @@ int main(int argc, char** argv) {
             previous = frameStart;
             elapsedSeconds += deltaTime;
 
-            liara_core_update(core, deltaTime);
+            core->update(coreInstance, deltaTime);
 
-            liara_render_packet_t packet {};
-            if (liara_core_get_render_packet(core, &packet) == LIARA_RESULT_SUCCESS) {
-                liara_renderer_submit_frame(renderer, &packet);
+            if (liara_render_packet_t packet {};
+                core->get_render_packet(coreInstance, &packet) == LIARA_RESULT_SUCCESS) {
+                renderer->submit_frame(rendererInstance, &packet);
             }
 
             const auto spent = std::chrono::duration<float>(Clock::now() - frameStart);
             if (const auto remaining = std::chrono::duration<float>(TARGET_FRAME_SECONDS) - spent;
                 remaining.count() > 0.0F) {
                 std::this_thread::sleep_for(remaining);
-                }
+            }
         }
 
         std::cout << "\033[2J\033[H";
         std::cout << std::format("\n{} seconds elapsed. Stopping.\n", DEMO_DURATION_SECONDS);
     }
 
-    liara_core_destroy(core);
-    liara_renderer_destroy(renderer);
+    core->destroy(coreInstance);
+    renderer->destroy(rendererInstance);
 
     std::cout << "Core finished. Exiting launcher.\n";
     return 0;
-#endif
 }

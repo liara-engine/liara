@@ -10,7 +10,7 @@
 #include <liara/abi_version.h>
 #include <liara/core/core.h>
 #include <liara/framework/ModuleLoader.h>
-#include <liara/modules.h>
+#include <liara/framework/Modules.h>
 #include <liara/renderer/renderer.h>
 #include <liara/result.h>
 #include <liara/version.h>
@@ -39,42 +39,6 @@ static_assert(ABI_COMPAT == LIARA_VERSION_COMPAT_EXACT || ABI_COMPAT == LIARA_VE
 constexpr float DEMO_DURATION_SECONDS = 8.0F;
 constexpr float TARGET_FRAME_SECONDS = 1.0F / 60.0F;
 
-namespace
-{
-    /**
-     * @brief Check if a list of modules are compatible with the current ABI version.
-     * @param modules The list of modules to check.
-     * @return True if all modules are compatible, false otherwise.
-     */
-    bool ModulesAreCompatible(const std::initializer_list<const liara_module_info_t*> modules) {
-        bool compatible = true;
-
-        for (const auto* module : modules) {
-            if (module == nullptr) {
-                std::cout << "Error: Failed to retrieve module information.\n";
-                compatible = false;
-                continue;
-            }
-
-            if (const liara_version_compat_t compat = liara_abi_is_compatible(module->abi_version);
-                compat == LIARA_VERSION_COMPAT_EXACT || compat == LIARA_VERSION_COMPAT_COMPATIBLE) {
-                std::cout << std::format("{} {} is available and compatible (ABI {}).\n",
-                                         module->module_name,
-                                         module->module_version_str,
-                                         module->abi_version_str);
-            }
-            else {
-                std::cout << std::format("Error: {} {} is not compatible with ABI {}.\n",
-                                         module->module_name,
-                                         module->module_version_str,
-                                         module->abi_version_str);
-                compatible = false;
-            }
-        }
-        return compatible;
-    }
-}  // namespace
-
 int main(int argc, char** argv) {
     const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
 
@@ -102,7 +66,7 @@ int main(int argc, char** argv) {
     std::cout << "Modules linked at build time.\n";
 #endif
 
-    if (!ModulesAreCompatible({renderer->info(), core->info(), platform->info()})) {
+    if (!Liara::Framework::ModulesAreCompatible({renderer->info(), core->info(), platform->info()}, std::cout)) {
         std::cout << "\nError: Required modules are not available or compatible. Exiting launcher.\n";
         return 1;
     }

@@ -77,11 +77,7 @@ target_include_directories(liara_launcher PRIVATE
         "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
-    target_link_libraries(liara_launcher PRIVATE
-            Liara::Interfaces
-            $<COMPILE_ONLY:Liara::Core>
-            $<COMPILE_ONLY:Liara::Platform>
-            $<COMPILE_ONLY:Liara::Renderer>)
+    target_link_libraries(liara_launcher PRIVATE Liara::Interfaces)
 
     foreach(module IN ITEMS liara_core liara_platform liara_renderer)
         if(TARGET ${module})

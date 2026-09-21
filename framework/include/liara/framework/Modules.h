@@ -7,7 +7,6 @@
 
 #include <liara/abi_version.h>
 #include <liara/modules.h>
-#include <liara/version.h>
 
 #include <format>
 #include <initializer_list>

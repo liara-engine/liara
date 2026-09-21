@@ -12,6 +12,10 @@ sidebar:
 
 *Retrospective.*
 
+:::note[Rule 4 has been superseded]
+[ADR 0011](../0011-removing-the-degraded-compatibility-state/) removes `DEGRADED`: a provided minor below the required minor is now `INCOMPATIBLE`, and negotiation has three outcomes rather than four. Everything else below still holds — the packed encoding, rules 1 to 3, and the 0.0.x lockstep.
+:::
+
 ## Context
 
 Modules version independently and have to agree at their boundary. Two things needed deciding: how a version is written down in the ABI, and what "compatible" means when two of them differ.

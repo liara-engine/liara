@@ -36,5 +36,6 @@ Every record opens with a table giving its status, its date, and who decided. St
 | [0008](./0008-two-tier-ci/)                               | Two-tier CI, and reusable workflows                         | Accepted |
 | [0009](./0009-in-house-ecs/)                              | An in-house ECS rather than an existing library             | Proposed |
 | [0010](./0010-vulkan-without-abstraction-layer/)          | Vulkan directly, without a rendering abstraction layer      | Proposed |
+| [0011](./0011-removing-the-degraded-compatibility-state/) | Removing the DEGRADED compatibility state                   | Accepted |
 
 New tooling requires a record of its own, which is what [The inventory](../tooling/#the-inventory) states. The bootstrapping exemption that used to stand beside that rule expired when [Phase 0](../roadmap/phase-0/) closed, so the rule now has no exception.

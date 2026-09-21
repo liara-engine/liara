@@ -125,11 +125,6 @@ int main(int argc, char** argv) {
                                          module->module_name,
                                          module->module_version_str,
                                          module->abi_version_str);
-            } else if (compat == LIARA_VERSION_COMPAT_DEGRADED) {
-                std::cout << std::format("Warning: {} {} is degraded with ABI {}. Some features may not work as expected. We highly recommend updating your Liara installation to a compatible version.\n",
-                                         module->module_name,
-                                         module->module_version_str,
-                                         module->abi_version_str);
             } else {
                 std::cout << std::format("Error: {} {} is not compatible with ABI {}. Please update your Liara installation to a compatible version.\n",
                                          module->module_name,

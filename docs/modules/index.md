@@ -1,6 +1,6 @@
 ---
 title: Modules
-description: The four kinds of repository, the rule that decides whether something is a module, and when each one is created.
+description: The five kinds of repository, the rule that decides whether something is a module, and when each one is created.
 sidebar:
   label: Overview
   order: 0
@@ -8,7 +8,7 @@ sidebar:
 
 Where [Modularity model](../architecture/modularity/) explains why the project is modular, these pages specify what is actually built and where it lives. One page per repository, plus the boundaries between them.
 
-Everything is hosted under the `liara-engine` organization, and everything falls into one of four kinds. The kind matters more than the list, because it decides what a repository is allowed to do.
+Everything is hosted under the `liara-engine` organization, and everything falls into one of five kinds. The kind matters more than the list, because it decides what a repository is allowed to do.
 
 ## The contract
 
@@ -41,6 +41,18 @@ A host composes modules: it creates them, checks their ABI versions against each
 |----------------|---------------------------------------------------------------------------|------------|
 | `liara` (meta) | The launcher, plus everything that has to know about every module at once | Phase 0    |
 | `liara-editor` | The editor application                                                    | v1.x       |
+
+## The libraries
+
+A library is linked into its consumer and compiled with it. It exports C++ symbols rather than a C ABI, which means it carries no ABI namespace, no `info()` entry point, and no version anyone negotiates at run time: it versions as source, and two versions of it never meet in one process.
+
+| Repository                     | Role                                  | Introduced |
+|--------------------------------|---------------------------------------|------------|
+| `framework/` in `liara` (meta) | The convenience layer above the C ABI | v0.1       |
+
+A host exports nothing and nobody links against it, while being linked is the whole of what a library is for. A module passes the substitution test below; a library fails it, having no C interface to reimplement against, since it is what consumes one.
+
+[liara-framework](./framework/) holds the three rules that say what such a library may contain, and the boundary rule that decides whether a given feature belongs to it or to `liara-interfaces`. [ADR 0013](../adr/0013-the-framework-layer/) is why the kind exists at all.
 
 ## The infrastructure
 

@@ -47,7 +47,7 @@ A scope names a concern inside one repository, and it never names another module
 | `liara-renderer`   | `device`, `swapchain`, `pipeline`, `passes`, `targets`, `imgui`, `debug`         |
 | `liara-assets`     | `loading`, `decoding`, `lifetime`, `mesh`, `texture`                             |
 | `liara-audio`      | `playback`, `mixing`, `sources`                                                  |
-| `liara` (meta)     | `launcher`, `docs`, `packaging`, `scripts`                                       |
+| `liara` (meta)     | `launcher`, `framework`, `docs`, `packaging`, `scripts`                          |
 
 `build`, `ci` and `deps` work everywhere. The lists are open, and the rows for repositories that do not exist yet are there because the vocabulary is claimed with the namespace.
 
@@ -87,15 +87,16 @@ Each module's configuration also carries `extra-files`, so the release commit re
 
 ### Several packages in one repository
 
-The meta repository is the only one releasing more than one thing. It declares three packages with `separate-pull-requests` enabled, so each accumulates its own release pull request and its own line in `.release-please-manifest.json`:
+The meta repository is the only one releasing more than one thing. It declares four packages with `separate-pull-requests` enabled, so each accumulates its own release pull request and its own line in `.release-please-manifest.json`:
 
-| Package                     | Tag form          |
-|-----------------------------|-------------------|
-| `.` (the repository itself) | `vX.Y.Z`          |
-| `schemas`                   | `schemas-vX.Y.Z`  |
-| `launcher`                  | `launcher-vX.Y.Z` |
+| Package                     | Tag form           |
+|-----------------------------|--------------------|
+| `.` (the repository itself) | `vX.Y.Z`           |
+| `schemas`                   | `schemas-vX.Y.Z`   |
+| `launcher`                  | `launcher-vX.Y.Z`  |
+| `framework`                 | `framework-vX.Y.Z` |
 
-The root package lists the others in `exclude-paths`, so a change to the schemas does not bump the engine's version. Two consequences reach CMake: each `CMakeLists.txt` reads its version out of `.release-please-manifest.json` instead of hard-coding it, and the launcher reads the `launcher` key rather than the root one.
+The root package lists the others in `exclude-paths`, so a change to the schemas does not bump the engine's version. Two consequences reach CMake: each `CMakeLists.txt` that reports a version reads it out of `.release-please-manifest.json` instead of hard-coding it, and the launcher reads the `launcher` key rather than the root one.
 
 ### Changelogs
 

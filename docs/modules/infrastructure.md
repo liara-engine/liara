@@ -3,7 +3,7 @@ title: Infrastructure repositories
 description: docs-shared, liara-docs and .github. The three repositories that carry no engine code and that every other repository depends on anyway.
 sidebar:
   label: Infrastructure
-  order: 9
+  order: 10
 ---
 
 Three repositories hold no engine code and never appear in a CMake dependency. They are consumed by GitHub Actions and by the documentation pipeline, which is a dependency that no build failure will ever reveal.

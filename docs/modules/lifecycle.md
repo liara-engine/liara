@@ -3,7 +3,7 @@ title: Adding and removing a module
 description: The six steps that introduce a module, why the namespace is claimed before the repository exists, and what it costs to rename one.
 sidebar:
   label: Adding and removing
-  order: 12
+  order: 13
 ---
 
 ## Adding one

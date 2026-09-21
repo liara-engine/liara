@@ -22,6 +22,8 @@ The triangle is hardcoded in the launcher: three vertices, a vertex shader, a fr
 
 The renderer initializes Vulkan with validation layers on in debug builds, using Vulkan-Hpp for type safety and VMA for memory.
 
+The machinery that composition needs leaves the launcher on the way. Module loading and ABI version negotiation move into `framework/`, which v0.1 releases as the meta repository's fourth package on `framework-vX.Y.Z` tags, seeded at `0.1.0`. [liara-framework](../../modules/framework/) says what the layer may hold, and [ADR 0013](../../adr/0013-the-framework-layer/) is why a layer above the C ABI exists at all.
+
 ## Out of scope
 
 The ECS (v0.2), asset loading (v0.3), lighting (v0.4), input beyond the window closing and audio (v0.5), several objects, frames whose content differs, configurable shaders, and anything resembling an editor.
@@ -84,7 +86,7 @@ It carried an `Experimental` badge until the loader was built. It no longer does
 
 ### Scope
 
-The launcher gains a small loader. It resolves each module's shared library by a platform-correct name, opens it, resolves that module's `liara_<module>_info` entry point plus the handful of functions the host actually calls, runs the negotiation of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) on the result, and refuses to proceed on `INCOMPATIBLE`. Library names live in one place, next to the platform macros, rather than being spelled at each call site.
+The framework gains a small loader, and the launcher uses it. It resolves each module's shared library by a platform-correct name, opens it, resolves that module's `liara_<module>_info` entry point plus the handful of functions the host actually calls, runs the negotiation of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) on the result, and refuses to proceed on `INCOMPATIBLE`. Library names live in one place, next to the platform macros, rather than being spelled at each call site.
 
 In this form it is deliberately naive: a fixed list of modules, no discovery, no plugin directory, no versioned filename resolution, no graceful degradation when a module is absent.
 

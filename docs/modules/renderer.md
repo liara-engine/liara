@@ -3,7 +3,7 @@ title: "liara-renderer"
 description: The reference Vulkan implementation, from device creation to the debug pass, and the one module whose replaceability matters most.
 sidebar:
   label: liara-renderer
-  order: 7
+  order: 8
 ---
 
 The reference implementation of the renderer interface. It is the most complex module in the project and the one whose replaceability matters most, since it is the one somebody would plausibly rewrite against another graphics API.

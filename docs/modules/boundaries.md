@@ -3,7 +3,7 @@ title: What crosses a boundary
 description: The dependency graph between repositories, and every data flow that is allowed to cross a module boundary. Anything not listed here should not cross.
 sidebar:
   label: What crosses
-  order: 10
+  order: 11
 ---
 
 ## The dependency graph
@@ -42,7 +42,7 @@ flowchart TB
     merge1 --> editor
 ```
 
-`liara-interfaces` depends on nothing. Every module depends on it and on nothing else, not even on the core, because they are siblings. Hosts depend on the modules they compose, and they are the only thing in the project allowed to know the shape of that set.
+`liara-interfaces` depends on nothing. Every module depends on it and on nothing else, not even on the core, because they are siblings. Hosts depend on the modules they compose, and a host, with the framework linked into it, is the only thing in the project allowed to know the shape of that set.
 
 The infrastructure repositories do not appear at all, since `.github`, `docs-shared` and `liara-docs` are consumed by GitHub Actions rather than by CMake.
 

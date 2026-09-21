@@ -3,7 +3,7 @@ title: "liara-audio"
 description: Playing sound, and why audio is the clearest replaceability case in the project.
 sidebar:
   label: liara-audio
-  order: 6
+  order: 7
 ---
 
 Arrives with v0.5. Playing sound.

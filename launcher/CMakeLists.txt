@@ -24,7 +24,7 @@ configure_file(
 
 set(LIARA_LAUNCHER_MODULE_LOADING "link" CACHE STRING "How the launcher consumes modules: link | runtime
         link: The launcher links against the modules at build time. This is the default and recommended option.
-        runtime (experimental): The launcher loads the modules at runtime. This option is only available if the modules are built as shared libraries."
+        runtime: The launcher resolves the modules at load time with dlopen/LoadLibrary. Requires them to be built as shared libraries, and is the only mode that can load a module this build system did not build."
 )
 set_property(CACHE LIARA_LAUNCHER_MODULE_LOADING PROPERTY STRINGS link runtime)
 

@@ -27,6 +27,8 @@ Presets are generated from one template and organized along three axes: platform
 
 `LIARA_LAUNCHER_MODULE_LOADING` is an explicit cache variable rather than something inferred from `BUILD_SHARED_LIBS`, because "built as a shared library" and "loaded at runtime" are two different questions. The middle combination is the one that catches export-macro mistakes, and inferring one from the other would remove it.
 
+**`link` is the C and C++ path, and only that.** Linking a module at build time means naming a CMake target for it, so the two `link` rows require every module to be built from this workspace by this build system. `runtime` requires only a shared library exporting the right symbols, which is what a module written in any language with a C FFI can produce. That makes the difference between the rows a question of what a module *is*, not only of how fast it starts: a Rust or Zig module is reachable through `-runtime` and through nothing else. [ADR 0012](../../adr/0012-generated-module-dispatch-tables/) covers how a host calls one either way without the call site knowing which.
+
 On Linux that gives twelve presets: `linux-<debug|release>-<gcc|clang>`, each also in a `-link` and a `-runtime` variant. `linux-debug-clang` is what `liara.sh` uses when you do not name one.
 
 ## Single-config on Linux, multi-config on Windows

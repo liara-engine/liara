@@ -28,8 +28,10 @@ The host composes. The launcher today, and the editor later, creates each module
 
 A module never creates, loads, references or links against a sibling. Its only dependency is `liara-interfaces`. Where two modules have to exchange data, they exchange a type declared in the contract and the host carries it across: the renderer receives a render packet, it does not ask the core for one.
 
-:::caution[The frame loop is not there yet]
-`liara-core` still exposes `liara_core_set_run_mode()`, `liara_core_run()` and `liara_core_stop()`, so the Phase 0 demo runs its loop inside the core and calls back into the launcher through a late update callback. Those three entry points are marked provisional in `core.h` and are removed in ABI 1.0.x. The shape this decision actually describes is `LIARA_CORE_RUN_MODE_MANUAL` plus `liara_core_update()`, which exists today and is what the `liara-core` test suite uses. It's an artifact of the bootstrapping phase, when the launcher was not created yet, but a loop was needed to test the core.
+:::note[Resolved on the way to v0.1]
+From its acceptance until the v0.1 cycle this record carried a caution, because `liara-core` still exposed `liara_core_set_run_mode()`, `liara_core_run()` and `liara_core_stop()`: the Phase 0 demo ran its loop inside the core and called back into the launcher through a late update callback. It was an artifact of the bootstrapping phase, when the launcher did not exist yet but the core still had to be exercised.
+
+Those three entry points, and the late update callback with them, were removed from `liara-interfaces` on the way to ABI 1.0.0. The launcher owns the loop outright, and the decision below now describes what the code does. The caution is recorded here as what this page used to say rather than deleted, since a record is append-only.
 :::
 
 ## Alternatives considered
@@ -48,9 +50,9 @@ The host is the only component that knows the module graph, and it grows as modu
 
 Two modules cannot call each other, even when it would be convenient. The data goes through a type in the contract and through the host, so adding an interaction between two modules means changing `liara-interfaces`. That is deliberately more expensive than adding a function call, because it is a change to the contract everything else depends on.
 
-Testing a module on its own becomes cheap, since there is no sibling to stand up first. The `liara-core` suite creates a core, switches it to `LIARA_CORE_RUN_MODE_MANUAL`, ticks it once with a delta of 1/60 s and reads the packet back, with no renderer anywhere in the test binary.
+Testing a module on its own becomes cheap, since there is no sibling to stand up first. The `liara-core` suite creates a core, ticks it once with a delta of 1/60 s and reads the packet back, with no renderer anywhere in the test binary. That the core has no other mode of operation is what makes the test ordinary rather than a special path.
 
-The `-runtime` presets are what keep the decision honest. Under them the launcher links against `liara-interfaces` and pulls in `Liara::Core` and `Liara::Renderer` with `$<COMPILE_ONLY:>` (headers, no link), then opens both shared libraries with `dlopen` on Linux and `LoadLibrary` on Windows, resolves `liara_core_info` and `liara_renderer_info` by name, and refuses to proceed when what they report is incompatible with `MIN_ABI_VERSION`, currently 0.2.0. What that proves today is that the launcher itself carries no link-time dependency on a module. Whether a module that picked one up on a sibling would fail there rather than somewhere later has not been tested, so that half of the claim is still an expectation.
+The `-runtime` presets are what keep the decision honest. Under them the launcher links against `liara-interfaces` and pulls in `Liara::Core`, `Liara::Platform` and `Liara::Renderer` with `$<COMPILE_ONLY:>` (headers, no link), then opens all three shared libraries with `dlopen` on Linux and `LoadLibrary` on Windows, resolves `liara_core_info`, `liara_platform_info` and `liara_renderer_info` by name, and refuses to proceed when what they report is incompatible with `MIN_ABI_VERSION`, which moves to 1.0.0 when that ABI is tagged. What that proves today is that the launcher itself carries no link-time dependency on a module. Whether a module that picked one up on a sibling would fail there rather than somewhere later has not been tested, so that half of the claim is still an expectation.
 
 ## Revisit if
 

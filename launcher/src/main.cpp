@@ -5,7 +5,6 @@
 
 #include "config.h"
 
-#include "liara/launcher/ModuleLoader.h"
 #include "liara/renderer/packet.h"
 
 #include <liara/abi_version.h>

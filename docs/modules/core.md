@@ -24,9 +24,7 @@ It owns the data and the schedule, and the other modules transform data on a sch
 
 **The loop primitives.** `liara_core_update(core, dt)` advances the simulation by one tick, and `liara_core_get_render_packet()` hands back what the host should submit to the renderer.
 
-:::caution[Three provisional entry points]
-`liara_core_set_run_mode()`, `liara_core_run()` and `liara_core_stop()` currently let the core own the loop and call back into the host, which is how the Phase 0 demo runs. They are marked provisional in `core.h` and are removed in ABI 1.0.x. `LIARA_CORE_RUN_MODE_MANUAL` plus `liara_core_update()` is the arrangement [ADR 0003](../../adr/0003-the-host-composes-modules/) actually describes, and it is what the test suite uses.
-:::
+Those two are the whole of the loop surface. The core has no notion of real time, no run mode and no way to call back into its host: it advances when asked, by exactly the delta it is given, and a host that stops asking has a core that stops advancing.
 
 **Module lifecycle.** Creation, destruction and the per-tick step, exposed through the C interface for a host to drive. The core neither loads nor registers nor holds a reference to another module. Deciding which renderer to pair it with, checking their versions against each other and wiring them together is the host's job.
 

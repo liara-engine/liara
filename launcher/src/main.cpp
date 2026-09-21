@@ -1,14 +1,25 @@
 /**
-* @file main.cpp
+ * @file main.cpp
  * @brief Phase 0 launcher: hello world + ABI version smoke check.
  */
 
-#include <liara/abi_version.h>
-#include <liara/modules.h>
+#include "config.h"
 
+#include "liara/launcher/ModuleLoader.h"
+#include "liara/renderer/packet.h"
+
+#include <liara/abi_version.h>
+#include <liara/core/core.h>
+#include <liara/modules.h>
+#include <liara/renderer/renderer.h>
+#include <liara/result.h>
+#include <liara/version.h>
+
+#include <chrono>
 #include <cstdint>
 #include <format>
 #include <iostream>
+#include <thread>
 
 #ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
     #ifdef _WIN32
@@ -54,6 +65,7 @@ static_assert(ABI_COMPAT == LIARA_VERSION_COMPAT_EXACT || ABI_COMPAT == LIARA_VE
               "Liara ABI version is too old for this launcher. Please update your Liara installation.");
 
 constexpr float DEMO_DURATION_SECONDS = 8.0F;
+constexpr float TARGET_FRAME_SECONDS = 1.0F / 60.0F;
 
 int main(int argc, char** argv) {
     const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
@@ -163,27 +175,34 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    static liara_renderer_handle_t* s_activeRenderer = renderer;
-
-    liara_core_set_late_update_callback(core, [](liara_core_handle_t* lambdaCore, float deltaTime) {
-        static float elapsedSeconds = 0.0F;
-        elapsedSeconds += deltaTime;
-
-        liara_render_packet_t packet{};
-        if (liara_core_get_render_packet(lambdaCore, &packet) == LIARA_RESULT_SUCCESS) {
-            liara_renderer_submit_frame(s_activeRenderer, &packet);
-        }
-
-        if (elapsedSeconds >= DEMO_DURATION_SECONDS) {
-            std::cout << "\033[2J\033[H";
-            std::cout << std::format("\n{} seconds elapsed. Stopping core...\n", DEMO_DURATION_SECONDS);
-            liara_core_stop(lambdaCore);
-        }
-    });
-
     if (!smoke) {
-        liara_core_set_run_mode(core, LIARA_CORE_RUN_MODE_FIXED, 1.0F / 60.0F);
-        liara_core_run(core);
+        using Clock = std::chrono::steady_clock;
+
+        auto previous = Clock::now();
+        float elapsedSeconds = 0.0F;
+
+        while (elapsedSeconds < DEMO_DURATION_SECONDS) {
+            const auto frameStart = Clock::now();
+            const float deltaTime = std::chrono::duration<float>(frameStart - previous).count();
+            previous = frameStart;
+            elapsedSeconds += deltaTime;
+
+            liara_core_update(core, deltaTime);
+
+            liara_render_packet_t packet {};
+            if (liara_core_get_render_packet(core, &packet) == LIARA_RESULT_SUCCESS) {
+                liara_renderer_submit_frame(renderer, &packet);
+            }
+
+            const auto spent = std::chrono::duration<float>(Clock::now() - frameStart);
+            if (const auto remaining = std::chrono::duration<float>(TARGET_FRAME_SECONDS) - spent;
+                remaining.count() > 0.0F) {
+                std::this_thread::sleep_for(remaining);
+                }
+        }
+
+        std::cout << "\033[2J\033[H";
+        std::cout << std::format("\n{} seconds elapsed. Stopping.\n", DEMO_DURATION_SECONDS);
     }
 
     liara_core_destroy(core);

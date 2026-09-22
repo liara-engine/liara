@@ -31,6 +31,8 @@
       "include-component-in-tag": true
     },
     "framework": {
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
       "package-name": "framework",
       "release-type": "simple",
       "include-component-in-tag": true

@@ -3,7 +3,7 @@ title: Planned modules
 description: The editor and the physics module. What they will hold, and why neither interface is designed yet.
 sidebar:
   label: Planned (editor, physics)
-  order: 8
+  order: 9
 ---
 
 Two repositories are named, have their namespaces claimed, and will not be created until the v1.x cycle. Both entries exist so that the v0.x interfaces are designed with them in mind, and neither is a commitment to a design.

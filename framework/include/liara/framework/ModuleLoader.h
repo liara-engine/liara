@@ -23,7 +23,7 @@
     #define LIARA_LIB_NAME(stem) "lib" stem ".so"
 #endif
 
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+#ifdef LIARA_MODULE_LOADING_RUNTIME
     #ifdef _WIN32
         #include <windows.h>
 using LibHandle = HMODULE;
@@ -48,9 +48,9 @@ using LibHandle = void*;
     api.suffix = reinterpret_cast<returnType(*) parameters>(LIARA_LIB_SYMBOL(library, #prefix "_" #suffix)); \
     if (api.suffix == nullptr) { return {LoadFailure::Reason::SymbolMissing, #prefix "_" #suffix}; }
 
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+#ifdef LIARA_MODULE_LOADING_RUNTIME
     #define LIARA_DEFINE_MODULE_API(Name, prefix, FUNCTION_LIST)                                                       \
-        namespace Liara::Launcher                                                                                      \
+        namespace Liara::Framework                                                                                     \
         {                                                                                                              \
             struct Name##Api                                                                                           \
             {                                                                                                          \
@@ -72,7 +72,7 @@ using LibHandle = void*;
         }
 #else
     #define LIARA_DEFINE_MODULE_API(Name, prefix, FUNCTION_LIST)                     \
-        namespace Liara::Launcher                                                    \
+        namespace Liara::Framework                                                   \
         {                                                                            \
             struct Name##Api                                                         \
             {                                                                        \
@@ -88,7 +88,7 @@ using LibHandle = void*;
 
 // NOLINTEND(cppcoreguidelines-macro-usage, bugprone-macro-parentheses)
 
-namespace Liara::Launcher
+namespace Liara::Framework
 {
     /**
      * @brief The platform's description of the last dynamic-loading failure.
@@ -99,7 +99,7 @@ namespace Liara::Launcher
      * @return A string describing the last dynamic-loading failure.
      */
     inline std::string LastLibraryError() {
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+#ifdef LIARA_MODULE_LOADING_RUNTIME
         return LIARA_LIB_ERROR();
 #else
         return "this build links its modules rather than opening them";
@@ -168,7 +168,7 @@ namespace Liara::Launcher
          * @brief Destroy the module's library and clear its entry points.
          */
         ~Module() {
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+#ifdef LIARA_MODULE_LOADING_RUNTIME
             if (m_Library != nullptr) { LIARA_LIB_FREE(m_Library); }
 #endif
         }
@@ -183,7 +183,7 @@ namespace Liara::Launcher
          * @return A LoadFailure describing any failure, or Reason::None if successful.
          */
         [[nodiscard]] LoadFailure Load() {
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+#ifdef LIARA_MODULE_LOADING_RUNTIME
             m_Library = LIARA_LIB_LOAD(Api::LIBRARY_FILE);
             if (m_Library == nullptr) { return {LoadFailure::Reason::LibraryNotFound, Api::LIBRARY_FILE}; }
             return LoadApi(m_Api, m_Library);
@@ -196,11 +196,11 @@ namespace Liara::Launcher
 
     private:
         Api m_Api {};
-#ifdef LIARA_LAUNCHER_MODULE_LOADING_RUNTIME
+#ifdef LIARA_MODULE_LOADING_RUNTIME
         LibHandle m_Library = nullptr;
 #endif
     };
-}  // namespace Liara::Launcher
+}  // namespace Liara::Framework
 
 // NOLINTBEGIN(readability-identifier-naming)
 LIARA_DEFINE_MODULE_API(Core, liara_core, LIARA_CORE_FUNCTIONS)

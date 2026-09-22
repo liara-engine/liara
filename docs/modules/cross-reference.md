@@ -3,7 +3,7 @@ title: Where things live
 description: A topic-to-repository index, for when you know what you are looking for but not which repository owns it.
 sidebar:
     label: Where things live
-    order: 11
+    order: 12
 ---
 
 When a topic is added to the project, this table gains a row.
@@ -31,7 +31,8 @@ When a topic is added to the project, this table gains a row.
 | Render packet structure                              | `liara-interfaces`                                                |
 | The interface design rules                           | `liara-interfaces` (`INTERFACES.md`)                              |
 | The ABI layout freeze and its oracle                 | `liara-interfaces` (`tests/abi/`, `tools/`)                       |
-| Logical input mapping                                | `liara` (launcher)                                                |
+| Logical input mapping                                | `liara` (`framework/`)                                            |
+| Module loading and ABI version negotiation           | `liara` (`framework/`)                                            |
 | The standalone loop and module composition           | `liara` (launcher)                                                |
 | Architecture decision records                        | `liara` (`docs/adr/`)                                             |
 | JSON schemas, served over GitHub Pages               | `liara` (`schemas/`)                                              |

@@ -22,21 +22,6 @@ configure_file(
         "${CMAKE_CURRENT_BINARY_DIR}/generated/config.h"
         @ONLY)
 
-set(LIARA_LAUNCHER_MODULE_LOADING "link" CACHE STRING "How the launcher consumes modules: link | runtime
-        link: The launcher links against the modules at build time. This is the default and recommended option.
-        runtime: The launcher resolves the modules at load time with dlopen/LoadLibrary. Requires them to be built as shared libraries, and is the only mode that can load a module this build system did not build."
-)
-set_property(CACHE LIARA_LAUNCHER_MODULE_LOADING PROPERTY STRINGS link runtime)
-
-if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "link")
-    add_compile_definitions(LIARA_LAUNCHER_MODULE_LOADING_LINK)
-elseif(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
-    add_compile_definitions(LIARA_LAUNCHER_MODULE_LOADING_RUNTIME)
-else()
-    message(FATAL_ERROR "Invalid value for LIARA_LAUNCHER_MODULE_LOADING: ${LIARA_LAUNCHER_MODULE_LOADING}. Valid values are: link, runtime")
-endif()
-
-
 if(NOT TARGET Liara::Interfaces)
     message(FATAL_ERROR
             "Liara::Interfaces is not available. Build the launcher through the workspace superbuild "
@@ -76,23 +61,17 @@ target_include_directories(liara_launcher PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/include"
         "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
-if(LIARA_LAUNCHER_MODULE_LOADING STREQUAL "runtime")
-    target_link_libraries(liara_launcher PRIVATE Liara::Interfaces)
+if(LIARA_MODULE_LOADING STREQUAL "runtime")
+    target_link_libraries(liara_launcher PRIVATE Liara::Interfaces Liara::Framework)
 
     foreach(module IN ITEMS liara_core liara_platform liara_renderer)
         if(TARGET ${module})
             add_dependencies(liara_launcher ${module})
         endif()
     endforeach()
-
-    if(NOT BUILD_SHARED_LIBS)
-        message(FATAL_ERROR
-                "LIARA_LAUNCHER_MODULE_LOADING=runtime requires BUILD_SHARED_LIBS=ON: there is "
-                "nothing to load at runtime in a static build. Use a '-runtime' preset.")
-    endif()
 else()
     target_link_libraries(liara_launcher PRIVATE
-            Liara::Interfaces Liara::Core Liara::Platform Liara::Renderer)
+            Liara::Interfaces Liara::Framework Liara::Core Liara::Platform Liara::Renderer)
 endif()
 
 set_target_properties(liara_launcher PROPERTIES

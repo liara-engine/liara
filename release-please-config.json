@@ -8,6 +8,7 @@
       "include-component-in-tag": false,
       "exclude-paths": [
         "docker",
+        "framework",
         "launcher",
         "schemas"
       ],
@@ -26,6 +27,11 @@
     },
     "launcher": {
       "package-name": "launcher",
+      "release-type": "simple",
+      "include-component-in-tag": true
+    },
+    "framework": {
+      "package-name": "framework",
       "release-type": "simple",
       "include-component-in-tag": true
     }

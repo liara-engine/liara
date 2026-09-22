@@ -3,7 +3,7 @@ title: "liara-assets"
 description: The only module that reads the file system, what it hands back, and the boundary that is easiest to get wrong.
 sidebar:
   label: liara-assets
-  order: 5
+  order: 6
 ---
 
 Arrives with v0.3. Turning bytes on disk into data the engine can use, and owning that data's lifetime. It is the only module that reads the file system.

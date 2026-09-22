@@ -23,6 +23,7 @@ And it is the **compatibility record**, in the sense that its `manifest.json` de
 | Path            | Holds                                                                                                                                                                                 |
 |-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `docs/`         | These pages, the other foundational documents, and the ADRs                                                                                                                           |
+| `framework/`    | The convenience layer above the C ABI: module loading, version negotiation, and what a host would otherwise rewrite                                                                   |
 | `launcher/`     | The host application: `main.cpp`, its `config.h.in`, its `CMakeLists.txt`                                                                                                             |
 | `scripts/`      | `liara.py`, the `liara.sh` and `liara.ps1` wrappers, and the `CMakeLists.txt` and `CMakePresets.json` templates the workspace is generated from                                       |
 | `schemas/`      | The JSON schemas for `manifest.json` and the modules registry, served over GitHub Pages so that a `$schema` URL resolves. The v1 manifest schema is deprecated and is retired in v0.1 |
@@ -45,4 +46,4 @@ And no Dockerfile. The documentation builder image used to live here in a `docke
 
 The meta repository versions along the milestone roadmap rather than with any module, and module repositories version independently of it and of each other.
 
-It is also the only repository releasing more than one thing: the repository itself on plain `vX.Y.Z` tags, plus `schemas` and `launcher` on component-prefixed ones. The mechanics are in [Commits and releases](../../tooling/commits-and-releases/#several-packages-in-one-repository).
+It is also the only repository releasing more than one thing. Four packages: the repository itself on plain `vX.Y.Z` tags, plus `schemas`, `launcher` and `framework` on component-prefixed ones, the last of those on `framework-vX.Y.Z`. The mechanics are in [Commits and releases](../../tooling/commits-and-releases/#several-packages-in-one-repository).

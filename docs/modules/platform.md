@@ -1,6 +1,6 @@
 ---
 title: "liara-platform"
-description: Everything the engine needs from the operating system behind one interface, and the poll-only shutdown design that keeps signal handling safe.
+description: Everything the engine needs from the operating system behind one interface, the poll-only shutdown design that keeps signal handling safe, and the three time entry points the loop runs on.
 sidebar:
   label: liara-platform
   order: 4
@@ -16,7 +16,9 @@ Its capabilities arrive with v0.1; the repository exists from Phase 0, holding t
 
 **OS signals and shutdown requests.** SIGINT, SIGTERM, the Windows console control events, and the window's close button. These are deliberately one thing at the interface, because they are all "the user asked the process to stop", and a host that handles one handles all of them.
 
-**Timing.** A monotonic clock and high-resolution counters, so that the loop's notion of time does not depend on which standard library the host happened to be built against.
+**Timing.** Three entry points, none of which takes a handle. `liara_platform_time_now_ns` reads a monotonic counter in nanoseconds from an unspecified origin, so only the difference between two readings means anything, and the value never decreases as seen from any thread. `liara_platform_time_wall_ns` reads the wall clock as a signed count of nanoseconds since the Unix epoch, UTC as the operating system reports it, signed because the value steps backwards when NTP (the protocol that corrects a machine's clock against a time server) adjusts it. `liara_platform_time_sleep_until_ns` blocks until the monotonic counter has reached a deadline, at least and never less, with no bound on the overshoot and no early return when a signal arrives. The two clocks are separate calls because they answer different questions, and fusing them is the classic bug: a duration measured on the wall clock goes negative the first time NTP steps the machine, and a log line timestamped from the monotonic counter carries a number that matches no calendar. The loop's notion of time therefore stops depending on which standard library the host happened to be built against, and the contract prevents the mix-up by making the caller name the clock it wants: `liara_platform_time_now_ns` to measure a duration, `liara_platform_time_wall_ns` to timestamp a line.
+
+The duration form of the sleep is absent on purpose. It is `sleep_until_ns(time_now_ns() + d)` and nothing more, so the [boundary rule](../framework/#the-boundary-rule) puts it in `Liara::Framework`. The alternatives that lost, including the frequency-and-raw-counter pair that `QueryPerformanceFrequency` and `QueryPerformanceCounter` expose, are in [ADR 0014](../../adr/0014-the-platform-time-facility/).
 
 ## Shutdown is poll-only
 

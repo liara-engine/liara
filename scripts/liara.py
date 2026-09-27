@@ -293,6 +293,12 @@ def checkout_ref(module_dir, module, wanted):
         fatal(f"Cannot check out {module} at {wanted}.")
 
 
+def remote_has_branch(url, branch):
+    """True when the repository at `url` has a branch named exactly `branch`."""
+    code, _ = run_cmd(["git", "ls-remote", "--exit-code", "--heads", url, f"refs/heads/{branch}"], capture=True)
+    return code == 0
+
+
 def do_setup(args):
     script_dir = Path(__file__).resolve().parent
     meta_root = script_dir.parent
@@ -305,6 +311,20 @@ def do_setup(args):
 
     # 1. Clone / Pull Modules
     refs = dict(item.split("=", 1) for item in args.ref)
+
+    # A change crossing repositories uses one branch name in each of them. Checking every module out at that branch
+    # when it exists is what lets CI build the pull requests of one change against each other.
+    if args.sibling_branch:
+        info(f"Resolving sibling branch {args.sibling_branch}...")
+        for module in MODULES:
+            if module in refs:
+                ok(f"{module}: {refs[module]} (explicit --ref)")
+            elif remote_has_branch(f"{git_base}/{module}.git", args.sibling_branch):
+                refs[module] = args.sibling_branch
+                ok(f"{module}: {args.sibling_branch} (sibling branch)")
+            else:
+                ok(f"{module}: default branch")
+
     for module in MODULES:
         module_dir = workspace / module
         wanted = refs.get(module)
@@ -691,6 +711,9 @@ def main():
     setup_parser.add_argument("--no-pull", action="store_true", help="Skip pulling existing clones")
     setup_parser.add_argument("--ref", action="append", default=[], metavar="MODULE=REF",
         help="Check out MODULE at REF instead of its default branch. Repeatable. Example: --ref liara-interfaces=v0.1.1")
+    setup_parser.add_argument("--sibling-branch", metavar="BRANCH",
+        help="Check out every module whose repository has BRANCH at that branch, and the others at their default "
+             "branch. An explicit --ref wins for its module. CI passes a pull request's branch here.")
 
     # Sub-command: build
     build_parser = subparsers.add_parser("build", help="Build the workspace using CMake presets")

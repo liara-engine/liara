@@ -20,7 +20,7 @@ The subcommands are `verify`, `setup`, `build`, `test`, `launch`, `clean` and `c
 
 `setup` does the assembly: it clones every module repository into `workspace/`, generates the superbuild `CMakeLists.txt`, a merged `vcpkg.json` that is the union of every module's dependencies and features, and the workspace `CMakePresets.json`, then configures CMake and, on Linux, symlinks `compile_commands.json` at the workspace root. vcpkg resolves dependencies during that configure step, which can be a 10-to-30-minute wait on a machine that has never built the project.
 
-`--preset` overrides the preset, `--no-configure` stops before CMake, `--no-pull` leaves existing clones alone (which is what you want while working on a branch), and `--ssh` clones over SSH. Re-running `setup` is safe and is the normal way to refresh a workspace.
+`--preset` overrides the preset, `--no-configure` stops before CMake, `--no-pull` leaves existing clones alone (which is what you want while working on a branch), and `--ssh` clones over SSH. `--ref MODULE=REF` checks one module out at a branch, a tag or a commit, and `--sibling-branch BRANCH` checks out every module whose repository has `BRANCH` at that branch and leaves the others on their default branch, which is what CI does for a pull request; an explicit `--ref` wins for its module. Re-running `setup` is safe and is the normal way to refresh a workspace.
 
 The Visual Studio generator produces no `compile_commands.json`, so the symlink step is skipped on Windows and clangd-based tooling there needs a Ninja configuration of its own.
 

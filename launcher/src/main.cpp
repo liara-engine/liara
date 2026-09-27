@@ -84,8 +84,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    const liara_platform_create_info_t platformInfo {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION,
-                                                     .reserved = 0};
+    constexpr liara_platform_create_info_t platformInfo {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION};
     liara_platform_handle_t* platformInstance = nullptr;
     if (platform->create(&platformInfo, &platformInstance) != LIARA_RESULT_SUCCESS || platformInstance == nullptr) {
         std::cout << "Error: Failed to create platform instance.\n";

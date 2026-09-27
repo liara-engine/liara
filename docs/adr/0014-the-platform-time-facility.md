@@ -30,7 +30,7 @@ Four parts. The three entry points and what each one promises are described at [
 
 ## Alternatives considered
 
-Three, and the first two are what other projects ship.
+Three:
 
 **A frequency and a raw counter**, the shape of `QueryPerformanceFrequency` and `QueryPerformanceCounter` under Win32 and of `SDL_GetPerformanceFrequency` and `SDL_GetPerformanceCounter` in SDL. Rejected on two counts. It puts a Win32 implementation detail into a contract that has to hold on POSIX too, where `clock_gettime` already reports nanoseconds and the frequency is a constant nobody asked for. And it moves the same division into every caller, where each one gets its own opportunity to write it in `float` and lose the low bits.
 
@@ -44,10 +44,7 @@ Three, and the first two are what other projects ship.
 
 A stop request is observed one frame late. `liara_platform_time_sleep_until_ns` does not return early when a signal interrupts it, so no caller has to wrap it in a loop against spurious wake-ups, and a caller that needs to react sooner than one frame slices its own wait. The price is that a Ctrl+C arriving during the pacing sleep is seen by the next call to `liara_platform_quit_requested`, about 16 ms later at 60 Hz. The clause is what a caller may rely on, and what delivers it today is narrower than the wording suggests: `Time.cpp` computes `deadlineNs - now` and sleeps on that duration, so the no-early-return behaviour rests on libstdc++'s `sleep_for` retrying with the remainder rather than on the call targeting an absolute deadline. The module is therefore doing internally what the Decision above says a caller should not have to do, and it collects the prize the deadline form was chosen for only once the sleep targets the deadline itself, which `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME)` does.
 
-The first implementation is plain `<chrono>` and `<thread>`: `steady_clock` for the monotonic counter, `system_clock` for the wall clock, and `std::this_thread::sleep_for` on the remaining duration for the sleep, with no `#ifdef` and no new dependency. C++20 guarantees that `system_clock`'s epoch is the Unix epoch, so the wall clock needs no platform-specific code to be exact. Windows pacing is coarse under `sleep_for`, and how coarse has not been measured in this project: Windows parity for the whole of v0.1 is confirmed at stage 8. The refinement that replaces it is `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME)` under POSIX and a high-resolution waitable timer under Win32, and it changes no line of `liara/platform/platform.h`.
-
 ## Revisit if
 
-- A consumer asks what granularity the clock actually announces, which is the profiler's question when a 200 ns measurement has to be told apart from noise. The answer is an additive `liara_platform_time_resolution_ns`, and it is deliberately not shipped now as a no-op returning zero, because a caller cannot tell "unknown" from "one nanosecond" and a bare `uint64_t` has no `LIARA_RESULT_NOT_IMPLEMENTED` to say it with.
 - A consumer depends on whether the monotonic counter advances across a system suspend, which the contract leaves unspecified. Pinning it down costs per-platform work for a guarantee no named consumer asks for: Linux separates `CLOCK_MONOTONIC` from `CLOCK_BOOTTIME`, and Windows makes no matching guarantee, offering the near-equivalent `QueryUnbiasedInterruptTime`.
 - A consumer needs the clock as a frequency reference rather than as a way to measure durations, which is where the audio module's sample scheduling is heading. The clause saying the tick rate is not promised to be constant starts to bite there: a sample-accurate schedule accumulates whatever the system's time discipline slews off `CLOCK_MONOTONIC`, which is up to a few hundred parts per million.

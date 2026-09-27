@@ -323,7 +323,7 @@ def do_setup(args):
                 refs[module] = args.sibling_branch
                 ok(f"{module}: {args.sibling_branch} (sibling branch)")
             else:
-                ok(f"{module}: default branch")
+                ok(f"{module}: no {args.sibling_branch} branch")
 
     for module in MODULES:
         module_dir = workspace / module
@@ -712,8 +712,10 @@ def main():
     setup_parser.add_argument("--ref", action="append", default=[], metavar="MODULE=REF",
         help="Check out MODULE at REF instead of its default branch. Repeatable. Example: --ref liara-interfaces=v0.1.1")
     setup_parser.add_argument("--sibling-branch", metavar="BRANCH",
-        help="Check out every module whose repository has BRANCH at that branch, and the others at their default "
-             "branch. An explicit --ref wins for its module. CI passes a pull request's branch here.")
+        help="Check out every module whose repository has BRANCH at that branch. The others are cloned at their "
+             "default branch, or updated as usual when already cloned. An explicit --ref wins for its module. A module "
+             "checked out this way stays detached there until you switch it back. CI passes a pull request's branch "
+             "here.")
 
     # Sub-command: build
     build_parser = subparsers.add_parser("build", help="Build the workspace using CMake presets")

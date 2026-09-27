@@ -30,7 +30,7 @@ This follows the Unreal Engine convention, CamelCase for types and methods with 
 
 ## Files
 
-A source file takes the name of its primary type. The exception is the ABI shim, which takes the name of the module: `renderer.cpp` for the C interface of `liara-renderer`, lowercase, matching the C side it implements.
+A source file takes the name of its primary type, and there are two exceptions to that. The ABI shim takes the name of the module: `renderer.cpp` for the C interface of `liara-renderer`, lowercase, matching the C side it implements. A file holding free functions in a namespace has no primary type, so it takes the name of its concern and keeps the CamelCase of the C++ side it lives on: `Time.h` and `Time.cpp` for `Liara::Platform::Time`, `Shutdown.h` and `Shutdown.cpp` for the signal handling beside it in `liara-platform`.
 
 Headers are `.h`, implementations are `.cpp`, and template implementations are `.tpp`.
 
@@ -39,6 +39,9 @@ Renderer.h      // the Renderer class
 Renderer.cpp
 
 core.cpp        // the core's ABI shim
+
+Time.h          // free functions in Liara::Platform::Time
+Time.cpp
 
 Logger.h        // a template implementation
 Logger.tpp

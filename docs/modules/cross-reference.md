@@ -19,6 +19,7 @@ When a topic is added to the project, this table gains a row.
 | Window creation                                      | `liara-platform`                                                  |
 | Input devices                                        | `liara-platform`                                                  |
 | OS signals and shutdown requests                     | `liara-platform`                                                  |
+| Monotonic clock, wall clock and sleep to a deadline  | `liara-platform`                                                  |
 | Asset loading and decoding                           | `liara-assets`                                                    |
 | Asset handles and lifetime                           | `liara-assets`                                                    |
 | Audio playback and mixing                            | `liara-audio`                                                     |

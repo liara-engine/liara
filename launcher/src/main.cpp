@@ -11,17 +11,16 @@
 #include <liara/core/core.h>
 #include <liara/framework/ModuleLoader.h>
 #include <liara/framework/Modules.h>
+#include <liara/platform/platform.h>
 #include <liara/renderer/renderer.h>
 #include <liara/result.h>
 #include <liara/version.h>
 
-#include <chrono>
 #include <cstdint>
 #include <format>
 #include <initializer_list>
 #include <iostream>
 #include <string_view>
-#include <thread>
 
 /*
  * @brief Minimum ABI version required for this launcher.
@@ -36,8 +35,9 @@ constexpr liara_version_compat_t ABI_COMPAT = liara_version_provides(LIARA_ABI_V
 static_assert(ABI_COMPAT == LIARA_VERSION_COMPAT_EXACT || ABI_COMPAT == LIARA_VERSION_COMPAT_COMPATIBLE,
               "Liara ABI version is too old for this launcher. Please update your Liara installation.");
 
-constexpr float DEMO_DURATION_SECONDS = 8.0F;
-constexpr float TARGET_FRAME_SECONDS = 1.0F / 60.0F;
+constexpr uint64_t NS_PER_SECOND = 1'000'000'000ULL;
+constexpr uint64_t DEMO_DURATION_NS = 8ULL * NS_PER_SECOND;
+constexpr uint64_t TARGET_FRAME_NS = NS_PER_SECOND / 60ULL;
 
 int main(int argc, char** argv) {
     const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
@@ -84,36 +84,49 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    constexpr liara_platform_create_info_t platformInfo {.struct_version = LIARA_PLATFORM_CREATE_INFO_VERSION};
+    liara_platform_handle_t* platformInstance = nullptr;
+    if (platform->create(&platformInfo, &platformInstance) != LIARA_RESULT_SUCCESS || platformInstance == nullptr) {
+        std::cout << "Error: Failed to create platform instance.\n";
+        core->destroy(coreInstance);
+        renderer->destroy(rendererInstance);
+        return 1;
+    }
+
+    if (platform->install_signal_handlers(platformInstance) != LIARA_RESULT_SUCCESS) {
+        std::cout << "Error: Failed to install signal handlers.\n";
+        platform->destroy(platformInstance);
+        core->destroy(coreInstance);
+        renderer->destroy(rendererInstance);
+        return 1;
+    }
+
     if (!smoke) {
-        using Clock = std::chrono::steady_clock;
+        uint64_t frameStart = platform->time_now_ns();
+        const uint64_t start = frameStart;
+        uint64_t previous = frameStart;
 
-        auto previous = Clock::now();
-        float elapsedSeconds = 0.0F;
-
-        while (elapsedSeconds < DEMO_DURATION_SECONDS) {
-            const auto frameStart = Clock::now();
-            const float deltaTime = std::chrono::duration<float>(frameStart - previous).count();
+        while (frameStart - start < DEMO_DURATION_NS && !platform->quit_requested(platformInstance)) {
+            const uint64_t deltaNs = frameStart - previous;
             previous = frameStart;
-            elapsedSeconds += deltaTime;
 
-            core->update(coreInstance, deltaTime);
+            core->update(coreInstance, static_cast<float>(deltaNs) / static_cast<float>(NS_PER_SECOND));
 
             if (liara_render_packet_t packet {};
                 core->get_render_packet(coreInstance, &packet) == LIARA_RESULT_SUCCESS) {
                 renderer->submit_frame(rendererInstance, &packet);
             }
 
-            const auto spent = std::chrono::duration<float>(Clock::now() - frameStart);
-            if (const auto remaining = std::chrono::duration<float>(TARGET_FRAME_SECONDS) - spent;
-                remaining.count() > 0.0F) {
-                std::this_thread::sleep_for(remaining);
-            }
+            platform->time_sleep_until_ns(frameStart + TARGET_FRAME_NS);
+            frameStart = platform->time_now_ns();
         }
 
         std::cout << "\033[2J\033[H";
-        std::cout << std::format("\n{} seconds elapsed. Stopping.\n", DEMO_DURATION_SECONDS);
+        if (platform->quit_requested(platformInstance)) { std::cout << "\nStop requested. Shutting down.\n"; }
+        else { std::cout << std::format("\n{} seconds elapsed. Stopping.\n", DEMO_DURATION_NS / NS_PER_SECOND); }
     }
 
+    platform->destroy(platformInstance);
     core->destroy(coreInstance);
     renderer->destroy(rendererInstance);
 

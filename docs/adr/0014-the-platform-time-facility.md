@@ -1,0 +1,50 @@
+---
+title: "ADR 0014: The platform's time facility"
+description: Why the engine's clock is a monotonic nanosecond counter with a separate wall clock and a sleep that takes a deadline, and why none of the three entry points takes a handle.
+sidebar:
+    label: "0014 · The platform time facility"
+    order: 14
+---
+
+| Status   | Date       | Deciders |
+|----------|------------|----------|
+| Accepted | 2026-09-21 | Antoine  |
+
+## Context
+
+`launcher/src/main.cpp` drove its loop off `std::chrono::steady_clock`, computed each frame delta as a `float` of seconds, and paced itself with `std::this_thread::sleep_for` against `constexpr float TARGET_FRAME_SECONDS = 1.0F / 60.0F`. That made the host's notion of time a property of whichever standard library compiled the host: the granularity `sleep_for` actually delivers differs between MSVC's standard library and libstdc++, and nothing in `main.cpp` recorded which one a given build got. A host written in Rust or Zig had no clock at all, and that host is not hypothetical: the `-runtime` presets resolve every entry point by name, so a module is reachable from any language with a C FFI (foreign function interface, the ability to call C symbols).
+
+[liara-platform](../../modules/platform/) had owned timing on paper since Phase 0, in one sentence promising "a monotonic clock and high-resolution counters", and behind that sentence nothing was designed: no entry point, no unit, no statement of what the clock promises a caller. Designing one for the loop alone would have guaranteed that `std::chrono` came back somewhere else in the engine, so the facility is designed against every consumer that can be named today: the frame loop, frame-time measurement and profiling, animation, timeouts, and the audio module's scheduling.
+
+## Decision
+
+Four parts. The three entry points and what each one promises are described at [liara-platform](../../modules/platform/), and the contract clause by clause is the Doxygen of `liara/platform/platform.h` in `liara-interfaces`.
+
+**A monotonic nanosecond counter is the primitive.** `liara_platform_time_now_ns` returns a `uint64_t` of nanoseconds from an unspecified origin, so only the difference between two readings is meaningful. Nanoseconds are the unit rather than a promise about granularity, which is why two readings taken close together may return the same value and a frame delta may legitimately be zero. Overflow gets no sentence in the header, because at that unit a `uint64_t` covers about 584 years.
+
+**The wall clock is a separate call, and its return type differs.** `liara_platform_time_wall_ns` returns an `int64_t` of nanoseconds since the Unix epoch, signed because 1970 is not the beginning of time and because the value steps backwards when NTP (the protocol that corrects a machine's clock against a time server) adjusts it. The differing type is doing work: passing a wall timestamp where a monotonic deadline belongs is at least a signed-to-unsigned conversion a reader can see. Nothing catches it mechanically today: the warning set in `LiaraCompilerSettings.cmake` runs from `-Wall -Wextra -Wpedantic` through `-Wshadow` and `-Wdouble-promotion`, and `-Wsign-conversion` is not in it.
+
+**The sleep takes a deadline rather than a duration.** `liara_platform_time_sleep_until_ns` blocks until the monotonic counter has reached at least the `uint64_t` it is handed. The deadline form is the one that cannot be rebuilt from above: `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME)` sleeps to an absolute point and drops nothing, while a caller computing `deadline - now` for itself has already lost whatever elapsed between reading the clock and issuing the call. The duration form is `sleep_until_ns(time_now_ns() + d)` and nothing more, so the [boundary rule](../../modules/framework/#the-boundary-rule) puts it in `Liara::Framework`.
+
+**None of the three takes a handle.** `liara_platform_info` and `liara_platform_abi_version` were already handle-free, so the shape has precedent in the namespace, and three properties follow from it. The clock is callable before `liara_platform_create`, so a test or a profiler reads it without first creating an instance it does not otherwise want. There is no pointer to validate, so there is no failure to report: `time_now_ns` and `time_wall_ns` return their values directly and the sleep returns `void`, which is what `errors.md`, the error-reporting page of the interface guide, asks of a function that cannot fail. And no call can race another, because there is no instance for two threads to share. The symmetry argument for a handle is real, since `liara_platform_install_signal_handlers` and `liara_platform_quit_requested` do take one, and it loses because the handle would carry nothing: those two merge a process-global flag with per-instance window state from the next milestone on, while the clock has nothing to merge. An injectable clock or a time scale belongs to simulation time, which `liara-core` and the host own between them, never `liara-platform`.
+
+## Alternatives considered
+
+Three:
+
+**A frequency and a raw counter**, the shape of `QueryPerformanceFrequency` and `QueryPerformanceCounter` under Win32 and of `SDL_GetPerformanceFrequency` and `SDL_GetPerformanceCounter` in SDL. Rejected on two counts. It puts a Win32 implementation detail into a contract that has to hold on POSIX too, where `clock_gettime` already reports nanoseconds and the frequency is a constant nobody asked for. And it moves the same division into every caller, where each one gets its own opportunity to write it in `float` and lose the low bits.
+
+**One fused clock**, a single entry point serving both the duration measurement and the log timestamp. Rejected because those are different questions: measuring a duration needs a value that never goes backwards, and timestamping a log line needs a value that matches a calendar. A fused clock makes one of the two wrong, and the consumer that picks the wrong one produces a negative frame delta the first time NTP steps the machine. Forcing the caller to name which clock it wants costs one word at the call site, and it is why `liara_platform_time_now_ns` and `liara_platform_time_wall_ns` are two names rather than one.
+
+**Leaving time to the host's standard library**, which is what the launcher did until stage 1 of v0.1. Rejected because it makes pacing quality a property of the host's toolchain rather than of the engine, and because it leaves a host that is not written in C++ with nothing to call: `std::chrono` is not reachable from Rust or Zig, while under the `-runtime` presets `liara_platform_time_now_ns` is.
+
+## Consequences
+
+`sleep_ns` is where the duration form will land once something needs it written. `framework/include/liara/framework/` holds `ModuleLoader.h` and `Modules.h` today and nothing game-facing, so the boundary rule of [ADR 0013](../0013-the-framework-layer/) has placed that function rather than produced it. A game written in Rust or Zig does the addition itself, on top of `liara_platform_time_sleep_until_ns`.
+
+A stop request is observed one frame late. `liara_platform_time_sleep_until_ns` does not return early when a signal interrupts it, so no caller has to wrap it in a loop against spurious wake-ups, and a caller that needs to react sooner than one frame slices its own wait. The price is that a Ctrl+C arriving during the pacing sleep is seen by the next call to `liara_platform_quit_requested`, about 16 ms later at 60 Hz. The clause is what a caller may rely on, and what delivers it today is narrower than the wording suggests: `Time.cpp` computes `deadlineNs - now` and sleeps on that duration, so the no-early-return behaviour rests on libstdc++'s `sleep_for` retrying with the remainder rather than on the call targeting an absolute deadline. The module is therefore doing internally what the Decision above says a caller should not have to do, and it collects the prize the deadline form was chosen for only once the sleep targets the deadline itself, which `clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME)` does.
+
+## Revisit if
+
+- A consumer depends on whether the monotonic counter advances across a system suspend, which the contract leaves unspecified. Pinning it down costs per-platform work for a guarantee no named consumer asks for: Linux separates `CLOCK_MONOTONIC` from `CLOCK_BOOTTIME`, and Windows makes no matching guarantee, offering the near-equivalent `QueryUnbiasedInterruptTime`.
+- A consumer needs the clock as a frequency reference rather than as a way to measure durations, which is where the audio module's sample scheduling is heading. The clause saying the tick rate is not promised to be constant starts to bite there: a sample-accurate schedule accumulates whatever the system's time discipline slews off `CLOCK_MONOTONIC`, which is up to a few hundred parts per million.

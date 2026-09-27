@@ -1,6 +1,6 @@
 ---
 title: Architecture decision records
-description: What a record holds, how the format differs from the plain Nygard template, and the index of the thirteen written so far.
+description: What a record holds, how the format differs from the plain Nygard template, and the index of the fourteen written so far.
 sidebar:
     label: Overview
     order: 0
@@ -39,5 +39,6 @@ Every record opens with a table giving its status, its date, and who decided. St
 | [0011](./0011-removing-the-degraded-compatibility-state/) | Removing the DEGRADED compatibility state                   | Accepted |
 | [0012](./0012-generated-module-dispatch-tables/)          | Module entry points as data, and generated dispatch tables  | Accepted |
 | [0013](./0013-the-framework-layer/)                       | A framework layer above the C ABI                           | Accepted |
+| [0014](./0014-the-platform-time-facility/)                | The platform's time facility                                | Accepted |
 
 New tooling requires a record of its own, which is what [The inventory](../tooling/#the-inventory) states. The bootstrapping exemption that used to stand beside that rule expired when [Phase 0](../roadmap/phase-0/) closed, so the rule now has no exception.

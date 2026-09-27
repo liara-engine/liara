@@ -284,6 +284,15 @@ def do_verify(args):
     print(f"\n{Term.BOLD}Verification Complete: {Term.GREEN}Environment is ready!{Term.RESET}")
 
 
+def checkout_ref(module_dir, module, wanted):
+    """Check out `wanted` (a branch, a tag or a commit) detached, in a clone that already exists."""
+    info(f"Checking out {module} at {wanted}...")
+    run_cmd(["git", "-C", str(module_dir), "fetch", "--tags", "origin", wanted])
+    code, _ = run_cmd(["git", "-C", str(module_dir), "checkout", "--detach", "FETCH_HEAD"])
+    if code != 0:
+        fatal(f"Cannot check out {module} at {wanted}.")
+
+
 def do_setup(args):
     script_dir = Path(__file__).resolve().parent
     meta_root = script_dir.parent
@@ -298,35 +307,25 @@ def do_setup(args):
     refs = dict(item.split("=", 1) for item in args.ref)
     for module in MODULES:
         module_dir = workspace / module
+        wanted = refs.get(module)
         if (module_dir / ".git").exists():
-            if not args.no_pull:
-                wanted = refs.get(module)
-                if wanted:
-                    info(f"Checking out {module} at {wanted}...")
-                    run_cmd(["git", "-C", str(module_dir), "fetch", "--tags", "origin", wanted])
-                    code, _ = run_cmd(["git", "-C", str(module_dir), "checkout", "--detach", "FETCH_HEAD"])
-                    if code != 0:
-                        fatal(f"Cannot check out {module} at {wanted}.")
-                else:
-                    info(f"Pulling latest for {module}...")
-                    code, _ = run_cmd(["git", "-C", str(module_dir), "pull", "--ff-only"])
-                    if code != 0:
-                        warn(f"Fast-forward pull failed for {module}. Left as-is.")
-            else:
+            if args.no_pull:
                 info(f"Skipping update for {module}")
-        else:
-            wanted = refs.get(module)
-            if wanted:
-                info(f"Checking out {module} at {wanted}...")
-                run_cmd(["git", "-C", str(module_dir), "fetch", "--tags", "origin", wanted])
-                code, _ = run_cmd(["git", "-C", str(module_dir), "checkout", "--detach", "FETCH_HEAD"])
-                if code != 0:
-                    fatal(f"Cannot check out {module} at {wanted}.")
+            elif wanted:
+                checkout_ref(module_dir, module, wanted)
             else:
-                info(f"Cloning {module}...")
-                code, _ = run_cmd(["git", "clone", f"{git_base}/{module}.git", str(module_dir)])
+                info(f"Pulling latest for {module}...")
+                code, _ = run_cmd(["git", "-C", str(module_dir), "pull", "--ff-only"])
                 if code != 0:
-                    fatal(f"Failed to clone {module}")
+                    warn(f"Fast-forward pull failed for {module}. Left as-is.")
+        else:
+            # Clone first: a ref can only be fetched into a repository that exists.
+            info(f"Cloning {module}...")
+            code, _ = run_cmd(["git", "clone", f"{git_base}/{module}.git", str(module_dir)])
+            if code != 0:
+                fatal(f"Failed to clone {module}")
+            if wanted:
+                checkout_ref(module_dir, module, wanted)
 
     # 2. CMake Superbuild Generation
     info("Generating workspace CMakeLists.txt...")

@@ -24,7 +24,7 @@ Three parts. The behaviour each one produces is described at [liara-platform](..
 
 **The native handle is a tagged union in a shared header.** `liara_native_window_t` holds a `uint32_t` kind (`NONE`, `WIN32`, `XLIB`, `WAYLAND`) and a union whose members carry the fields of the matching Vulkan create-info under Vulkan's own names, plus a `uint64_t padding[4]` member that fixes the struct at 40 bytes on 32- and 64-bit targets. A new kind is a constant appended to the enum and a member that fits inside the padding, so the struct's size and every existing offset stay put. It lives in `liara/native_window.h`, with the bare `liara_` prefix `naming.md` reserves for what belongs to no single module, because a native window can come from somewhere other than `liara-platform`: an editor embedding the engine in a toolkit widget hands the renderer a window it made itself.
 
-**Events are fixed-size records polled one at a time.** `liara_platform_poll_event` fills one caller-allocated `liara_platform_event_t` (64 bytes: a type, a timestamp, the window concerned, a payload union with padding) per call. The first call of a drain pumps the operating system and the others read what it produced, which bounds the host's loop.
+**Events are fixed-size records polled one at a time.** `liara_platform_poll_event` fills one caller-allocated `liara_platform_event_t` (64 bytes on 64-bit targets: a type, a timestamp, the window concerned, a payload union with padding) per call. The first call of a drain pumps the operating system and the others read what it produced, which bounds the host's loop.
 
 ## Alternatives considered
 

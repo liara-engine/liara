@@ -7,6 +7,22 @@ sidebar:
 
 # Changelog
 
+## [1.0.0](https://github.com/liara-engine/liara/compare/v0.2.2...v1.0.0) (2026-09-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* LIARA_LAUNCHER_MODULE_LOADING is gone. A build directory configured before this change carries a stale cache entry and has to be deleted and reconfigured.
+
+### Features
+
+* **bootstrap:** setup sibling branch ([#47](https://github.com/liara-engine/liara/issues/47)) ([6974504](https://github.com/liara-engine/liara/commit/69745045466ee0bfd28173c448f86a3d703fe1cf))
+* framework layer ([#43](https://github.com/liara-engine/liara/issues/43)) ([b9896ca](https://github.com/liara-engine/liara/commit/b9896ca8c6f3c9a457e714342d1f42901a2db787))
+* **launcher:** platform clock and shutdown ([#46](https://github.com/liara-engine/liara/issues/46)) ([3b9a976](https://github.com/liara-engine/liara/commit/3b9a976f6c3b787eda2d4a8aca79ed83174ba227))
+* module loader ([#42](https://github.com/liara-engine/liara/issues/42)) ([73c3179](https://github.com/liara-engine/liara/commit/73c3179ace9e9116d00a88fe217076355476ad82))
+* platform introduction ([#40](https://github.com/liara-engine/liara/issues/40)) ([53ee88d](https://github.com/liara-engine/liara/commit/53ee88dc9253352c11329e5e9c6196d046f06e37))
+* remove DEGRADED compatibility state and update related documentation ([5cb1031](https://github.com/liara-engine/liara/commit/5cb1031a0b7ab050ff24d15075dd0218e880c114))
+
 ## [0.2.2](https://github.com/liara-engine/liara/compare/v0.2.1...v0.2.2) (2026-09-20)
 
 

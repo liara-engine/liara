@@ -1,6 +1,6 @@
 {
   ".": "0.2.2",
   "schemas": "0.1.2",
-  "launcher": "0.1.2",
+  "launcher": "1.0.0",
   "framework": "0.1.0"
 }

@@ -43,6 +43,45 @@ constexpr uint64_t TARGET_FRAME_NS = NS_PER_SECOND / 60ULL;
 constexpr std::string_view WINDOW_TITLE = "Liara";
 constexpr liara_extent2d_t WINDOW_SIZE {.width = 1280, .height = 720};
 
+namespace
+{
+    /**
+     * @brief Runs the frame loop until the platform reports a stop request: the window's close button, Ctrl+C or
+     * SIGTERM.
+     *
+     * Events are polled before the quit flag is read, since a close request reaches the flag through the poll.
+     */
+    void RunLoop(const Liara::Framework::Module<Liara::Framework::PlatformApi>& platform,
+                 liara_platform_handle_t* platformInstance,
+                 const Liara::Framework::Module<Liara::Framework::CoreApi>& core,
+                 liara_core_handle_t* coreInstance,
+                 const Liara::Framework::Module<Liara::Framework::RendererApi>& renderer,
+                 liara_renderer_handle_t* rendererInstance) {
+        uint64_t previous = platform->time_now_ns();
+        while (true) {
+            liara_platform_event_t event {};
+            while (platform->poll_event(platformInstance, &event)) {
+                // Resizes are not wired to the renderer yet, and a close request needs nothing: quit_requested
+                // covers it.
+            }
+            if (platform->quit_requested(platformInstance)) { return; }
+
+            const uint64_t frameStart = platform->time_now_ns();
+            const uint64_t deltaNs = frameStart - previous;
+            previous = frameStart;
+
+            core->update(coreInstance, static_cast<float>(deltaNs) / static_cast<float>(NS_PER_SECOND));
+
+            if (liara_render_packet_t packet {};
+                core->get_render_packet(coreInstance, &packet) == LIARA_RESULT_SUCCESS) {
+                renderer->submit_frame(rendererInstance, &packet);
+            }
+
+            platform->time_sleep_until_ns(frameStart + TARGET_FRAME_NS);
+        }
+    }
+}  // namespace
+
 int main(int argc, char** argv) {
     const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
 
@@ -125,28 +164,7 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        uint64_t previous = platform->time_now_ns();
-        while (true) {
-            liara_platform_event_t event {};
-            while (platform->poll_event(platformInstance, &event)) {
-                // Resizes are not wired to the renderer yet, and a close request needs nothing: quit_requested
-                // covers it.
-            }
-            if (platform->quit_requested(platformInstance)) { break; }
-
-            const uint64_t frameStart = platform->time_now_ns();
-            const uint64_t deltaNs = frameStart - previous;
-            previous = frameStart;
-
-            core->update(coreInstance, static_cast<float>(deltaNs) / static_cast<float>(NS_PER_SECOND));
-
-            if (liara_render_packet_t packet {};
-                core->get_render_packet(coreInstance, &packet) == LIARA_RESULT_SUCCESS) {
-                renderer->submit_frame(rendererInstance, &packet);
-            }
-
-            platform->time_sleep_until_ns(frameStart + TARGET_FRAME_NS);
-        }
+        RunLoop(platform, platformInstance, core, coreInstance, renderer, rendererInstance);
 
         platform->window_destroy(window);
         std::cout << "\033[2J\033[H" << "\nStop requested. Shutting down.\n";

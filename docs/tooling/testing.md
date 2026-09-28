@@ -25,16 +25,17 @@ A module is linked through its `Liara::` alias and never through the bare target
 
 Tests are classified with CTest labels rather than doctest tags, because the taxonomy has to cover tests that are not doctest executables at all: the C-only compilation test, the Zig and Rust cross-language tests, the launcher smoke test.
 
-| Label         | What it marks                                                            |
-|---------------|--------------------------------------------------------------------------|
-| `unit`        | No I/O, no Vulkan, no OS interaction                                     |
-| `integration` | Several modules together, may touch the file system or load real assets  |
-| `gpu`         | Needs a Vulkan device, so nothing on GitHub-hosted runners can run it    |
-| `benchmark`   | Performance measurements, recorded but never gating                      |
-| `slow`        | More than a few hundred milliseconds                                     |
-| `cross-lang`  | Exercises the C API from a language with a C FFI, currently Zig and Rust |
+| Label         | What it marks                                                                           |
+|---------------|-----------------------------------------------------------------------------------------|
+| `unit`        | No I/O, no Vulkan, no OS interaction                                                    |
+| `integration` | Several modules together, may touch the file system or load real assets                 |
+| `gpu`         | Needs a Vulkan device, so nothing on GitHub-hosted runners can run it                   |
+| `display`     | Needs a real window-system session (Wayland, X11 or a Win32 desktop), so CI excludes it |
+| `benchmark`   | Performance measurements, recorded but never gating                                     |
+| `slow`        | More than a few hundred milliseconds                                                    |
+| `cross-lang`  | Exercises the C API from a language with a C FFI, currently Zig and Rust                |
 
-A test may carry several (`LABELS "integration;slow"`). A category is selected with `ctest -L unit` and excluded with `ctest -LE gpu`, and the orchestrator exposes both without dropping to ctest:
+A test may carry several (`LABELS "integration;slow"`). A category is selected with `ctest -L unit` and excluded with `ctest -LE "gpu|display"`, and the orchestrator exposes both without dropping to ctest:
 
 ```bash
 ./scripts/liara.sh test --label unit
@@ -44,7 +45,7 @@ A test may carry several (`LABELS "integration;slow"`). A category is selected w
 
 Both flags are repeatable and accept a comma-separated list. Several labels in one flag are an or, each name matches a label exactly rather than as a substring, and `--exclude-label` wins over `--label` for a test carrying both.
 
-**Selection works by exclusion.** CI and the developer both run everything and subtract what does not apply: `ctest -LE gpu` in CI, `ctest -LE "slow|gpu"` for a faster local loop. A test carrying no label therefore runs everywhere, which is the safe default, because forgetting a label costs time while the opposite convention would let a whole repository report success without executing anything.
+**Selection works by exclusion.** CI and the developer both run everything and subtract what does not apply: `ctest -LE "gpu|display"` in CI, `ctest -LE "slow|gpu"` for a faster local loop. A test carrying no label therefore runs everywhere, which is the safe default, because forgetting a label costs time while the opposite convention would let a whole repository report success without executing anything.
 
 The corollary is that a label is only worth adding when something is meant to exclude it. `unit` is the exception, carried anyway, because `ctest -L unit` is the loop reached for while working and it is the one place inclusion is convenient.
 

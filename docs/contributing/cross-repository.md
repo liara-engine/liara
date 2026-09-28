@@ -21,6 +21,10 @@ Some changes span repositories. A new function in `liara-interfaces` needs imple
 
 For a breaking change, the order inverts at the end: the consumer pull requests are opened at the same time as the interface one, and the interface one merges last, once every consumer is ready. Otherwise the consumers sit broken between the interface change and their adaptation.
 
+## One branch name
+
+The pull requests of one change share one branch name in every repository they touch, `feat/platform-window` for instance. CI builds a pull request against the same-named branch of every sibling that has one, which is what lets the interface pull request and its consumers go green before any of them merges; [Continuous integration](../../tooling/ci/#two-tiers) describes the mechanism. They still merge in the order above, one right after the other, since `main` is inconsistent across repositories between the first merge and the last.
+
 ## Why it is this slow
 
 The procedure has five steps on purpose. Cross-repository changes are friction, and that friction is what discourages a frivolous interface change. [ADR 0001](../../adr/0001-multi-repository-layout/) is the argument in full: a boundary that can be crossed by editing one line is a boundary that gets crossed at 2am with a good reason.

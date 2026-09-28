@@ -6,11 +6,11 @@ sidebar:
   order: 4
 ---
 
-Its first capabilities arrive with v0.1: the create and destroy lifecycle, the shutdown surface and the clock are built, while the window and the input devices are designed and not yet written. The repository exists from Phase 0, when it held the module's self-description and nothing else. Everything the engine needs from the operating system, behind one interface, which is what makes "Linux and Windows are both first-class" a property of one repository instead of an `#ifdef` scattered through all of them.
+Its first capabilities arrive with v0.1: the create and destroy lifecycle, the shutdown surface, the clock, and windows with their events are built, while the input devices are designed and not yet written. The repository exists from Phase 0, when it held the module's self-description and nothing else. Everything the engine needs from the operating system, behind one interface, which is what makes "Linux and Windows are both first-class" a property of one repository instead of an `#ifdef` scattered through all of them.
 
 ## Contents
 
-**Window management.** Creation, resizing, fullscreen, and exposure of the native handle the renderer needs to create its surface. SDL3 is the backend, and no SDL type crosses the module boundary.
+**Window management.** A window is a handle of its own, `liara_platform_window_handle_t`, created from a platform instance with `liara_platform_window_create` and destroyed with `liara_platform_window_destroy` before the instance is. SDL3 is the backend, and no SDL type crosses the module boundary. The size a caller asks for is in the window system's logical units and is a request, which a tiling window manager ignores; every size the module reports back is in pixels, which is what a swapchain needs, and the field names (`requested_size`, `pixel_size`) carry the unit. `liara_platform_window_get_native` fills the `liara_native_window_t` a renderer creates its surface from, declared in the shared `liara/native_window.h` because a window can come from somewhere other than this module; [ADR 0015](../../adr/0015-the-window-and-its-native-handle/) records why it is a tagged union. A window's content is unspecified until something presents to it, and until the renderer does, the module paints a solid placeholder, since Wayland never shows a surface nothing was committed to. A window is always resizable. Every window and event entry point is called from the process's main thread, which SDL requires on several platforms.
 
 **Input devices.** Keyboard, mouse, gamepad. The module reports physical device state and physical events, and it does not know what an action is. Mapping a physical input to a logical action is a consumer's concern.
 
@@ -20,6 +20,10 @@ Its first capabilities arrive with v0.1: the create and destroy lifecycle, the s
 
 The duration form of the sleep is absent on purpose. It is `sleep_until_ns(time_now_ns() + d)` and nothing more, so the [boundary rule](../framework/#the-boundary-rule) puts it in `Liara::Framework`. The alternatives that lost, including the frequency-and-raw-counter pair that `QueryPerformanceFrequency` and `QueryPerformanceCounter` expose, are in [ADR 0014](../../adr/0014-the-platform-time-facility/).
 
+## Events
+
+`liara_platform_poll_event` returns one event per call into a `liara_platform_event_t` the caller allocates, 64 bytes whatever the target, and `false` once the drain is over. A drain is the run of calls up to one returning `false`: its first call pumps the operating system once and the others only read what that pump queued, so a `while` loop over `liara_platform_poll_event` terminates under a continuous stream of events such as a resize drag. Each event carries its type, the window it concerns, and a `timestamp_ns` on the `liara_platform_time_now_ns` clock, read when the module translated the event. Two types exist in v0.1: `LIARA_PLATFORM_EVENT_WINDOW_CLOSE_REQUESTED`, the user asking a window to close, which does not destroy it, and `LIARA_PLATFORM_EVENT_WINDOW_RESIZED`, a change of size in pixels. New types arrive in minor versions with their payload inside the record's padding, so a host skips any type it does not recognise. An instance sees the events of its own windows only, and destroying a window discards those still queued for it.
+
 ## Shutdown is poll-only
 
 The interface exposes shutdown as a flag the host polls, never as a callback:
@@ -28,6 +32,8 @@ The interface exposes shutdown as a flag the host polls, never as a callback:
 liara_result_t liara_platform_install_signal_handlers(liara_platform_handle_t*);
 bool           liara_platform_quit_requested(const liara_platform_handle_t*);
 ```
+
+The window's close button joins the flag when it closes the last window. A close request on the last open window of an instance (created and not yet destroyed) raises that instance's flag on top of producing its event, so with one window, closing it is exactly a Ctrl+C; with several, closing one produces the event alone and the host decides. A quit the window system itself requests, such as a session ending, raises the process-global flag the signal handler writes. Both reach the flag through `liara_platform_poll_event`, which is why a host polls its events before it reads `liara_platform_quit_requested`.
 
 Three constraints follow from that shape, and all three are easy to violate later.
 

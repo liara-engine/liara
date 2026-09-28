@@ -726,7 +726,7 @@ def main():
     test_parser.add_argument("--preset", help="Override CMake test preset")
     test_parser.add_argument("--label", action="append", default=[], metavar="LABEL",
         help="Run only the tests carrying LABEL. Repeatable, and accepts a comma-separated list. "
-             "Known labels: unit, integration, gpu, benchmark, slow, cross-lang. Example: --label unit,integration")
+             "Known labels: unit, integration, gpu, display, benchmark, slow, cross-lang. Example: --label unit,integration")
     test_parser.add_argument("--exclude-label", action="append", default=[], metavar="LABEL",
         help="Skip the tests carrying LABEL, even when --label selected them. "
              "Repeatable, and accepts a comma-separated list. Example: --exclude-label slow,gpu")

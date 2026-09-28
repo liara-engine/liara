@@ -38,7 +38,7 @@ This is the target, built up progressively across v0.x:
 | `liara-assets`     | doctest (tests only), stb, and either cgltf or tinygltf                                                                                                  |
 | `liara-audio`      | doctest (tests only), miniaudio                                                                                                                          |
 
-Today the lists are shorter than that table: `liara-core/vcpkg.json` declares no runtime dependency at all, with doctest behind its `tests` feature, because settings and math have not been written yet.
+Today the lists are shorter than that table: `liara-core/vcpkg.json` declares no runtime dependency at all, with doctest behind its `tests` feature, because settings and math have not been written yet. `liara-platform/vcpkg.json` declares SDL3 without its default features, adding back `x11` and `wayland` on Linux and leaving out `ibus`, the input-method bridge, until text input exists.
 
 Logging is deliberately missing from the table. Whether `liara-core` uses spdlog or its own logger is undecided, and the decision belongs to v0.2 rather than to a line in a manifest.
 

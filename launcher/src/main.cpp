@@ -1,17 +1,19 @@
 /**
  * @file main.cpp
- * @brief Phase 0 launcher: hello world + ABI version smoke check.
+ * @brief The reference host: loads the modules, negotiates their ABI versions, opens a window and runs the loop.
  */
 
 #include "config.h"
 
-#include "liara/renderer/packet.h"
-
 #include <liara/abi_version.h>
 #include <liara/core/core.h>
+#include <liara/extent.h>
 #include <liara/framework/ModuleLoader.h>
 #include <liara/framework/Modules.h>
+#include <liara/platform/event.h>
 #include <liara/platform/platform.h>
+#include <liara/platform/window.h>
+#include <liara/renderer/packet.h>
 #include <liara/renderer/renderer.h>
 #include <liara/result.h>
 #include <liara/version.h>
@@ -36,8 +38,10 @@ static_assert(ABI_COMPAT == LIARA_VERSION_COMPAT_EXACT || ABI_COMPAT == LIARA_VE
               "Liara ABI version is too old for this launcher. Please update your Liara installation.");
 
 constexpr uint64_t NS_PER_SECOND = 1'000'000'000ULL;
-constexpr uint64_t DEMO_DURATION_NS = 8ULL * NS_PER_SECOND;
 constexpr uint64_t TARGET_FRAME_NS = NS_PER_SECOND / 60ULL;
+
+constexpr std::string_view WINDOW_TITLE = "Liara";
+constexpr liara_extent2d_t WINDOW_SIZE {.width = 1280, .height = 720};
 
 int main(int argc, char** argv) {
     const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
@@ -101,12 +105,36 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+    // --smoke stops here: modules loaded, versions negotiated, every instance created. It opens no window, so it runs
+    // where no window system exists, CI included.
     if (!smoke) {
-        uint64_t frameStart = platform->time_now_ns();
-        const uint64_t start = frameStart;
-        uint64_t previous = frameStart;
+        const liara_platform_window_create_info_t windowInfo {
+            .struct_version = LIARA_PLATFORM_WINDOW_CREATE_INFO_VERSION,
+            .requested_size = WINDOW_SIZE,
+            .reserved = 0,
+            .title = WINDOW_TITLE.data(),
+            .title_length = WINDOW_TITLE.size(),
+        };
+        liara_platform_window_handle_t* window = nullptr;
+        if (platform->window_create(platformInstance, &windowInfo, &window) != LIARA_RESULT_SUCCESS) {
+            std::cout << "Error: Failed to create the window. Is a graphical session available? "
+                         "--smoke runs without one.\n";
+            platform->destroy(platformInstance);
+            core->destroy(coreInstance);
+            renderer->destroy(rendererInstance);
+            return 1;
+        }
 
-        while (frameStart - start < DEMO_DURATION_NS && !platform->quit_requested(platformInstance)) {
+        uint64_t previous = platform->time_now_ns();
+        while (true) {
+            liara_platform_event_t event {};
+            while (platform->poll_event(platformInstance, &event)) {
+                // Resizes are not wired to the renderer yet, and a close request needs nothing: quit_requested
+                // covers it.
+            }
+            if (platform->quit_requested(platformInstance)) { break; }
+
+            const uint64_t frameStart = platform->time_now_ns();
             const uint64_t deltaNs = frameStart - previous;
             previous = frameStart;
 
@@ -118,12 +146,10 @@ int main(int argc, char** argv) {
             }
 
             platform->time_sleep_until_ns(frameStart + TARGET_FRAME_NS);
-            frameStart = platform->time_now_ns();
         }
 
-        std::cout << "\033[2J\033[H";
-        if (platform->quit_requested(platformInstance)) { std::cout << "\nStop requested. Shutting down.\n"; }
-        else { std::cout << std::format("\n{} seconds elapsed. Stopping.\n", DEMO_DURATION_NS / NS_PER_SECOND); }
+        platform->window_destroy(window);
+        std::cout << "\033[2J\033[H" << "\nStop requested. Shutting down.\n";
     }
 
     platform->destroy(platformInstance);

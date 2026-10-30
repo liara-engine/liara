@@ -61,8 +61,7 @@ namespace
         while (true) {
             liara_platform_event_t event {};
             while (platform->poll_event(platformInstance, &event)) {
-                // Resizes are not wired to the renderer yet, and a close request needs nothing: quit_requested
-                // covers it.
+                // Resizes are not wired to the renderer yet
             }
             if (platform->quit_requested(platformInstance)) { return; }
 
@@ -82,7 +81,7 @@ namespace
     }
 }  // namespace
 
-int main(int argc, char** argv) {
+int main(const int argc, char* const* argv) {
     const bool smoke = (argc > 1 && std::string_view(argv[1]) == "--smoke");
 
     std::cout << "Hello from the Liara launcher!\n\n";
@@ -144,20 +143,19 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    // --smoke stops here: modules loaded, versions negotiated, every instance created. It opens no window, so it runs
-    // where no window system exists, CI included.
     if (!smoke) {
-        const liara_platform_window_create_info_t windowInfo {
+        constexpr liara_platform_window_create_info_t windowInfo {
             .struct_version = LIARA_PLATFORM_WINDOW_CREATE_INFO_VERSION,
             .requested_size = WINDOW_SIZE,
             .reserved = 0,
             .title = WINDOW_TITLE.data(),
             .title_length = WINDOW_TITLE.size(),
         };
+
         liara_platform_window_handle_t* window = nullptr;
         if (platform->window_create(platformInstance, &windowInfo, &window) != LIARA_RESULT_SUCCESS) {
-            std::cout << "Error: Failed to create the window. Is a graphical session available? "
-                         "--smoke runs without one.\n";
+            std::cout
+                << "Error: Failed to create the window. Is a graphical session available? --smoke runs without one.\n";
             platform->destroy(platformInstance);
             core->destroy(coreInstance);
             renderer->destroy(rendererInstance);

@@ -30,7 +30,7 @@ using LibHandle = HMODULE;
         #define LIARA_LIB_LOAD(path)           LoadLibraryA(path)
         #define LIARA_LIB_SYMBOL(handle, name) GetProcAddress(handle, name)
         #define LIARA_LIB_FREE(handle)         FreeLibrary(handle)
-        #define LIARA_LIB_ERROR()              std::string_view(GetLastError())
+        #define LIARA_LIB_ERROR()              std::string_view(std::to_string(GetLastError())))
     #else
         #include <dlfcn.h>
 using LibHandle = void*;

@@ -30,14 +30,14 @@ using LibHandle = HMODULE;
         #define LIARA_LIB_LOAD(path)           LoadLibraryA(path)
         #define LIARA_LIB_SYMBOL(handle, name) GetProcAddress(handle, name)
         #define LIARA_LIB_FREE(handle)         FreeLibrary(handle)
-        #define LIARA_LIB_ERROR()              std::to_string(GetLastError())
+        #define LIARA_LIB_ERROR()              std::string_view(std::to_string(GetLastError()))
     #else
         #include <dlfcn.h>
 using LibHandle = void*;
         #define LIARA_LIB_LOAD(path)           dlopen(path, RTLD_LAZY)
         #define LIARA_LIB_SYMBOL(handle, name) dlsym(handle, name)
         #define LIARA_LIB_FREE(handle)         dlclose(handle)
-        #define LIARA_LIB_ERROR()              std::string(dlerror())
+        #define LIARA_LIB_ERROR()              std::string_view(dlerror())
     #endif
 #endif
 
@@ -98,7 +98,7 @@ namespace Liara::Framework
      *
      * @return A string describing the last dynamic-loading failure.
      */
-    inline std::string LastLibraryError() {
+    inline std::string_view LastLibraryError() {
 #ifdef LIARA_MODULE_LOADING_RUNTIME
         return LIARA_LIB_ERROR();
 #else

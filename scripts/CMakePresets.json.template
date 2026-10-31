@@ -12,7 +12,14 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },
-    { "name": "linux-base", "hidden": true, "inherits": "common", "generator": "Ninja", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" } },
+    {
+      "name": "linux-base", "hidden": true, "inherits": "common", "generator": "Ninja",
+      "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
+      "cacheVariables": {
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/../scripts/vcpkg-triplets",
+        "VCPKG_TARGET_TRIPLET": "liara-x64-linux"
+      }
+    },
     { "name": "windows-base", "hidden": true, "inherits": "common", "generator": "Visual Studio 17 2022", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" } },
 
     { "name": "gcc", "hidden": true, "cacheVariables": { "CMAKE_C_COMPILER": "gcc", "CMAKE_CXX_COMPILER": "g++" } },

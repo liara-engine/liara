@@ -18,6 +18,7 @@ import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 | `vulkan-devel`             | Vulkan headers and loader                |
 | `vulkan-validation-layers` | Required by debug builds                 |
 | `shaderc`                  | `glslc`, which compiles the shaders      |
+| `libx11`, `libxext`, `libxft`, `wayland`, `libxkbcommon`, `mesa` | The headers SDL3 builds its X11 and Wayland support against |
 | `clang`                    | The recommended toolchain                |
 | `gcc`                      | Also tested                              |
 | `mold`                     | The fast linker, picked up automatically |
@@ -27,7 +28,8 @@ import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 ```bash frame="terminal"
 sudo pacman -S --needed base-devel cmake ninja git vulkan-devel \
      vulkan-validation-layers shaderc clang gcc mold \
-     clang-tools-extra python
+     clang-tools-extra python \
+     libx11 libxext libxft wayland libxkbcommon mesa
 ```
 
 Zig and Rust are optional, and they are what the cross-language ABI tests of `liara-interfaces` run on:

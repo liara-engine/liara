@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/liara-engine/liara/compare/framework-v0.1.0...framework-v0.1.1) (2026-10-31)
+
+
+### Features
+
+* **launcher:** open a window and route its close button into shutdown ([#48](https://github.com/liara-engine/liara/issues/48)) ([0a6ba15](https://github.com/liara-engine/liara/commit/0a6ba15a50ae57564e1ca6cd460d5f694fab5fa8))
+
 ## [0.1.0](https://github.com/liara-engine/liara/compare/framework-v0.0.1...framework-v0.1.0) (2026-09-22)
 
 

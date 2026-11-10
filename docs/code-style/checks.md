@@ -35,6 +35,8 @@ Everything else in the baseline is fatal, because everything else catches someth
 
 `portability-avoid-pragma-once` is off in **both** baselines, and it is the one disabled check that is not about noise. It argues for include guards; [Files](../files/#pragma-once) states `#pragma once` as the convention. The convention wins, so the check is subtracted once in each baseline rather than suppressed in every header the project owns.
 
+`readability-trailing-comma` is off in **both** baselines because this check was added after the beginning of the project, and activating it would produce a flood of findings in every header. Can be re-considered in a future version of the baseline, but it is not a priority because the check is stylistic rather than bug-catching.
+
 Three more are off in the **C baseline only**, and all three are the same mistake: a check applying a C++ judgment to a C contract.
 
 `modernize-redundant-void-arg` reads `liara_core_info(void)` as a redundant `void`. In C it is the opposite of redundant: `f()` declares a function with *unspecified* arguments and `f(void)` declares one with none, so removing it would widen every entry point in the contract.

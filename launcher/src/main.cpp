@@ -113,16 +113,9 @@ int main(const int argc, char* const* argv) {
         return 1;
     }
 
-    liara_renderer_handle_t* rendererInstance = nullptr;
-    if (renderer->create(&rendererInstance) != LIARA_RESULT_SUCCESS || rendererInstance == nullptr) {
-        std::cout << "Error: Failed to create renderer instance.\n";
-        return 1;
-    }
-
     liara_core_handle_t* coreInstance = nullptr;
     if (core->create(&coreInstance) != LIARA_RESULT_SUCCESS || coreInstance == nullptr) {
         std::cout << "Error: Failed to create core instance.\n";
-        renderer->destroy(rendererInstance);
         return 1;
     }
 
@@ -131,7 +124,6 @@ int main(const int argc, char* const* argv) {
     if (platform->create(&platformInfo, &platformInstance) != LIARA_RESULT_SUCCESS || platformInstance == nullptr) {
         std::cout << "Error: Failed to create platform instance.\n";
         core->destroy(coreInstance);
-        renderer->destroy(rendererInstance);
         return 1;
     }
 
@@ -139,10 +131,11 @@ int main(const int argc, char* const* argv) {
         std::cout << "Error: Failed to install signal handlers.\n";
         platform->destroy(platformInstance);
         core->destroy(coreInstance);
-        renderer->destroy(rendererInstance);
         return 1;
     }
 
+    // --smoke stops here: the modules are loaded and negotiated, and every entry point is resolved, which is what CI
+    // can check without a window-system session or a GPU. The window and the renderer need one each.
     if (!smoke) {
         constexpr liara_platform_window_create_info_t windowInfo {
             .struct_version = LIARA_PLATFORM_WINDOW_CREATE_INFO_VERSION,
@@ -158,19 +151,29 @@ int main(const int argc, char* const* argv) {
                 << "Error: Failed to create the window. Is a graphical session available? --smoke runs without one.\n";
             platform->destroy(platformInstance);
             core->destroy(coreInstance);
-            renderer->destroy(rendererInstance);
+            return 1;
+        }
+
+        // Created after the window and destroyed before it: the renderer will present to that window, and a swapchain
+        // has to go before the surface it presents to.
+        liara_renderer_handle_t* rendererInstance = nullptr;
+        if (renderer->create(&rendererInstance) != LIARA_RESULT_SUCCESS || rendererInstance == nullptr) {
+            std::cout << "Error: Failed to create renderer instance.\n";
+            platform->window_destroy(window);
+            platform->destroy(platformInstance);
+            core->destroy(coreInstance);
             return 1;
         }
 
         RunLoop(platform, platformInstance, core, coreInstance, renderer, rendererInstance);
 
+        renderer->destroy(rendererInstance);
+        std::cout << "\nStop requested. Shutting down.\n";
         platform->window_destroy(window);
-        std::cout << "\033[2J\033[H" << "\nStop requested. Shutting down.\n";
     }
 
     platform->destroy(platformInstance);
     core->destroy(coreInstance);
-    renderer->destroy(rendererInstance);
 
     std::cout << "Core finished. Exiting launcher.\n";
     return 0;

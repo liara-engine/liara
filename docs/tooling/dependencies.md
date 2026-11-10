@@ -38,11 +38,11 @@ This is the target, built up progressively across v0.x:
 | `liara-assets`     | doctest (tests only), stb, and either cgltf or tinygltf                                                                                                  |
 | `liara-audio`      | doctest (tests only), miniaudio                                                                                                                          |
 
-Today the lists are shorter than that table: `liara-core/vcpkg.json` declares no runtime dependency at all, with doctest behind its `tests` feature, because settings and math have not been written yet. `liara-platform/vcpkg.json` declares SDL3 without its default features, adding back `x11` and `wayland` on Linux and leaving out `ibus`, the input-method bridge, until text input exists. The Linux workspace triplet keeps SDL3's X11 backend enabled while disabling its optional extensions, so compilation needs only the Xlib/Xext core development packages rather than Xrandr, Xcursor, Xi, Xfixes, and similar packages.
+Today the lists are shorter than that table: `liara-core/vcpkg.json` declares no runtime dependency at all, with doctest behind its `tests` feature, because settings and math have not been written yet. `liara-platform/vcpkg.json` declares SDL3 without its default features, adding back `x11` and `wayland` on Linux and leaving out `ibus`, the input-method bridge, until text input exists. The Linux workspace triplet keeps SDL3's X11 backend enabled while disabling its optional extensions, so compilation needs only the Xlib/Xext core development packages rather than Xrandr, Xcursor, Xi, Xfixes, and similar packages. `liara-renderer/vcpkg.json` declares `vulkan-headers` (which carries Vulkan-Hpp) and `vulkan-memory-allocator`, both header-only; imgui and a shader compiler wait for the code that needs them.
 
 Logging is deliberately missing from the table. Whether `liara-core` uses spdlog or its own logger is undecided, and the decision belongs to v0.2 rather than to a line in a manifest.
 
-The Vulkan SDK is not managed by vcpkg. It is a system dependency the developer installs, with instructions in [Bootstrap](../../bootstrap/).
+The rest of Vulkan is not managed by vcpkg. The loader and the driver are run-time system dependencies, which the renderer opens when it is created rather than linking against ([ADR 0016](../../adr/0016-vulkan-loaded-at-run-time/)), and the validation layer and `glslc` come from the system or the Vulkan SDK. The developer installs them, with instructions in [Bootstrap](../../bootstrap/).
 
 ## Between Liara's own modules
 

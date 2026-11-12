@@ -15,6 +15,7 @@ from pathlib import Path
 MODULES = ["liara-interfaces", "liara-core", "liara-platform", "liara-renderer"]
 # The line in CMakePresets.json.template that the per-module cache variables are generated over.
 PRESET_MODULE_FLAGS_PLACEHOLDER = '"__LIARA_MODULE_FLAGS__": "GENERATED",'
+PRESET_LINUX_TRIPLET = '        "VCPKG_TARGET_TRIPLET": "x64-linux"'
 
 DEFAULT_CONFIGURE_PRESETS = {
     "Linux": "linux-debug-clang",
@@ -438,6 +439,14 @@ def do_setup(args):
               "it the workspace would configure with none of them and skip every module's tests.")
     presets_content = presets_content.replace(PRESET_MODULE_FLAGS_PLACEHOLDER,
                                               render_module_flags(buildable))
+    if PRESET_LINUX_TRIPLET not in presets_content:
+        fatal(f"{presets_template.name} no longer contains the standalone Linux triplet setting.")
+    presets_content = presets_content.replace(
+        PRESET_LINUX_TRIPLET,
+        '        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/../scripts/vcpkg-triplets",\n'
+        '        "VCPKG_TARGET_TRIPLET": "liara-x64-linux"',
+        1,
+    )
     (workspace / "CMakePresets.json").write_text(presets_content, encoding="utf-8")
 
     # 5. Configure CMake

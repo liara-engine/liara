@@ -16,8 +16,7 @@
       "name": "linux-base", "hidden": true, "inherits": "common", "generator": "Ninja",
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
       "cacheVariables": {
-        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/../scripts/vcpkg-triplets",
-        "VCPKG_TARGET_TRIPLET": "liara-x64-linux"
+        "VCPKG_TARGET_TRIPLET": "x64-linux"
       }
     },
     { "name": "windows-base", "hidden": true, "inherits": "common", "generator": "Visual Studio 17 2022", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" } },

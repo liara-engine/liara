@@ -8,6 +8,32 @@ sidebar:
 
 import { Tabs, TabItem } from '@astrojs/starlight/components';
 
+## `VK_LAYER_KHRONOS_validation` not found
+
+A debug build refuses to create the renderer without the Khronos validation layer, and the launcher stops with `[liara-renderer] error: debug builds require the Vulkan validation layer` followed by "Failed to create renderer instance". The layer comes from `vulkan-validation-layers` on Arch and from the Vulkan SDK on Windows.
+
+<Tabs syncKey="platform">
+<TabItem label="Arch Linux">
+
+```bash frame="terminal"
+sudo pacman -S vulkan-validation-layers
+vulkaninfo --summary   # VK_LAYER_KHRONOS_validation is listed under Instance Layers
+```
+
+</TabItem>
+<TabItem label="Windows 11">
+
+```powershell frame="terminal"
+vulkaninfo --summary   # VK_LAYER_KHRONOS_validation is listed under Instance Layers
+```
+
+If it is missing, reinstall the Vulkan SDK; the installer registers the layer.
+
+</TabItem>
+</Tabs>
+
+A release build does not load the layer and does not need it.
+
 ## Vulkan validation errors
 
 If validation errors persist on a driver known to be good, capture the exact message and open a bug report. This is often a real bug in the engine rather than a setup problem, and the message is the part that makes it findable.

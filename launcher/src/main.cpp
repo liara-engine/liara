@@ -10,6 +10,7 @@
 #include <liara/extent.h>
 #include <liara/framework/ModuleLoader.h>
 #include <liara/framework/Modules.h>
+#include <liara/native_window.h>
 #include <liara/platform/event.h>
 #include <liara/platform/platform.h>
 #include <liara/platform/window.h>
@@ -154,10 +155,39 @@ int main(const int argc, char* const* argv) {
             return 1;
         }
 
-        // Created after the window and destroyed before it: the renderer will present to that window, and a swapchain
-        // has to go before the surface it presents to.
+        // NOT_SUPPORTED leaves the kind at NONE (SDL's offscreen driver has no native window), which asks the renderer
+        // for no surface rather than failing.
+        liara_native_window_t native {};
+        if (const liara_result_t described = platform->window_get_native(window, &native);
+            described != LIARA_RESULT_SUCCESS && described != LIARA_RESULT_NOT_SUPPORTED) {
+            std::cout << "Error: Failed to describe the window to the renderer.\n";
+            platform->window_destroy(window);
+            platform->destroy(platformInstance);
+            core->destroy(coreInstance);
+            return 1;
+        }
+        liara_extent2d_t pixelSize {};
+        if (platform->window_get_pixel_size(window, &pixelSize) != LIARA_RESULT_SUCCESS) {
+            std::cout << "Error: Failed to describe the window to the renderer.\n";
+            platform->window_destroy(window);
+            platform->destroy(platformInstance);
+            core->destroy(coreInstance);
+            return 1;
+        }
+
+        const liara_renderer_create_info_t rendererInfo {
+            .struct_version = LIARA_RENDERER_CREATE_INFO_VERSION,
+            .reserved = 0,
+            .native_window = native,
+            .pixel_size = pixelSize,
+            .preferred_device_name = nullptr,
+            .preferred_device_name_length = 0,
+        };
+
+        // Created after the window and destroyed before it: the renderer presents to that window, and a swapchain has
+        // to go before the surface it presents to.
         liara_renderer_handle_t* rendererInstance = nullptr;
-        if (renderer->create(&rendererInstance) != LIARA_RESULT_SUCCESS || rendererInstance == nullptr) {
+        if (renderer->create(&rendererInfo, &rendererInstance) != LIARA_RESULT_SUCCESS || rendererInstance == nullptr) {
             std::cout << "Error: Failed to create renderer instance.\n";
             platform->window_destroy(window);
             platform->destroy(platformInstance);

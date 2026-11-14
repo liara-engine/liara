@@ -11,6 +11,12 @@ Every local operation goes through `./scripts/liara.sh` on Linux and `.\scripts\
 
 The subcommands are `verify`, `setup`, `build`, `test`, `launch`, `clean` and `check`.
 
+`launch` passes everything after `--` to the launcher, as in `./scripts/liara.sh launch -- --gpu 6800`. The launcher takes three options:
+
+- `--smoke` loads and negotiates every module and creates the core and platform instances, then stops, with no window and no GPU. It is what the `launcher_smoke` test runs in CI.
+- `--gpu <name>` passes `<name>` to the renderer as its preferred GPU, which [liara-renderer](../../modules/renderer/) describes. The renderer logs every GPU it could use, so the names to pass are on screen after one run.
+- `--frames <count>` stops after that many frames, through the same shutdown as closing the window.
+
 ## Setting up a workspace
 
 1. Clone the meta repository.

@@ -538,7 +538,11 @@ def do_launch(args):
     if not exe_path.exists():
         fatal(f"Executable not found: {exe_path}. Please build the project first.")
 
-    code, _ = run_cmd([str(exe_path)], cwd=exe_dir)
+    launcher_args = list(args.launcher_args or [])
+    if launcher_args and launcher_args[0] == "--":
+        launcher_args = launcher_args[1:]
+
+    code, _ = run_cmd([str(exe_path), *launcher_args], cwd=exe_dir)
     if code != 0:
         fatal("Liara Engine exited with an error.")
     ok("Liara Engine exited successfully.")
@@ -743,6 +747,8 @@ def main():
     # Sub-command: launch
     launch_parser = subparsers.add_parser("launch", help="Launch the Liara Engine application")
     launch_parser.add_argument("--preset", help="Override CMake build preset for launching")
+    launch_parser.add_argument("launcher_args", nargs=argparse.REMAINDER,
+                               help="Arguments for the launcher, after --. Example: launch -- --gpu 6800")
 
     # Sub-command: clean
     clean_parser = subparsers.add_parser("clean", help="Clean build artifacts")

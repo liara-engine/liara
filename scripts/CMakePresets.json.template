@@ -16,7 +16,8 @@
       "name": "linux-base", "hidden": true, "inherits": "common", "generator": "Ninja",
       "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Linux" },
       "cacheVariables": {
-        "VCPKG_TARGET_TRIPLET": "x64-linux"
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "VCPKG_CMAKE_CONFIGURE_OPTIONS": "-DSDL_X11_XTEST=OFF"
       }
     },
     { "name": "windows-base", "hidden": true, "inherits": "common", "generator": "Visual Studio 17 2022", "condition": { "type": "equals", "lhs": "${hostSystemName}", "rhs": "Windows" } },

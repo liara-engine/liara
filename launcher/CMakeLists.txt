@@ -81,3 +81,16 @@ set_target_properties(liara_launcher PROPERTIES
 
 add_test(NAME launcher_smoke COMMAND liara_launcher --smoke)
 set_tests_properties(launcher_smoke PROPERTIES LABELS "integration" TIMEOUT 30)
+
+# A bad option is refused before anything is loaded, so these run headless, in CI.
+add_test(NAME launcher_rejects_zero_frames COMMAND liara_launcher --frames 0)
+add_test(NAME launcher_rejects_unknown_option COMMAND liara_launcher --no-such-option)
+set_tests_properties(launcher_rejects_zero_frames launcher_rejects_unknown_option PROPERTIES
+        LABELS "integration" TIMEOUT 30 WILL_FAIL TRUE)
+
+# The whole stack for a bounded run: a window, a surface, a swapchain, 120 frames, and a clean shutdown. Any warning or
+# error from the renderer fails it, validation messages included.
+add_test(NAME launcher_present COMMAND liara_launcher --frames 120)
+set_tests_properties(launcher_present PROPERTIES
+        LABELS "gpu;display" TIMEOUT 30
+        FAIL_REGULAR_EXPRESSION "\\[liara-renderer\\] (warning|error):")

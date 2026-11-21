@@ -40,26 +40,9 @@ If validation errors persist on a driver known to be good, capture the exact mes
 
 ## `glslc` not found
 
-`glslc` comes from `shaderc` on Arch and from the Vulkan SDK on Windows.
+`glslc` is not something to install. The renderer's build takes it from vcpkg, which builds it from the `shaderc` port, and never from `PATH`, so that every machine compiles the shaders with the same compiler ([ADR 0017](../../adr/0017-glslc-built-by-vcpkg/)).
 
-<Tabs syncKey="platform">
-<TabItem label="Arch Linux">
-
-```bash frame="terminal"
-which glslc   # expect /usr/bin/glslc
-```
-
-</TabItem>
-<TabItem label="Windows 11">
-
-```powershell frame="terminal"
-Get-Command glslc   # expect something under %VULKAN_SDK%\Bin\
-```
-
-</TabItem>
-</Tabs>
-
-If it is not on `PATH`, the SDK install is incomplete. Re-run the installer, or `pacman -S shaderc`.
+When the configure step stops with `glslc was not found in vcpkg's host tools`, vcpkg's install of `shaderc` did not complete, and its output, earlier in the same run, says why. Running `./scripts/liara.sh setup` again retries it.
 
 ## `compile_commands.json` not found
 

@@ -12,7 +12,7 @@ It takes render packets and produces pixels. It knows nothing about the ECS, abo
 
 ## Contents
 
-**The Vulkan device layer.** Instance creation, physical device selection, logical device creation, queue management, command pool management. Built on Vulkan-Hpp and VMA, for the reasons in [ADR 0010](../../adr/0010-vulkan-without-abstraction-layer/), and the one part of this list that exists today: `liara_renderer_create` builds all of it, and `liara_renderer_destroy` tears it down in reverse.
+**The Vulkan device layer.** Instance creation, physical device selection, logical device creation, queue management, command pool management. Built on Vulkan-Hpp and VMA, for the reasons in [ADR 0010](../../adr/0010-vulkan-without-abstraction-layer/). It exists in full: `liara_renderer_create` builds all of it, and `liara_renderer_destroy` tears it down in reverse.
 
 The renderer does not link against the Vulkan loader. It opens `libvulkan` on Linux and `vulkan-1.dll` on Windows when a renderer is created, through Vulkan-Hpp's `vk::raii::Context`, and `VK_NO_PROTOTYPES` makes any direct call to a Vulkan C function a compile error inside the module. [ADR 0016](../../adr/0016-vulkan-loaded-at-run-time/) says why: a binary that contains the renderer starts on a machine with no Vulkan at all, such as a CI runner, and creation then fails with `LIARA_RESULT_NOT_SUPPORTED` and a message.
 

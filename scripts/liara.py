@@ -256,9 +256,9 @@ def do_verify(args):
 
     # 4. Vulkan
     info("Vulkan SDK:")
+    # The SDK is for the validation layer. glslc is not checked: the build takes it from vcpkg (ADR 0017).
     if is_windows and not os.environ.get("VULKAN_SDK"):
         fatal("VULKAN_SDK environment variable is not set.")
-    check_req("glslc")
     if has_tool("vulkaninfo"):
         code, out = run_cmd(["vulkaninfo", "--summary"], capture=True)
         if code != 0:

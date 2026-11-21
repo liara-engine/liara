@@ -66,6 +66,35 @@ def get_tool_version(args):
     match = re.search(r'(\d+(\.\d+)+)', out)
     return match.group(1) if match else None
 
+# The major CI formats with: reusable-lint.yml in liara-engine/.github installs clang-format-20. Another major can
+# format the same source differently under the same .clang-format (clang-format 23 puts a struct with one member on
+# a single line), so a local check run with it would pass code CI rejects, or the reverse.
+CI_CLANG_FORMAT_MAJOR = 20
+
+def clang_format_major(cmd):
+    version = get_tool_version(cmd + ["--version"])
+    return int(version.split(".")[0]) if version else None
+
+def resolve_clang_format():
+    """The command running CI's clang-format major, else the local clang-format with a warning, else None.
+
+    Tried in order: clang-format-<major> (the Debian and Ubuntu name), a clang-format whose major matches, then
+    the PyPI build of that major through uvx, which needs no system package.
+    """
+    for name in (f"clang-format-{CI_CLANG_FORMAT_MAJOR}", "clang-format"):
+        if has_tool(name) and clang_format_major([name]) == CI_CLANG_FORMAT_MAJOR:
+            return [name]
+    if has_tool("uvx"):
+        cmd = ["uvx", "--quiet", "--from", f"clang-format=={CI_CLANG_FORMAT_MAJOR}.*", "clang-format"]
+        if clang_format_major(cmd) == CI_CLANG_FORMAT_MAJOR:
+            return cmd
+    if has_tool("clang-format"):
+        warn(f"clang-format {CI_CLANG_FORMAT_MAJOR}, the version CI uses, was found neither as "
+             f"clang-format-{CI_CLANG_FORMAT_MAJOR} nor through uvx; using clang-format "
+             f"{clang_format_major(['clang-format'])}, whose output may differ from CI's.")
+        return ["clang-format"]
+    return None
+
 def version_ge(actual, minimum):
     from sys import version_info
     actual_parts = [int(x) for x in actual.split('.')]
@@ -601,18 +630,20 @@ def do_check(args):
     # 1. clang-format
     if not args.no_format:
         def step_format():
-            if not has_tool("clang-format"):
+            clang_format = resolve_clang_format()
+            if clang_format is None:
                 print("  clang-format not found.", file=sys.stderr)
                 return False
             if not sources:
                 print("  No C/C++ sources found; nothing to format.")
                 return True
+            print(f"  Using {' '.join(clang_format)} (clang-format {clang_format_major(clang_format)})")
 
             success = True
             grouped_sources = group_by_config(sources, ".clang-format")
 
             for local_config, files in grouped_sources.items():
-                cmd = ["clang-format"]
+                cmd = list(clang_format)
                 if local_config:
                     cmd.append(f"--style=file:{local_config}")
                     print(f"  Using local .clang-format at {local_config}")

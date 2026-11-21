@@ -37,8 +37,8 @@ It **makes the cross-language story work**. A packet is plain data, so it crosse
 
 The cost is that the core builds a packet every tick, iterating the ECS and copying data. In practice that is a few floats per visible entity, and it is dwarfed by the cost of drawing them.
 
-:::caution[The packet in the headers is a placeholder]
-`liara_render_packet_t` as it stands today carries a grid width and height, a background color, and an array of drawables that are an x, a y and a packed `0xAARRGGBB` colour. It is what the Phase 0 demo needs and nothing more. The views, lights, meshes and materials described above arrive with v0.2, when the ECS they are extracted from exists.
+:::caution[The packet in the headers is an experiment]
+`liara_render_packet_t` as it stands today is v0.1's experiment: a list of views, each with a target, a viewport, a clear colour and drawables that reference meshes the host gave the renderer beforehand. It has no transform, no material and no camera, and nothing in it comes from an ECS. It was built close to the shape described above in order to try that shape in use before v0.2 designs the real one, from the ECS the views, lights, meshes and materials are extracted from.
 
-The struct carries a `struct_version` field against `LIARA_RENDER_PACKET_VERSION`, which is how that growth happens without a major bump.
+v0.2 replaces it wholesale rather than growing it. Its `struct_version` field, checked against `LIARA_RENDER_PACKET_VERSION`, covers every structure the packet reaches, and the real packet arrives with a new major version of the ABI.
 :::

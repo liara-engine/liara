@@ -23,18 +23,29 @@ liara/
 ├── result.h                   # the error reporting convention
 ├── modules.h                  # the self-description entry point every module exports
 ├── config.h.in                # generated, carries the version at build time
+├── extent.h                   # a width and a height, shared by every module that measures a surface
+├── native_window.h            # the window the platform hands the renderer, through the host
+├── mesh.h                     # mesh identifiers and mesh data (experimental, v0.1)
 ├── internal/
 │   └── portability.h          # compatibility macros, C and C++ alike
 ├── core/
 │   ├── core.h                 # the core module's entry points
+│   ├── core_functions.h       # the same entry points as an X-macro list
 │   └── core_export.h          # generated visibility macros
+├── platform/
+│   ├── platform.h             # the platform module's lifecycle, time and shutdown
+│   ├── window.h               # windows and their native handle
+│   ├── event.h                # the events a poll returns
+│   ├── platform_functions.h   # the entry points as an X-macro list
+│   └── platform_export.h      # generated visibility macros
 └── renderer/
     ├── renderer.h             # the renderer module's entry points
+    ├── renderer_functions.h   # the same entry points as an X-macro list
     ├── renderer_export.h      # generated visibility macros
-    └── packet.h               # the render packet
+    └── packet.h               # the render packet (experimental, v0.1)
 ```
 
-The namespaces for `platform`, `assets`, `audio` and `physics` are claimed and their directories do not exist yet, which is the schedule of the [overview](./) applied to the contract.
+The namespaces for `assets`, `audio` and `physics` are claimed and their directories do not exist yet, which is the schedule of the [overview](./) applied to the contract.
 
 Alongside the headers, the repository carries a `CMakeLists.txt` exposing them as an `INTERFACE` library, a `vcpkg.json` with no runtime dependency and a `tests` feature pulling doctest, the `INTERFACES.md` document specifying how interfaces are designed and evolved, and a test suite that is unlike any other module's.
 

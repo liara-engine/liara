@@ -10,6 +10,7 @@
 #include <liara/extent.h>
 #include <liara/framework/ModuleLoader.h>
 #include <liara/framework/Modules.h>
+#include <liara/mesh.h>
 #include <liara/native_window.h>
 #include <liara/platform/event.h>
 #include <liara/platform/platform.h>
@@ -19,6 +20,7 @@
 #include <liara/result.h>
 #include <liara/version.h>
 
+#include <array>
 #include <charconv>
 #include <cstddef>
 #include <cstdint>
@@ -50,6 +52,13 @@ constexpr uint64_t TARGET_FRAME_NS = NS_PER_SECOND / 60ULL;
 
 constexpr std::string_view WINDOW_TITLE = "Liara";
 constexpr liara_extent2d_t WINDOW_SIZE {.width = 1280, .height = 720};
+
+// The hello triangle. The launcher holds its vertices in the role liara-assets takes from v0.3: it gives them to the
+// renderer under an identifier of its choosing, and tells the core which mesh its packets draw. Normalized device
+// coordinates, y up: red at the top, green bottom right, blue bottom left.
+constexpr liara_mesh_id_t TRIANGLE_MESH = 1;
+constexpr std::array<float, 9> TRIANGLE_POSITIONS {0.0F, 0.5F, 0.0F, 0.5F, -0.5F, 0.0F, -0.5F, -0.5F, 0.0F};
+constexpr std::array<uint32_t, 3> TRIANGLE_COLORS {0xFFFF0000U, 0xFF00FF00U, 0xFF0000FFU};
 
 namespace
 {
@@ -149,6 +158,66 @@ namespace
             if (frameLimit.has_value() && frames >= *frameLimit) { return; }
 
             platform->time_sleep_until_ns(frameStart + TARGET_FRAME_NS);
+        }
+    }
+
+    /**
+     * @brief Gives the renderer the triangle's mesh and tells the core to draw it.
+     *
+     * @return Whether both succeeded. On failure, the error has been written to stdout and nothing is left uploaded.
+     */
+    bool ShowTriangle(const Liara::Framework::Module<Liara::Framework::RendererApi>& renderer,
+                      liara_renderer_handle_t* rendererInstance,
+                      const Liara::Framework::Module<Liara::Framework::CoreApi>& core,
+                      liara_core_handle_t* coreInstance) {
+        const liara_mesh_data_t triangle {
+            .struct_version = LIARA_MESH_DATA_VERSION,
+            .reserved = 0,
+            .positions = TRIANGLE_POSITIONS.data(),
+            .colors = TRIANGLE_COLORS.data(),
+            .vertex_count = TRIANGLE_POSITIONS.size() / 3,
+            .indices = nullptr,
+            .index_count = 0,
+        };
+        if (renderer->mesh_upload(rendererInstance, TRIANGLE_MESH, &triangle) != LIARA_RESULT_SUCCESS) {
+            std::cout << "Error: Failed to upload the triangle to the renderer.\n";
+            return false;
+        }
+        if (core->draw_mesh(coreInstance, TRIANGLE_MESH) != LIARA_RESULT_SUCCESS) {
+            std::cout << "Error: Failed to tell the core which mesh to draw.\n";
+            (void)renderer->mesh_release(rendererInstance, TRIANGLE_MESH);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @brief Creates the renderer, then shows the triangle in it.
+     *
+     * @return The renderer, or null on failure, with the error written to stdout and nothing of it left behind.
+     */
+    liara_renderer_handle_t* CreateRendererWithTriangle(
+        const Liara::Framework::Module<Liara::Framework::RendererApi>& renderer,
+        const liara_renderer_create_info_t& info,
+        const Liara::Framework::Module<Liara::Framework::CoreApi>& core,
+        liara_core_handle_t* coreInstance) {
+        liara_renderer_handle_t* instance = nullptr;
+        if (renderer->create(&info, &instance) != LIARA_RESULT_SUCCESS || instance == nullptr) {
+            std::cout << "Error: Failed to create renderer instance.\n";
+            return nullptr;
+        }
+        if (!ShowTriangle(renderer, instance, core, coreInstance)) {
+            renderer->destroy(instance);
+            return nullptr;
+        }
+        return instance;
+    }
+
+    /** @brief Takes the triangle's mesh back from the renderer; a failure is reported and shutdown carries on. */
+    void HideTriangle(const Liara::Framework::Module<Liara::Framework::RendererApi>& renderer,
+                      liara_renderer_handle_t* rendererInstance) {
+        if (renderer->mesh_release(rendererInstance, TRIANGLE_MESH) != LIARA_RESULT_SUCCESS) {
+            std::cout << "Warning: Failed to release the triangle's mesh.\n";
         }
     }
 }  // namespace
@@ -261,9 +330,9 @@ int main(const int argc, char* const* argv) {
 
         // Created after the window and destroyed before it: the renderer presents to that window, and a swapchain has
         // to go before the surface it presents to.
-        liara_renderer_handle_t* rendererInstance = nullptr;
-        if (renderer->create(&rendererInfo, &rendererInstance) != LIARA_RESULT_SUCCESS || rendererInstance == nullptr) {
-            std::cout << "Error: Failed to create renderer instance.\n";
+        liara_renderer_handle_t* rendererInstance =
+            CreateRendererWithTriangle(renderer, rendererInfo, core, coreInstance);
+        if (rendererInstance == nullptr) {
             platform->window_destroy(window);
             platform->destroy(platformInstance);
             core->destroy(coreInstance);
@@ -272,6 +341,7 @@ int main(const int argc, char* const* argv) {
 
         RunLoop(platform, platformInstance, core, coreInstance, renderer, rendererInstance, options->m_FrameLimit);
 
+        HideTriangle(renderer, rendererInstance);
         renderer->destroy(rendererInstance);
         std::cout << "\nStop requested. Shutting down.\n";
         platform->window_destroy(window);

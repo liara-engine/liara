@@ -18,7 +18,7 @@ The launcher initializes the platform, the core and the renderer independently t
 
 The window's close button and a Ctrl+C surface as the same shutdown request from the platform module, and both produce the same graceful shutdown.
 
-The triangle is hardcoded in the launcher: three vertices, a vertex shader, a fragment shader. No ECS, no asset loader, no math beyond what the renderer needs internally.
+The triangle is hardcoded. Its three vertices live in the launcher, which gives them to the renderer as `liara-assets` will from v0.3, the core's render packet references that mesh, and the renderer draws it with a vertex shader and a fragment shader of its own. No ECS, no asset loader, no math beyond what the renderer needs internally.
 
 The renderer initializes Vulkan with validation layers on in debug builds, using Vulkan-Hpp for type safety and VMA for memory.
 
@@ -32,7 +32,7 @@ The ECS (v0.2), asset loading (v0.3), lighting (v0.4), input beyond the window c
 
 - [ ] The launcher builds and runs on Linux, under GCC and Clang.
 - [ ] The launcher builds and runs on Windows, under MSVC.
-- [ ] A window appears with a triangle in it.
+- [x] A window appears with a triangle in it.
 - [ ] The window closes and the application shuts down cleanly.
 - [ ] No Vulkan validation errors in debug builds.
 - [ ] Version negotiation between core and renderer is exercised: a mismatch is detected before anything is called, produces a clear error and refuses to proceed, with no crash and no silent mismatch. Under the `-runtime` presets the same check runs after symbol resolution rather than before the first call, and both paths reach the same verdict.

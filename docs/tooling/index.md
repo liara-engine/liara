@@ -26,7 +26,7 @@ Every tool the project uses, with the page that covers it.
 | Container registry       | GitHub Container Registry, for the builder image                  | [CI](./ci/)                                     |
 | Test framework           | doctest                                                           | [Testing](./testing/)                           |
 | Cross-language ABI tests | Zig and Rust (cargo)                                              | [Testing](./testing/)                           |
-| Code formatter           | clang-format 20+                                                  | [Static analysis](./static-analysis/)           |
+| Code formatter           | clang-format 20, the major CI uses                                | [Static analysis](./static-analysis/)           |
 | Static analysis          | clang-tidy 20+                                                    | [Static analysis](./static-analysis/)           |
 | Conventional commits     | commitlint, in CI, without Husky                                  | [Commits and releases](./commits-and-releases/) |
 | Release automation       | release-please                                                    | [Commits and releases](./commits-and-releases/) |

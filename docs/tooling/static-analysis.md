@@ -15,7 +15,9 @@ The baselines themselves, with the reasoning for each choice, are in [`code-styl
 
 ## clang-format
 
-clang-format 20 or newer. CI runs `clang-format --dry-run --Werror` over every tracked C and C++ source of the calling repository, and any deviation fails the build. Generated files are excluded by pattern, because reformatting a file that is compared byte-for-byte against its generator breaks the check that produced it.
+clang-format 20, exactly the major CI installs. CI runs `clang-format --dry-run --Werror` over every tracked C and C++ source of the calling repository, and any deviation fails the build. Generated files are excluded by pattern, because reformatting a file that is compared byte-for-byte against its generator breaks the check that produced it.
+
+The major matters, not only the minimum. Two majors can format the same source differently under the same `.clang-format`: clang-format 23 puts a struct with one member on a single line, which clang-format 20 rejects. So `./scripts/liara.sh check` looks for clang-format 20 first, as `clang-format-20`, as a `clang-format` whose major is 20, or as the PyPI build run through `uvx`, which needs no system package. Only when none is found does it fall back to the local `clang-format`, with a warning that its verdict may differ from CI's.
 
 There is no optional pre-commit hook. `./scripts/liara.sh check --fix` applies the formatting locally for anyone who wants it before pushing, and CI stays the authority.
 

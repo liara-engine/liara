@@ -7,7 +7,7 @@ sidebar:
 
 The core does not own the application loop. It exposes a manual tick that advances the simulation by a given delta time, and whoever calls the core owns the loop itself.
 
-In standalone mode the launcher implements it: poll the platform for input and shutdown requests, advance the core by one tick, extract the render packet and the audio events, submit them to the renderer and to the audio module, present, repeat.
+In standalone mode the launcher implements it: poll the platform for input, resizes and shutdown requests, pass the window's new size on to the renderer, advance the core by as many fixed ticks as the time since the previous frame completes, extract the render packet and the audio events once, submit them to the renderer and to the audio module, present, repeat. The step never varies with the frame rate, so the simulation does not either; the accumulator that turns measured time into ticks is the framework's, and [ADR 0018](../../adr/0018-a-fixed-time-step/) records why it is exact, capped, and ready for interpolation.
 
 The host owns the loop because the host is the only participant that knows every module present. A module running the loop would have to know its siblings, which is exactly the coupling the whole architecture exists to prevent, and [ADR 0003](../../adr/0003-the-host-composes-modules/) is where that is argued.
 

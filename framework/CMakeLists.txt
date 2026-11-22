@@ -40,3 +40,5 @@ elseif(LIARA_MODULE_LOADING STREQUAL "runtime")
 else()
     message(FATAL_ERROR "Invalid value for LIARA_MODULE_LOADING: ${LIARA_MODULE_LOADING}. Valid values are: link, runtime")
 endif()
+
+add_subdirectory(tests)

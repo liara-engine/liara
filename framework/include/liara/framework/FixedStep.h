@@ -11,6 +11,9 @@
 #include <limits>
 #include <stdexcept>
 
+// `(std::min)` and `(std::numeric_limits<T>::max)()` are parenthesised so that <windows.h>'s `min` and `max` macros,
+// which a host includes without NOMINMAX more often than not, cannot expand them.
+
 namespace Liara::Framework
 {
     /** @brief How many fixed ticks a frame runs, and how far the simulation is into the next one. */
@@ -58,7 +61,8 @@ namespace Liara::Framework
             , m_MaxElapsedNs(maxElapsedNs) {
             if (ticksPerSecond == 0) { throw std::invalid_argument("a fixed step needs at least one tick per second"); }
             if (maxElapsedNs == 0) { throw std::invalid_argument("a fixed step's cap must be longer than zero"); }
-            if (maxElapsedNs > (std::numeric_limits<uint64_t>::max() - NS_PER_SECOND) / ticksPerSecond) {
+            // NOLINTNEXTLINE(readability-redundant-parentheses): they keep <windows.h>'s max macro from expanding.
+            if (maxElapsedNs > ((std::numeric_limits<uint64_t>::max)() - NS_PER_SECOND) / ticksPerSecond) {
                 throw std::invalid_argument("a fixed step's cap is too large for its rate");
             }
         }
@@ -69,14 +73,14 @@ namespace Liara::Framework
          * @param elapsedNs The time since the previous call, on a monotonic clock.
          */
         [[nodiscard]] FixedStepFrame Advance(const uint64_t elapsedNs) noexcept {
-            m_Accumulated += std::min(elapsedNs, m_MaxElapsedNs) * m_TicksPerSecond;
+            m_Accumulated += (std::min)(elapsedNs, m_MaxElapsedNs) * m_TicksPerSecond;
             const uint64_t ticks = m_Accumulated / NS_PER_SECOND;
             m_Accumulated %= NS_PER_SECOND;
             // In double, then clamped: a remainder within a few parts per billion of a whole step rounds to 1 as a
             // float, and the factor is promised below 1.
             const auto alpha =
                 static_cast<float>(static_cast<double>(m_Accumulated) / static_cast<double>(NS_PER_SECOND));
-            return {.m_Ticks = ticks, .m_Alpha = std::min(alpha, std::nextafter(1.0F, 0.0F))};
+            return {.m_Ticks = ticks, .m_Alpha = (std::min)(alpha, std::nextafter(1.0F, 0.0F))};
         }
 
         /** @brief Real time left before the next tick is complete, rounded up: at least 1. */

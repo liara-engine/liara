@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/liara-engine/liara/compare/framework-v0.1.1...framework-v0.1.2) (2026-11-22)
+
+
+### Features
+
+* **framework:** a fixed time step ([#54](https://github.com/liara-engine/liara/issues/54)) ([a7a0465](https://github.com/liara-engine/liara/commit/a7a0465c76a3e9a70c4840e8b55599cb07bd31dc))
+
 ## [0.1.1](https://github.com/liara-engine/liara/compare/framework-v0.1.0...framework-v0.1.1) (2026-11-12)
 
 

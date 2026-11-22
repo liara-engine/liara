@@ -49,9 +49,11 @@ namespace Liara::Framework
          * @param maxElapsedNs The most one call to `Advance` accounts for; anything beyond it is dropped.
          *
          * @throws std::invalid_argument when either argument is 0, or when `maxElapsedNs` is so large that the
-         *         accumulator would overflow: above `(UINT64_MAX - 1'000'000'000) / ticksPerSecond`.
+         *         accumulator would overflow: above `(UINT64_MAX - 1'000'000'000) / ticksPerSecond`. A step built as a
+         *         `constexpr` from constants is checked by the compiler instead, and cannot throw at run time.
          */
-        explicit FixedStep(const uint32_t ticksPerSecond, const uint64_t maxElapsedNs = DEFAULT_MAX_ELAPSED_NS)
+        constexpr explicit FixedStep(const uint32_t ticksPerSecond,
+                                     const uint64_t maxElapsedNs = DEFAULT_MAX_ELAPSED_NS)
             : m_TicksPerSecond(ticksPerSecond)
             , m_MaxElapsedNs(maxElapsedNs) {
             if (ticksPerSecond == 0) { throw std::invalid_argument("a fixed step needs at least one tick per second"); }
@@ -78,12 +80,14 @@ namespace Liara::Framework
         }
 
         /** @brief Real time left before the next tick is complete, rounded up: at least 1. */
-        [[nodiscard]] uint64_t NsUntilNextTick() const noexcept {
+        [[nodiscard]] constexpr uint64_t NsUntilNextTick() const noexcept {
             return (NS_PER_SECOND - m_Accumulated + m_TicksPerSecond - 1) / m_TicksPerSecond;
         }
 
         /** @brief The step, in seconds, as `liara_core_update` takes it. */
-        [[nodiscard]] float StepSeconds() const noexcept { return 1.0F / static_cast<float>(m_TicksPerSecond); }
+        [[nodiscard]] constexpr float StepSeconds() const noexcept {
+            return 1.0F / static_cast<float>(m_TicksPerSecond);
+        }
 
     private:
         static constexpr uint64_t NS_PER_SECOND = 1'000'000'000;

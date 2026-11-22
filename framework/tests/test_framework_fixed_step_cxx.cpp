@@ -167,6 +167,12 @@ TEST_CASE("FixedStep - time until the next tick") {
 
 TEST_CASE("FixedStep - the step in seconds") { CHECK(Step(60).StepSeconds() == 1.0F / 60.0F); }
 
+// A host builds its step from constants, and a constant one is checked by the compiler, so that nothing can throw at
+// run time: the launcher's `main` relies on it.
+constexpr Step CONSTANT_STEP(60);
+static_assert(CONSTANT_STEP.NsUntilNextTick() == 16'666'667);
+static_assert(CONSTANT_STEP.StepSeconds() == 1.0F / 60.0F);
+
 TEST_CASE("FixedStep - refuses what has no meaning") {
     CHECK_THROWS_AS(Step(0), std::invalid_argument);
     CHECK_THROWS_AS(Step(60, 0), std::invalid_argument);

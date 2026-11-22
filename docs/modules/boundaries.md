@@ -56,6 +56,10 @@ The infrastructure repositories do not appear at all, since `.github`, `docs-sha
 
 The host decides what to do with that: which events to forward to the core's event bus, how to map a physical input to a logical action, and whether a shutdown request is honoured immediately or deferred. The platform module never terminates the process itself.
 
+**Platform to host to renderer.** When the window changes size, the host passes the new size in pixels on to the renderer through `liara_renderer_window_resized`, the last one of each poll being enough. It is the only way a renderer learns of a resize on a window system that gives a surface no size of its own, which is Wayland's case. The window's size reaches the renderer through the host like every other platform fact, as data and never through a callback.
+
+**Renderer to host.** What became of a frame comes back as the result of `liara_renderer_submit_frame`: whether it was presented, whether nothing was presented because the swapchain no longer matched the window or the window has no area, which the renderer recovers from on its own, whether the surface was lost, and any other failure. [liara-renderer](../renderer/) says what each code means, and [ADR 0019](../../adr/0019-the-renderer-recreates-its-swapchain/) records why recovery is the renderer's. No callback crosses for any of it. The host decides what a lost surface or a failed frame means for the application, and whether the core hears of it.
+
 ## At startup and shutdown
 
 **Host to platform.** The host creates the window and asks for its native handle, which it then passes to the renderer at initialisation. That handle is the one piece of data travelling from one module to another, and it travels through the host, as an opaque pointer or a fixed-width integer whose interpretation is documented.
@@ -68,7 +72,7 @@ The host decides what to do with that: which events to forward to the core's eve
 
 Neither consumer retains a pointer into asset storage. They keep the handle, and the data is theirs to copy or upload during the call. That single constraint is what makes hot-reload implementable later without touching one consumer: the handle survives and the bytes behind it are replaced.
 
-**Renderer to host.** The renderer reports surface loss, swapchain resize and GPU errors through callbacks the host registers at initialisation. The host decides how to propagate them to the core.
+**Renderer to host, asynchronously.** Diagnostics the GPU produces outside any call, validation messages among them, are the one report that is a push rather than a result, since there is no call to return them from. They are meant to reach the host through the diagnostics callback of [the error-handling rules](https://liara-engine.liara-engine-documentation.workers.dev/liara-interfaces/latest/guides/errors/), which waits for the core's logger in v0.2; until then the renderer writes them to stderr.
 
 ## After v1.0
 

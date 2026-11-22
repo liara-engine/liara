@@ -48,13 +48,17 @@ The cases the rule has decided so far:
 
 **ABI version negotiation**, in `Modules.h`. `ModulesAreCompatible` takes a set of module descriptions and runs the negotiation of [ADR 0005](../../adr/0005-version-encoding-and-compatibility/) on each of them, reporting every incompatible module instead of stopping at the first, so that a mismatched workspace is fixed in one pass.
 
-Both moved out of `launcher/` with no change beyond the namespace. The framework has no test suite of its own yet.
+Both moved out of `launcher/` with no change beyond the namespace.
+
+**A fixed time step**, in `FixedStep.h`. `FixedStep` is the accumulator a host's loop advances the core with: the host measures the time elapsed since its previous frame on `liara_platform_time_now_ns` and hands it over, and `Advance` answers how many ticks of exactly one step that completes, so the core is always advanced by the same delta whatever the frame rate. It reads no clock itself. It accumulates nanoseconds times ticks per second in integers, so a step such as 1/60 s that is no whole number of nanoseconds still gives exactly sixty ticks a second and drifts by nothing over a session. One call accounts for at most a quarter of a second by default, so a suspend or a breakpoint costs the simulation the time beyond that rather than replaying it, and a slow frame under it is caught up in full. Each call also reports how far the accumulator is into the next tick, the factor that interpolating between two ticks will use; the launcher does not use it yet, since nothing in the render packet can be interpolated before v0.2. [ADR 0018](../../adr/0018-a-fixed-time-step/) records why it is shaped so.
+
+The tests live in `framework/tests/` and run in CI, one doctest executable per header that has behaviour of its own, which today means the fixed step.
 
 ## What it will hold
 
 At least four things are expected:
 
-**The game clock.** Pause, time scale, fixed time step, and human-readable formatting of a wall-clock timestamp. This is the feature that produced [ADR 0013](../../adr/0013-the-framework-layer/), and it arrives around v0.7, when a sample game exists to say what it should do.
+**The rest of the game clock.** Pause, time scale, and human-readable formatting of a wall-clock timestamp. This is the feature that produced [ADR 0013](../../adr/0013-the-framework-layer/), and it arrives around v0.7, when a sample game exists to say what it should do. Its fixed step came first, in v0.1, because the launcher's loop needed one.
 
 **Logical input mapping.** The translation from a physical key, button or axis to a named action, which [liara-platform](../platform/) has refused since Phase 0 and which no repository has held since.
 

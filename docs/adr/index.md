@@ -1,6 +1,6 @@
 ---
 title: Architecture decision records
-description: What a record holds, how the format differs from the plain Nygard template, and the index of the sixteen written so far.
+description: What a record holds, how the format differs from the plain Nygard template, and the index of the eighteen written so far.
 sidebar:
     label: Overview
     order: 0
@@ -43,5 +43,6 @@ Every record opens with a table giving its status, its date, and who decided. St
 | [0015](./0015-the-window-and-its-native-handle/)          | The window and its native handle                            | Accepted |
 | [0016](./0016-vulkan-loaded-at-run-time/)                 | Vulkan loaded at run time                                   | Accepted |
 | [0017](./0017-glslc-built-by-vcpkg/)                      | glslc built by vcpkg                                        | Accepted |
+| [0018](./0018-a-fixed-time-step/)                         | A fixed time step, in the framework                         | Accepted |
 
 New tooling requires a record of its own, which is what [The inventory](../tooling/#the-inventory) states. The bootstrapping exemption that used to stand beside that rule expired when [Phase 0](../roadmap/phase-0/) closed, so the rule now has no exception.

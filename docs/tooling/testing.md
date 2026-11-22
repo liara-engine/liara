@@ -9,7 +9,7 @@ sidebar:
 
 The project uses doctest. The choice over Catch2 came down to compile time: doctest is roughly an order of magnitude faster to compile, and that difference compounds across every leg of every CI run.
 
-Tests are separate executables per module, in that module's `tests/` directory, each a doctest runner registered with CTest. Targets are named after what they exercise and the language they exercise it from, since the same contract is tested from more than one:
+Tests are separate executables per module, in that module's `tests/` directory, each a doctest runner registered with CTest. The framework, which is not a module, keeps its own the same way in `framework/tests/`. Targets are named after what they exercise and the language they exercise it from, since the same contract is tested from more than one:
 
 ```cmake title="liara-core/tests/CMakeLists.txt"
 add_executable(test_core_functions_cxx test_core_functions.cpp)

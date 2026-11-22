@@ -8,6 +8,7 @@
 #include <liara/abi_version.h>
 #include <liara/core/core.h>
 #include <liara/extent.h>
+#include <liara/framework/FixedStep.h>
 #include <liara/framework/ModuleLoader.h>
 #include <liara/framework/Modules.h>
 #include <liara/mesh.h>
@@ -47,8 +48,11 @@ constexpr liara_version_compat_t ABI_COMPAT = liara_version_provides(LIARA_ABI_V
 static_assert(ABI_COMPAT == LIARA_VERSION_COMPAT_EXACT || ABI_COMPAT == LIARA_VERSION_COMPAT_COMPATIBLE,
               "Liara ABI version is too old for this launcher. Please update your Liara installation.");
 
-constexpr uint64_t NS_PER_SECOND = 1'000'000'000ULL;
-constexpr uint64_t TARGET_FRAME_NS = NS_PER_SECOND / 60ULL;
+/** The rate the core is advanced at, whatever the frame rate: every update is one tick of 1/60 s. */
+constexpr uint32_t TICKS_PER_SECOND = 60;
+
+/** The loop's fixed step, checked by the compiler: built as a constant, it cannot throw at run time. */
+constexpr Liara::Framework::FixedStep FIXED_STEP(TICKS_PER_SECOND);
 
 constexpr std::string_view WINDOW_TITLE = "Liara";
 constexpr liara_extent2d_t WINDOW_SIZE {.width = 1280, .height = 720};
@@ -119,46 +123,129 @@ namespace
         return options;
     }
 
+    /** @brief What became of a submitted frame. */
+    enum class FrameResult : std::uint8_t
+    {
+        Presented,     ///< An image reached the window.
+        NotPresented,  ///< Nothing reached it, and nothing is wrong: no area, no surface, or a swapchain being
+                       ///< replaced.
+        Failed,        ///< The frame failed, and the loop stops.
+    };
+
+    /** @brief Why the loop ended. */
+    struct LoopEnd
+    {
+        liara_result_t m_Failure = LIARA_RESULT_SUCCESS;  ///< SUCCESS for a requested stop or a reached frame limit.
+        std::string_view m_What;                          ///< What failed, for the `Error:` line; empty on success.
+    };
+
+    /** @brief The last size the platform reported for `window` in one drain of its events, or nothing. */
+    std::optional<liara_extent2d_t> DrainEvents(const Liara::Framework::Module<Liara::Framework::PlatformApi>& platform,
+                                                liara_platform_handle_t* platformInstance,
+                                                const liara_platform_window_handle_t* window) {
+        std::optional<liara_extent2d_t> resized;
+        liara_platform_event_t event {};
+        while (platform->poll_event(platformInstance, &event)) {
+            // A drag reports every intermediate size; only the last one of a drain matters to the renderer. `type` says
+            // which member of the union is valid, which is how the ABI's event record is read.
+            if (event.type == LIARA_PLATFORM_EVENT_WINDOW_RESIZED && event.window == window) {
+                resized = event.data.resized.pixel_size;  // NOLINT(cppcoreguidelines-pro-type-union-access)
+            }
+        }
+        return resized;
+    }
+
+    /** @brief What became of a frame `submit_frame` answered `result` for. */
+    FrameResult ClassifyFrame(const liara_result_t result, const bool rendererPresents) noexcept {
+        if (result == LIARA_RESULT_SUCCESS) {
+            return rendererPresents ? FrameResult::Presented : FrameResult::NotPresented;
+        }
+        // The renderer recreates its swapchain on a later frame by itself; there is nothing to do but carry on.
+        if (result == LIARA_RESULT_SURFACE_OUT_OF_DATE) { return FrameResult::NotPresented; }
+        return FrameResult::Failed;
+    }
+
+    /** @brief The `Error:` line's text for a frame that failed with `result`. */
+    std::string_view FailedFrameWhat(const liara_result_t result) noexcept {
+        switch (result) {
+            case LIARA_RESULT_VERSION_MISMATCH:
+            case LIARA_RESULT_NULL_POINTER:
+            case LIARA_RESULT_INVALID_ARGUMENT: return "The renderer refused the core's render packet";
+            default: return "The renderer failed to draw a frame";
+        }
+    }
+
     /**
-     * @brief Runs the frame loop until the platform reports a stop request: the window's close button, Ctrl+C or
-     * SIGTERM.
+     * @brief Runs the frame loop until the platform reports a stop request (the window's close button, Ctrl+C or
+     * SIGTERM), the frame limit is reached, or a frame fails.
      *
-     * Events are polled before the quit flag is read, since a close request reaches the flag through the poll. With a
-     * frame limit, the loop also returns once it has submitted that many frames, and the caller shuts down as for a
-     * stop request.
+     * Each frame drains the events and passes the window's last reported size to the renderer, then reads the quit
+     * flag, which a close request reaches through the poll. It then advances the core by as many fixed ticks as the
+     * time since the previous frame completes, at most a quarter of a second's worth, extracts one render packet and
+     * submits it. A presented frame needs no pacing, since FIFO presentation already waits for the display; a frame
+     * that presented nothing sleeps until the next tick is due, so that the loop does not spin while the window has no
+     * area.
+     *
+     * @return Why it ended. A failure carries the code and what failed; the caller reports it and exits with 1.
      */
-    void RunLoop(const Liara::Framework::Module<Liara::Framework::PlatformApi>& platform,
-                 liara_platform_handle_t* platformInstance,
-                 const Liara::Framework::Module<Liara::Framework::CoreApi>& core,
-                 liara_core_handle_t* coreInstance,
-                 const Liara::Framework::Module<Liara::Framework::RendererApi>& renderer,
-                 liara_renderer_handle_t* rendererInstance,
-                 const std::optional<uint64_t> frameLimit) {
+    LoopEnd RunLoop(const Liara::Framework::Module<Liara::Framework::PlatformApi>& platform,
+                    liara_platform_handle_t* platformInstance,
+                    const Liara::Framework::Module<Liara::Framework::CoreApi>& core,
+                    liara_core_handle_t* coreInstance,
+                    const Liara::Framework::Module<Liara::Framework::RendererApi>& renderer,
+                    liara_renderer_handle_t* rendererInstance,
+                    const liara_platform_window_handle_t* window,
+                    const bool rendererPresents,
+                    const std::optional<uint64_t> frameLimit) {
+        Liara::Framework::FixedStep step = FIXED_STEP;
         uint64_t previous = platform->time_now_ns();
         uint64_t frames = 0;
         while (true) {
-            liara_platform_event_t event {};
-            while (platform->poll_event(platformInstance, &event)) {
-                // Resizes are not wired to the renderer yet
+            if (const std::optional<liara_extent2d_t> size = DrainEvents(platform, platformInstance, window)) {
+                if (const liara_result_t told = renderer->window_resized(rendererInstance, *size);
+                    told != LIARA_RESULT_SUCCESS) {
+                    return {.m_Failure = told, .m_What = "Failed to tell the renderer the window's size"};
+                }
             }
-            if (platform->quit_requested(platformInstance)) { return; }
+            if (platform->quit_requested(platformInstance)) { return {}; }
 
-            const uint64_t frameStart = platform->time_now_ns();
-            const uint64_t deltaNs = frameStart - previous;
-            previous = frameStart;
+            const uint64_t now = platform->time_now_ns();
+            const Liara::Framework::FixedStepFrame frame = step.Advance(now - previous);
+            previous = now;
+            for (uint64_t tick = 0; tick < frame.m_Ticks; ++tick) { core->update(coreInstance, step.StepSeconds()); }
 
-            core->update(coreInstance, static_cast<float>(deltaNs) / static_cast<float>(NS_PER_SECOND));
-
-            if (liara_render_packet_t packet {};
-                core->get_render_packet(coreInstance, &packet) == LIARA_RESULT_SUCCESS) {
-                renderer->submit_frame(rendererInstance, &packet);
+            // frame.m_Alpha, how far the simulation is into the next tick, is not used yet: v0.2 passes it to this
+            // extraction, so that what is drawn lies between the last two ticks. This is the only line it touches.
+            liara_render_packet_t packet {};
+            if (const liara_result_t got = core->get_render_packet(coreInstance, &packet);
+                got != LIARA_RESULT_SUCCESS) {
+                return {.m_Failure = got, .m_What = "Failed to get the core's render packet"};
+            }
+            const liara_result_t submitted = renderer->submit_frame(rendererInstance, &packet);
+            const FrameResult result = ClassifyFrame(submitted, rendererPresents);
+            if (result == FrameResult::Failed) {
+                return {.m_Failure = submitted, .m_What = FailedFrameWhat(submitted)};
             }
 
             ++frames;
-            if (frameLimit.has_value() && frames >= *frameLimit) { return; }
+            if (frameLimit.has_value() && frames >= *frameLimit) { return {}; }
 
-            platform->time_sleep_until_ns(frameStart + TARGET_FRAME_NS);
+            if (result == FrameResult::NotPresented) { platform->time_sleep_until_ns(now + step.NsUntilNextTick()); }
         }
+    }
+
+    /**
+     * @brief Says how the loop ended: an `Error:` line for a failure, the usual line for a stop.
+     *
+     * @return The launcher's exit code: 1 after a failure, 0 otherwise.
+     */
+    int ReportLoopEnd(const LoopEnd& end) {
+        if (end.m_Failure == LIARA_RESULT_SUCCESS) {
+            std::cout << "\nStop requested. Shutting down.\n";
+            return 0;
+        }
+        std::cout << std::format("\nError: {}: {}.\n", end.m_What, liara_result_to_string(end.m_Failure));
+        return 1;
     }
 
     /**
@@ -279,6 +366,8 @@ int main(const int argc, char* const* argv) {
         return 1;
     }
 
+    int exitCode = 0;
+
     // --smoke stops here: the modules are loaded and negotiated, and every entry point is resolved, which is what CI
     // can check without a window-system session or a GPU. The window and the renderer need one each.
     if (!smoke) {
@@ -339,11 +428,19 @@ int main(const int argc, char* const* argv) {
             return 1;
         }
 
-        RunLoop(platform, platformInstance, core, coreInstance, renderer, rendererInstance, options->m_FrameLimit);
+        const LoopEnd end = RunLoop(platform,
+                                    platformInstance,
+                                    core,
+                                    coreInstance,
+                                    renderer,
+                                    rendererInstance,
+                                    window,
+                                    native.kind != LIARA_NATIVE_WINDOW_KIND_NONE,
+                                    options->m_FrameLimit);
+        exitCode = ReportLoopEnd(end);
 
         HideTriangle(renderer, rendererInstance);
         renderer->destroy(rendererInstance);
-        std::cout << "\nStop requested. Shutting down.\n";
         platform->window_destroy(window);
     }
 
@@ -351,5 +448,5 @@ int main(const int argc, char* const* argv) {
     core->destroy(coreInstance);
 
     std::cout << "Core finished. Exiting launcher.\n";
-    return 0;
+    return exitCode;
 }

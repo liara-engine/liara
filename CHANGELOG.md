@@ -7,6 +7,33 @@ sidebar:
 
 # Changelog
 
+## [1.0.0](https://github.com/liara-engine/liara/compare/v0.2.2...v1.0.0) (2026-11-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* LIARA_LAUNCHER_MODULE_LOADING is gone. A build directory configured before this change carries a stale cache entry and has to be deleted and reconfigured.
+
+### Features
+
+* **bootstrap:** setup sibling branch ([#47](https://github.com/liara-engine/liara/issues/47)) ([6974504](https://github.com/liara-engine/liara/commit/69745045466ee0bfd28173c448f86a3d703fe1cf))
+* framework layer ([#43](https://github.com/liara-engine/liara/issues/43)) ([b9896ca](https://github.com/liara-engine/liara/commit/b9896ca8c6f3c9a457e714342d1f42901a2db787))
+* **framework:** a fixed time step ([#54](https://github.com/liara-engine/liara/issues/54)) ([a7a0465](https://github.com/liara-engine/liara/commit/a7a0465c76a3e9a70c4840e8b55599cb07bd31dc))
+* **launcher:** create the renderer after the window, and not under --smoke ([#50](https://github.com/liara-engine/liara/issues/50)) ([0d2d2a5](https://github.com/liara-engine/liara/commit/0d2d2a5669a201f37e29fe58eb6a2a91a9245596))
+* **launcher:** open a window and route its close button into shutdown ([#48](https://github.com/liara-engine/liara/issues/48)) ([0a6ba15](https://github.com/liara-engine/liara/commit/0a6ba15a50ae57564e1ca6cd460d5f694fab5fa8))
+* **launcher:** platform clock and shutdown ([#46](https://github.com/liara-engine/liara/issues/46)) ([3b9a976](https://github.com/liara-engine/liara/commit/3b9a976f6c3b787eda2d4a8aca79ed83174ba227))
+* **launcher:** present to the window, and add --gpu and --frames ([#51](https://github.com/liara-engine/liara/issues/51)) ([ce37a32](https://github.com/liara-engine/liara/commit/ce37a32fdd6bdfe66da0f45e61ea32adfe9b52a1))
+* **launcher:** run the loop on a fixed step, and pass resizes to the renderer ([#56](https://github.com/liara-engine/liara/issues/56)) ([418b0aa](https://github.com/liara-engine/liara/commit/418b0aa6819e4d295cdadaeb1abea0c55219ff06))
+* **launcher:** upload the triangle and have the core draw it ([#53](https://github.com/liara-engine/liara/issues/53)) ([48a6679](https://github.com/liara-engine/liara/commit/48a66790e7ee9e146f23cc69e3d0646ad5957f26))
+* module loader ([#42](https://github.com/liara-engine/liara/issues/42)) ([73c3179](https://github.com/liara-engine/liara/commit/73c3179ace9e9116d00a88fe217076355476ad82))
+* platform introduction ([#40](https://github.com/liara-engine/liara/issues/40)) ([53ee88d](https://github.com/liara-engine/liara/commit/53ee88dc9253352c11329e5e9c6196d046f06e37))
+* remove DEGRADED compatibility state and update related documentation ([5cb1031](https://github.com/liara-engine/liara/commit/5cb1031a0b7ab050ff24d15075dd0218e880c114))
+
+
+### Bug Fixes
+
+* **scripts:** check formats with clang-format 20, the major CI uses ([#52](https://github.com/liara-engine/liara/issues/52)) ([7be9433](https://github.com/liara-engine/liara/commit/7be9433e10ca9beb6c30d4257503c80f2568f739))
+
 ## [0.2.2](https://github.com/liara-engine/liara/compare/v0.2.1...v0.2.2) (2026-09-20)
 
 
